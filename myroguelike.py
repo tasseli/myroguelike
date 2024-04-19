@@ -1,6 +1,19 @@
 # Example file showing a basic pygame "game loop"
 import pygame
 
+# Todo
+# map generation
+# agent knowledge
+# agent communication (language, )
+# agent faction
+# faction knowledge
+# faction communication
+# cultures for groups?
+# languages based on INT
+# bartering based on language / abilities
+# "Look at ..." "It doesn't make sense to you" / "you see another Dwarven healer with a spellbook of second circle on their backpack, probably"
+
+
 # pygame setup
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
