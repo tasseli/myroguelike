@@ -24,15 +24,8 @@ GRAY = (128, 128, 128)   # Wall
 
 # Define the dimensions of the map
 MAP_WIDTH = 80
-MAP_HEIGHT = 20
-TILE_SIZE = 8
-
-# Initialize an empty map
-game_map = [[OPEN_SPACE for y in range(MAP_HEIGHT)] for x in range(MAP_WIDTH)]
-
-# Example: Set a wall at position (5, 5)
-game_map[5][5] = WALL
-
+MAP_HEIGHT = 40
+TILE_SIZE = 15
 
 # pygame setup
 pygame.init()
@@ -43,8 +36,9 @@ pygame.display.set_caption("Simple Roguelike Map")
 # Initialize an empty map
 game_map = [[OPEN_SPACE for y in range(MAP_HEIGHT)] for x in range(MAP_WIDTH)]
 
-# Set a wall at position (5, 5)
-game_map[5][5] = WALL
+# Set a wall at position (3, 5)
+game_map[3][5] = WALL
+game_map[0] = [WALL for x in range(MAP_HEIGHT)]
 
 #player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 
