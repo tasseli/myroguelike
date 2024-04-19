@@ -42,6 +42,7 @@ game_map[0] = [WALL for x in range(MAP_HEIGHT)]
 game_map[MAP_WIDTH-1] = [WALL for x in range(MAP_HEIGHT)]
 for x in range(MAP_WIDTH):
     game_map[x][0] = WALL
+    game_map[x][MAP_HEIGHT-1] = WALL
 
 #player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 
