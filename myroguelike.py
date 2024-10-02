@@ -13,6 +13,7 @@ import sys
 # languages based on INT
 # bartering based on language / abilities
 # "Look at ..." "It doesn't make sense to you" / "you see another Dwarven healer with a spellbook of second circle on their backpack, probably"
+# It would be very cool if there'd be stat potions lying around, and raising a stat did show, but everything else changed based on the stats.
 
 # Define constants for tile types
 OPEN_SPACE = 0
