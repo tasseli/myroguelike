@@ -15,6 +15,17 @@ import sys
 # "Look at ..." "It doesn't make sense to you" / "you see another Dwarven healer with a spellbook of second circle on their backpack, probably"
 # It would be very cool if there'd be stat potions lying around, and raising a stat did show, but everything else changed based on the stats.
 
+# pygame.display.set_mode() 	can be used to create the grid
+# pygame.Surface				represents an off-screen image I can draw before blitting it to display. Frames, as it were.
+# pygame.event.get()			capture inputs. Most commands use up a turn, some don't.
+# pygame.KEYDOWN				detects arrows or WASD etc.
+# pygame.font.Font()			creating font object to render text
+# font.render()					converting ASCII to images
+# pygame.time.Clock()			control speed of the game. Handling frame rate, checking for input.
+# screen.blit()					Draw surface
+# pygame.display.update()		Updates the contents of the display after drawing everything. Update the screen after action or turn.
+# Game loop idea:				1 capture input 2 update game state 3 render new state 4 wait for next input
+
 # Define constants for tile types
 OPEN_SPACE = 0
 WALL = 1
