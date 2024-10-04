@@ -72,7 +72,7 @@ while True:
             sys.exit()
 
     # Clear the screen
-    screen.fill(GRAY)
+    screen.fill(DARK_GRAY)
 
     # Render the map
     for x in range(MAP_WIDTH):
