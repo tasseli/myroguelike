@@ -29,6 +29,7 @@ import sys
 # Define constants for tile types
 OPEN_SPACE = 0
 WALL = 1
+PLAYER = 2
 
 # Define colors for tiles
 WHITE = (255, 255, 255)  # Open space
@@ -61,8 +62,8 @@ for x in range(MAP_WIDTH):
     game_map[x][0] = WALL
     game_map[x][MAP_HEIGHT-1] = WALL
     
-#player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
-
+player_pos = (3, 6)
+game_map[player_pos[0]][player_pos[1]] = 2
 
  # Main loop
 while True:
@@ -72,7 +73,7 @@ while True:
             sys.exit()
 
     # Clear the screen
-    screen.fill(DARK_GRAY)
+    screen.fill(GRAY)
 
     # Render the map
     for x in range(MAP_WIDTH):
@@ -81,6 +82,12 @@ while True:
                 pygame.draw.rect(screen, DARK_GRAY, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
                 # Render the '#' character on top of the wall
                 text_surface = font.render("#", True, BLACK)
+                text_rect = text_surface.get_rect(center=(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2))
+                screen.blit(text_surface, text_rect)
+            elif game_map[x][y] == PLAYER:
+                pygame.draw.rect(screen, DARK_GRAY, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+                # Render the '@' character on top of the wall
+                text_surface = font.render("@", True, BLACK)
                 text_rect = text_surface.get_rect(center=(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2))
                 screen.blit(text_surface, text_rect)
     # Update the display
