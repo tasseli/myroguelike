@@ -2,7 +2,7 @@
 import pygame
 import sys
 
-# Todo
+# Ideas
 # map generation
 # agent knowledge
 # agent communication (language, )
@@ -14,6 +14,18 @@ import sys
 # bartering based on language / abilities
 # "Look at ..." "It doesn't make sense to you" / "you see another Dwarven healer with a spellbook of second circle on their backpack, probably"
 # It would be very cool if there'd be stat potions lying around, and raising a stat did show, but everything else changed based on the stats.
+
+# Easy steps for refactoring
+#- do functions 
+#- make classes 
+#- create input handle logic 
+#- refactor game loop 
+#- plan map logic 
+#- load map from file 
+#- consider game manager class 
+#- modularize rendering logic 
+#- create collision and movement system 
+#- consider game states
 
 # pygame.display.set_mode() 	can be used to create the grid
 # pygame.Surface				represents an off-screen image I can draw before blitting it to display. Frames, as it were.
@@ -67,8 +79,8 @@ game_map[player_pos[0]][player_pos[1]] = 2
 
  # Main loop
 while True:
-    for event in pygame.event.get():
         if event.type == pygame.QUIT:
+    for event in pygame.event.get():
             pygame.quit()
             sys.exit()
 
