@@ -27,6 +27,13 @@ import sys
 #- create collision and movement system 
 #- consider game states
 
+class Player:
+    position = (1, 1)
+    def __init__(self):
+        position = (3, 6)
+    def get_position(self):
+        return self.position
+
 # pygame.display.set_mode() 	can be used to create the grid
 # pygame.Surface				represents an off-screen image I can draw before blitting it to display. Frames, as it were.
 # pygame.event.get()			capture inputs. Most commands use up a turn, some don't.
@@ -74,13 +81,14 @@ for x in range(MAP_WIDTH):
     game_map[x][0] = WALL
     game_map[x][MAP_HEIGHT-1] = WALL
     
-player_pos = (3, 6)
-game_map[player_pos[0]][player_pos[1]] = 2
+player = Player()
+current_pos = player.get_position()
+game_map[current_pos[0]][current_pos[1]] = 2
 
  # Main loop
 while True:
-        if event.type == pygame.QUIT:
     for event in pygame.event.get():
+        if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
 
