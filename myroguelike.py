@@ -30,7 +30,7 @@ import sys
 class Player:
     position = (1, 1)
     def __init__(self):
-        position = (3, 6)
+        self.position = (3, 6)
     def get_position(self):
         return self.position
 
