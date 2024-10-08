@@ -85,6 +85,13 @@ player = Player()
 current_pos = player.get_position()
 game_map[current_pos[0]][current_pos[1]] = 2
 
+def draw_and_blit_char(my_char):
+    pygame.draw.rect(screen, DARK_GRAY, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+    # Render the '#' character on top of the wall
+    text_surface = font.render(my_char, True, BLACK)
+    text_rect = text_surface.get_rect(center=(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2))
+    screen.blit(text_surface, text_rect)
+
  # Main loop
 while True:
     for event in pygame.event.get():
@@ -99,16 +106,8 @@ while True:
     for x in range(MAP_WIDTH):
         for y in range(MAP_HEIGHT):
             if game_map[x][y] == WALL:
-                pygame.draw.rect(screen, DARK_GRAY, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
-                # Render the '#' character on top of the wall
-                text_surface = font.render("#", True, BLACK)
-                text_rect = text_surface.get_rect(center=(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2))
-                screen.blit(text_surface, text_rect)
+                draw_and_blit_char("#")
             elif game_map[x][y] == PLAYER:
-                pygame.draw.rect(screen, DARK_GRAY, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
-                # Render the '@' character on top of the wall
-                text_surface = font.render("@", True, BLACK)
-                text_rect = text_surface.get_rect(center=(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2))
-                screen.blit(text_surface, text_rect)
+                draw_and_blit_char("@")
     # Update the display
     pygame.display.flip()
