@@ -103,6 +103,12 @@ while True:
                 player.position[0] = player.position[0]-1
             if event.key == pygame.K_RIGHT:
                 player.position[0] = player.position[0]+1
+            if event.key == pygame.K_UP:
+                player.position[1] = player.position[1]-1
+            if event.key == pygame.K_DOWN:
+                player.position[1] = player.position[1]+1
+
+    game_map[current_pos[0]][current_pos[1]] = 2
 
     # Clear the screen
     screen.fill(GRAY)
