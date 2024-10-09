@@ -28,9 +28,9 @@ import sys
 #- consider game states
 
 class Player:
-    position = (1, 1)
+    position = [1, 1]
     def __init__(self):
-        self.position = (3, 6)
+        self.position = [3, 6]
     def get_position(self):
         return self.position
 
@@ -98,6 +98,11 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                player.position[0] = player.position[0]-1
+            if event.key == pygame.K_RIGHT:
+                player.position[0] = player.position[0]+1
 
     # Clear the screen
     screen.fill(GRAY)
