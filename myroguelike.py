@@ -56,6 +56,7 @@ class Player:
         return self.position
 
 class Map:
+
     def __init__(self):
         self.my_map = [[OPEN_SPACE for y in range(MAP_HEIGHT)] for x in range(MAP_WIDTH)]
         # Set a wall at position (3, 5)
@@ -93,11 +94,11 @@ font = pygame.font.SysFont(None, 22)
     
 player = Player()
 current_pos = player.get_position()
-game_map.set_location(current_pos, PLAYER)
+game_map.set_location(current_pos, 2)
 
-def draw_and_blit_char(my_char):
+def draw_and_blit_char(my_char, x, y):
     pygame.draw.rect(screen, DARK_GRAY, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
-    # Render the '#' character on top of the wall
+    # Render the my_char ('#'/'@') character on top of the background color
     text_surface = font.render(my_char, True, BLACK)
     text_rect = text_surface.get_rect(center=(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2))
     screen.blit(text_surface, text_rect)
@@ -127,8 +128,8 @@ while True:
     for x in range(MAP_WIDTH):
         for y in range(MAP_HEIGHT):
             if game_map.get_location(x,y) == WALL:
-                draw_and_blit_char("#")
+                draw_and_blit_char("#", x, y)
             elif game_map.get_location(x,y) == PLAYER:
-                draw_and_blit_char("@")
+                draw_and_blit_char("@", x, y)
     # Update the display
     pygame.display.flip()
