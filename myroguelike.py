@@ -27,13 +27,6 @@ import sys
 #- create collision and movement system 
 #- consider game states
 
-class Player:
-    position = [1, 1]
-    def __init__(self):
-        self.position = [3, 6]
-    def get_position(self):
-        return self.position
-
 # pygame.display.set_mode() 	can be used to create the grid
 # pygame.Surface				represents an off-screen image I can draw before blitting it to display. Frames, as it were.
 # pygame.event.get()			capture inputs. Most commands use up a turn, some don't.
@@ -45,21 +38,46 @@ class Player:
 # pygame.display.update()		Updates the contents of the display after drawing everything. Update the screen after action or turn.
 # Game loop idea:				1 capture input 2 update game state 3 render new state 4 wait for next input
 
+# Define the dimensions of the map
+MAP_WIDTH = 80
+MAP_HEIGHT = 40
+TILE_SIZE = 16
+
 # Define constants for tile types
 OPEN_SPACE = 0
 WALL = 1
 PLAYER = 2
+
+class Player:
+
+    position = [1, 1]
+
+    def __init__(self):
+        self.position = [3, 6]
+    def get_position(self):
+        return self.position
+
+class Map:
+    
+    my_map = [[OPEN_SPACE for y in range(MAP_HEIGHT)] for x in range(MAP_WIDTH)]
+
+    def __init__(self):
+        # Set a wall at position (3, 5)
+        self.my_map[3][5] = WALL
+        # wall for left side
+        self.my_map[0] = [WALL for x in range(MAP_HEIGHT)]
+        # wall for right side
+        self.my_map[MAP_WIDTH-1] = [WALL for x in range(MAP_HEIGHT)]
+        # wall for top and bottom
+        for x in range(MAP_WIDTH):
+            self.my_map[x][0] = WALL
+            self.my_map[x][MAP_HEIGHT-1] = WALL
 
 # Define colors for tiles
 WHITE = (255, 255, 255)  # Open space
 GRAY = (128, 128, 128)   # Wall
 DARK_GRAY = (64, 64, 64)
 BLACK = (0, 0, 0)        # Text color
-
-# Define the dimensions of the map
-MAP_WIDTH = 80
-MAP_HEIGHT = 40
-TILE_SIZE = 16
 
 # pygame setup
 pygame.init()
@@ -68,22 +86,14 @@ screen = pygame.display.set_mode((MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE)
 pygame.display.set_caption("Simple Roguelike Map")
 
 # Initialize an empty map
-game_map = [[OPEN_SPACE for y in range(MAP_HEIGHT)] for x in range(MAP_WIDTH)]
+game_map = Map()
 
 # Initialize a font
 font = pygame.font.SysFont(None, 22)
-
-# Set a wall at position (3, 5)
-game_map[3][5] = WALL
-game_map[0] = [WALL for x in range(MAP_HEIGHT)]
-game_map[MAP_WIDTH-1] = [WALL for x in range(MAP_HEIGHT)]
-for x in range(MAP_WIDTH):
-    game_map[x][0] = WALL
-    game_map[x][MAP_HEIGHT-1] = WALL
     
 player = Player()
 current_pos = player.get_position()
-game_map[current_pos[0]][current_pos[1]] = 2
+game_map.my_map[current_pos[0]][current_pos[1]] = 2
 
 def draw_and_blit_char(my_char):
     pygame.draw.rect(screen, DARK_GRAY, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
@@ -108,7 +118,7 @@ while True:
             if event.key == pygame.K_DOWN:
                 player.position[1] = player.position[1]+1
 
-    game_map[current_pos[0]][current_pos[1]] = 2
+    game_map.my_map[current_pos[0]][current_pos[1]] = 2
 
     # Clear the screen
     screen.fill(GRAY)
@@ -116,9 +126,9 @@ while True:
     # Render the map
     for x in range(MAP_WIDTH):
         for y in range(MAP_HEIGHT):
-            if game_map[x][y] == WALL:
+            if game_map.my_map[x][y] == WALL:
                 draw_and_blit_char("#")
-            elif game_map[x][y] == PLAYER:
+            elif game_map.my_map[x][y] == PLAYER:
                 draw_and_blit_char("@")
     # Update the display
     pygame.display.flip()
