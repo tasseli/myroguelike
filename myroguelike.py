@@ -49,11 +49,9 @@ WALL = 1
 PLAYER = 2
 
 class Player:
-
-    position = [1, 1]
-
     def __init__(self):
         self.position = [3, 6]
+
     def get_position(self):
         return self.position
 
