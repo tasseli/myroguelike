@@ -1,7 +1,3 @@
-# Example file showing a basic pygame "game loop"
-import pygame
-import sys
-
 # Ideas
 # map generation
 # agent knowledge
@@ -37,6 +33,10 @@ import sys
 # screen.blit()					Draw surface
 # pygame.display.update()		Updates the contents of the display after drawing everything. Update the screen after action or turn.
 # Game loop idea:				1 capture input 2 update game state 3 render new state 4 wait for next input
+
+# Example file showing a basic pygame "game loop"
+import pygame
+import sys
 
 # Define the dimensions of the map
 MAP_WIDTH = 80
