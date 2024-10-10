@@ -110,17 +110,26 @@ while True:
             pygame.quit()
             sys.exit()
         if event.type == pygame.KEYDOWN:
+            new_position = player.get_position().copy()
             if event.key == pygame.K_LEFT:
-                player.position[0] = player.position[0]-1
+                new_position[0] -= 1
             if event.key == pygame.K_RIGHT:
-                player.position[0] = player.position[0]+1
+                new_position[0] += 1
             if event.key == pygame.K_UP:
-                player.position[1] = player.position[1]-1
+                new_position[1] -= 1
             if event.key == pygame.K_DOWN:
-                player.position[1] = player.position[1]+1
+                new_position[1] += 1
 
-    game_map.my_map[current_pos[0]][current_pos[1]] = 2
-
+            # Check if the new position is not a wall
+            if game_map.my_map[new_position[0]][new_position[1]] != WALL:
+                # Clear the old position
+                current_pos = player.get_position()
+                game_map.my_map[current_pos[0]][current_pos[1]] = OPEN_SPACE
+                # Update the player position
+                player.position = new_position
+                # Mark the new position with PLAYER
+                game_map.my_map[player.position[0]][player.position[1]] = PLAYER
+                
     # Clear the screen
     screen.fill(GRAY)
 
