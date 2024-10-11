@@ -126,26 +126,28 @@ while True:
             if event.key == pygame.K_q or event.key == pygame.K_x:
                 pygame.quit()
                 sys.exit()
-            if event.key == pygame.K_LEFT:
+            elif event.key == pygame.K_LEFT:
                 new_position[0] -= 1
-            if event.key == pygame.K_RIGHT:
+            elif event.key == pygame.K_RIGHT:
                 new_position[0] += 1
-            if event.key == pygame.K_UP:
+            elif event.key == pygame.K_UP:
                 new_position[1] -= 1
-            if event.key == pygame.K_DOWN:
+            elif event.key == pygame.K_DOWN:
                 new_position[1] += 1
-            if event.key == pygame.K_1:
+            elif event.key == pygame.K_1:
                 new_position[0] -= 1
                 new_position[1] += 1
-            if event.key == pygame.K_3:
+            elif event.key == pygame.K_3:
                 new_position[0] += 1
                 new_position[1] += 1
-            if event.key == pygame.K_7:
+            elif event.key == pygame.K_7:
                 new_position[0] -= 1
                 new_position[1] -= 1
-            if event.key == pygame.K_9:
+            elif event.key == pygame.K_9:
                 new_position[0] += 1
                 new_position[1] -= 1
+            else:
+                continue
 
             # Check if the new position is not a wall
             if game_map.my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
