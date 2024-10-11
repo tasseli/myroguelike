@@ -111,6 +111,9 @@ while True:
             sys.exit()
         if event.type == pygame.KEYDOWN:
             new_position = player.get_position().copy()
+            if event.key == pygame.K_q or event.key == pygame.K_x:
+                pygame.quit()
+                sys.exit()
             if event.key == pygame.K_LEFT:
                 new_position[0] -= 1
             if event.key == pygame.K_RIGHT:
