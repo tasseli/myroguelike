@@ -47,10 +47,18 @@ TILE_SIZE = 16
 OPEN_SPACE = 0
 WALL = 1
 PLAYER = 2
+ORC = 3
 
 class Player:
     def __init__(self):
         self.position = [3, 6]
+
+    def get_position(self):
+        return self.position
+
+class Orc:
+    def __init__(self):
+        self.position = [62, 30]
 
     def get_position(self):
         return self.position
@@ -96,6 +104,10 @@ player = Player()
 current_pos = player.get_position()
 game_map.set_location(current_pos, 2)
 
+orc = Orc()
+orc_pos = orc.get_position()
+game_map.set_location(orc_pos, 3)
+
 def draw_and_blit_char(my_char, x, y):
     pygame.draw.rect(screen, DARK_GRAY, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
     # Render the my_char ('#'/'@') character on top of the background color
@@ -136,7 +148,7 @@ while True:
                 new_position[1] -= 1
 
             # Check if the new position is not a wall
-            if game_map.my_map[new_position[0]][new_position[1]] != WALL:
+            if game_map.my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
                 # Clear the old position
                 current_pos = player.get_position()
                 game_map.my_map[current_pos[0]][current_pos[1]] = OPEN_SPACE
@@ -155,5 +167,8 @@ while True:
                 draw_and_blit_char("#", x, y)
             elif game_map.get_location(x,y) == PLAYER:
                 draw_and_blit_char("@", x, y)
+            elif game_map.get_location(x,y) == ORC:
+                draw_and_blit_char("o", x, y)
+
     # Update the display
     pygame.display.flip()
