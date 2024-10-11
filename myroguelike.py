@@ -122,6 +122,15 @@ while True:
             if event.key == pygame.K_1:
                 new_position[0] -= 1
                 new_position[1] += 1
+            if event.key == pygame.K_3:
+                new_position[0] += 1
+                new_position[1] += 1
+            if event.key == pygame.K_7:
+                new_position[0] -= 1
+                new_position[1] -= 1
+            if event.key == pygame.K_9:
+                new_position[0] += 1
+                new_position[1] -= 1
 
             # Check if the new position is not a wall
             if game_map.my_map[new_position[0]][new_position[1]] != WALL:
