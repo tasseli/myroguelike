@@ -63,6 +63,9 @@ class Orc:
     def get_position(self):
         return self.position
 
+    def move(self):
+        self.position[0] = self.position[0] + 1
+
 class Map:
 
     def __init__(self):
@@ -158,6 +161,8 @@ while True:
                 player.position = new_position
                 # Mark the new position with PLAYER
                 game_map.my_map[player.position[0]][player.position[1]] = PLAYER
+                orc.move()
+                game_map.my_map[orc.position[0]][orc.position[1]] = ORC
                 
     # Clear the screen
     screen.fill(GRAY)
