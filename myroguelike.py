@@ -129,24 +129,24 @@ while True:
             if event.key == pygame.K_q or event.key == pygame.K_x:
                 pygame.quit()
                 sys.exit()
-            elif event.key == pygame.K_LEFT:
+            elif event.key == pygame.K_LEFT or event.key == pygame.K_KP4:
                 new_position[0] -= 1
-            elif event.key == pygame.K_RIGHT:
+            elif event.key == pygame.K_RIGHT or event.key == pygame.K_KP6:
                 new_position[0] += 1
-            elif event.key == pygame.K_UP:
+            elif event.key == pygame.K_UP or event.key == pygame.K_KP8:
                 new_position[1] -= 1
-            elif event.key == pygame.K_DOWN:
+            elif event.key == pygame.K_DOWN or event.key == pygame.K_KP2:
                 new_position[1] += 1
-            elif event.key == pygame.K_1:
+            elif event.key == pygame.K_1 or event.key == pygame.K_KP1:
                 new_position[0] -= 1
                 new_position[1] += 1
-            elif event.key == pygame.K_3:
+            elif event.key == pygame.K_3 or event.key == pygame.K_KP3:
                 new_position[0] += 1
                 new_position[1] += 1
-            elif event.key == pygame.K_7:
+            elif event.key == pygame.K_7 or event.key == pygame.K_KP7:
                 new_position[0] -= 1
                 new_position[1] -= 1
-            elif event.key == pygame.K_9:
+            elif event.key == pygame.K_9 or event.key == pygame.K_KP9:
                 new_position[0] += 1
                 new_position[1] -= 1
             else:
