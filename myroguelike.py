@@ -99,8 +99,11 @@ while True:
                 player.position = new_position
                 # Mark the new position with PLAYER
                 game_map.my_map[player.position[0]][player.position[1]] = PLAYER
-                orc.move()
-                game_map.my_map[orc.position[0]][orc.position[1]] = ORC
+                if game_map.my_map[orc.position[0]+1][orc.position[1]] == OPEN_SPACE:
+                    orc_position_old = orc.get_position().copy()
+                    orc.move()
+                    game_map.my_map[orc.position[0]][orc.position[1]] = ORC
+                    game_map.my_map[orc_position_old[0]][orc_position_old[1]] = OPEN_SPACE
                 
     # Clear the screen
     screen.fill(GRAY)
