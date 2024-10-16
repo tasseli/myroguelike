@@ -56,17 +56,20 @@ def draw_and_blit_char(my_char, x, y):
     text_rect = text_surface.get_rect(center=(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2))
     screen.blit(text_surface, text_rect)
 
+def quit_app(reason):
+    print(reason)
+    pygame.quit()
+    sys.exit()    
+
  # Main loop
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+            quit_app("event.type == quit")
         if event.type == pygame.KEYDOWN:
             new_position = player.get_position().copy()
             if event.key == pygame.K_q or event.key == pygame.K_x:
-                pygame.quit()
-                sys.exit()
+                quit_app("q or x pressed")
             elif event.key == pygame.K_LEFT or event.key == pygame.K_KP4:
                 new_position[0] -= 1
             elif event.key == pygame.K_RIGHT or event.key == pygame.K_KP6:
