@@ -61,6 +61,32 @@ def quit_app(reason):
     pygame.quit()
     sys.exit()    
 
+def read_moves(new_position, eventkey):
+    if eventkey == pygame.K_q or eventkey == pygame.K_x:
+        quit_app("q or x pressed")
+    elif eventkey == pygame.K_LEFT or eventkey == pygame.K_KP4:
+        new_position[0] -= 1
+    elif eventkey == pygame.K_RIGHT or eventkey == pygame.K_KP6:
+        new_position[0] += 1
+    elif eventkey == pygame.K_UP or eventkey == pygame.K_KP8:
+        new_position[1] -= 1
+    elif eventkey == pygame.K_DOWN or eventkey == pygame.K_KP2:
+        new_position[1] += 1
+    elif eventkey == pygame.K_1 or eventkey == pygame.K_KP1:
+        new_position[0] -= 1
+        new_position[1] += 1
+    elif eventkey == pygame.K_3 or eventkey == pygame.K_KP3:
+        new_position[0] += 1
+        new_position[1] += 1
+    elif eventkey == pygame.K_7 or eventkey == pygame.K_KP7:
+        new_position[0] -= 1
+        new_position[1] -= 1
+    elif eventkey == pygame.K_9 or eventkey == pygame.K_KP9:
+        new_position[0] += 1
+        new_position[1] -= 1
+    else:
+        pass
+
  # Main loop
 while True:
     for event in pygame.event.get():
@@ -68,30 +94,7 @@ while True:
             quit_app("event.type == quit")
         if event.type == pygame.KEYDOWN:
             new_position = player.get_position().copy()
-            if event.key == pygame.K_q or event.key == pygame.K_x:
-                quit_app("q or x pressed")
-            elif event.key == pygame.K_LEFT or event.key == pygame.K_KP4:
-                new_position[0] -= 1
-            elif event.key == pygame.K_RIGHT or event.key == pygame.K_KP6:
-                new_position[0] += 1
-            elif event.key == pygame.K_UP or event.key == pygame.K_KP8:
-                new_position[1] -= 1
-            elif event.key == pygame.K_DOWN or event.key == pygame.K_KP2:
-                new_position[1] += 1
-            elif event.key == pygame.K_1 or event.key == pygame.K_KP1:
-                new_position[0] -= 1
-                new_position[1] += 1
-            elif event.key == pygame.K_3 or event.key == pygame.K_KP3:
-                new_position[0] += 1
-                new_position[1] += 1
-            elif event.key == pygame.K_7 or event.key == pygame.K_KP7:
-                new_position[0] -= 1
-                new_position[1] -= 1
-            elif event.key == pygame.K_9 or event.key == pygame.K_KP9:
-                new_position[0] += 1
-                new_position[1] -= 1
-            else:
-                continue
+            read_moves(new_position, event.key)
 
             # Check if the new position is not a wall
             if game_map.my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
