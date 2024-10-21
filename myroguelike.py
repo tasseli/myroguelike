@@ -5,14 +5,10 @@ import sys
 from map import (Map, 
 MAP_WIDTH, MAP_HEIGHT, TILE_SIZE,
 OPEN_SPACE, WALL, PLAYER, ORC)
+from map import (draw_and_blit_char,
+WHITE, GRAY, DARK_GRAY, BLACK)
 from keyboard import read_moves
 from creatures import Player, Orc
-
-# Define colors for tiles
-WHITE = (255, 255, 255)  # Open space
-GRAY = (128, 128, 128)   # Wall
-DARK_GRAY = (64, 64, 64)
-BLACK = (0, 0, 0)        # Text color
 
 # pygame setup
 pygame.init()
@@ -33,13 +29,6 @@ game_map.set_location(current_pos, 2)
 orc = Orc()
 orc_pos = orc.get_position()
 game_map.set_location(orc_pos, 3)
-
-def draw_and_blit_char(my_char, x, y):
-    pygame.draw.rect(screen, DARK_GRAY, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
-    # Render the my_char ('#'/'@') character on top of the background color
-    text_surface = font.render(my_char, True, BLACK)
-    text_rect = text_surface.get_rect(center=(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2))
-    screen.blit(text_surface, text_rect)
 
 def quit_app(reason):
     print(reason)
@@ -62,6 +51,7 @@ while True:
             elif outcome == "m":
                 pass
 
+            # Make this into a function of the map, based on the creature and the new coord
             # Check if the new position is not a wall
             if game_map.my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
                 # Clear the old position
@@ -84,11 +74,11 @@ while True:
     for x in range(MAP_WIDTH):
         for y in range(MAP_HEIGHT):
             if game_map.get_location(x,y) == WALL:
-                draw_and_blit_char("#", x, y)
+                draw_and_blit_char(pygame, screen, font, "#", x, y)
             elif game_map.get_location(x,y) == PLAYER:
-                draw_and_blit_char("@", x, y)
+                draw_and_blit_char(pygame, screen, font, "@", x, y)
             elif game_map.get_location(x,y) == ORC:
-                draw_and_blit_char("o", x, y)
+                draw_and_blit_char(pygame, screen, font, "o", x, y)
 
     # Update the display
     pygame.display.flip()
