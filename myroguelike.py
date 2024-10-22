@@ -1,4 +1,4 @@
-#myroguelike.py
+# myroguelike.py
 
 import pygame
 import sys
@@ -35,7 +35,8 @@ def quit_app(reason):
     pygame.quit()
     sys.exit()    
 
- # Main loop
+# Main loop
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -52,7 +53,7 @@ while True:
                 pass
 
             # Make this into a function of the map, based on the creature and the new coord
-            # Check if the new position is not a wall
+            # Check if the new position is free (otherwise don't move)
             if game_map.my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
                 # Clear the old position
                 current_pos = player.get_position()
@@ -61,6 +62,7 @@ while True:
                 player.position = new_position
                 # Mark the new position with PLAYER
                 game_map.my_map[player.position[0]][player.position[1]] = PLAYER
+                # dummy orc only moves right :)
                 if game_map.my_map[orc.position[0]+1][orc.position[1]] == OPEN_SPACE:
                     orc_position_old = orc.get_position().copy()
                     orc.move()
