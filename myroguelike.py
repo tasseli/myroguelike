@@ -50,7 +50,20 @@ while True:
 #               print("An unhandled key was pressed.")
                 pass
             elif outcome == "m":
+#               print("Move key selected")
                 pass
+
+# rough idea for the map's creature move checking function
+# add ID for both creatures
+#def move_if_available(my_map, new_position, creature):
+#    if my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
+#        # Clear the old position
+#        current_pos = creature.get_position()
+#        my_map[current_pos[0]][current_pos[1]] = OPEN_SPACE
+#        # Update the player position
+#        creature.position = new_position
+#        # Mark the new position with its ID
+#        my_map[player.position[0]][player.position[1]] = PLAYER
 
             # Make this into a function of the map, based on the creature and the new coord
             # Check if the new position is free (otherwise don't move)
