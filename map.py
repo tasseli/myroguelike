@@ -17,6 +17,18 @@ GRAY = (128, 128, 128)   # Wall
 DARK_GRAY = (64, 64, 64)
 BLACK = (0, 0, 0)        # Text color
 
+# rough idea for the map's creature move checking function
+# add ID for both creatures
+#def move_if_available(my_map, new_position, creature):
+#    if my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
+#        # Clear the old position
+#        current_pos = creature.get_position()
+#        my_map[current_pos[0]][current_pos[1]] = OPEN_SPACE
+#        # Update the player position
+#        creature.position = new_position
+#        # Mark the new position with its ID
+#        my_map[player.position[0]][player.position[1]] = PLAYER
+
 def draw_and_blit_char(pygame, screen, font, my_char, x, y):
     pygame.draw.rect(screen, DARK_GRAY, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
     # Render the my_char ('#'/'@') character on top of the background color
