@@ -12,9 +12,9 @@ PLAYER = 2
 ORC = 3
 
 # Define colors for tiles
-WHITE = (255, 255, 255)  # Open space
-GRAY = (128, 128, 128)   # Wall
-DARK_GRAY = (64, 64, 64)
+WHITE = (255, 255, 255)  # 
+GRAY = (128, 128, 128)   # Open space
+DARK_GRAY = (64, 64, 64) # Wall
 BLACK = (0, 0, 0)        # Text color
 
 # rough idea for the map's creature move checking function
