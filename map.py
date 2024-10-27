@@ -49,6 +49,8 @@ class Map:
             creature.position = new_position
             # Mark the new position with its ID
             self.my_map[creature.position[0]][creature.position[1]] = creature.id
+            return True
+        return False
 
     def get_location(self, x, y):
         return self.my_map[x][y]

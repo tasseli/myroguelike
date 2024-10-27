@@ -21,5 +21,5 @@ class Orc:
         return self.position
 
     def move(self):
-        self.position[0] = self.position[0] + 1
+        return [self.position[0] + 1, self.position[1]]
 

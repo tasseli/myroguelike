@@ -52,8 +52,9 @@ while True:
             elif outcome == "m":
 #               print("Move key selected")
                 pass
-            game_map.move_if_available(new_position, player)
-            # Make this into a function of the map, based on the creature and the new coord
+            if game_map.move_if_available(new_position, player):
+                game_map.move_if_available(orc.move(), orc)
+
     # Clear the screen
     screen.fill(GRAY)
 
