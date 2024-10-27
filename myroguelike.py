@@ -52,24 +52,8 @@ while True:
             elif outcome == "m":
 #               print("Move key selected")
                 pass
-
+            game_map.move_if_available(new_position, player)
             # Make this into a function of the map, based on the creature and the new coord
-            # Check if the new position is free (otherwise don't move)
-            if game_map.my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
-                # Clear the old position
-                current_pos = player.get_position()
-                game_map.my_map[current_pos[0]][current_pos[1]] = OPEN_SPACE
-                # Update the player position
-                player.position = new_position
-                # Mark the new position with PLAYER
-                game_map.my_map[player.position[0]][player.position[1]] = PLAYER
-                # dummy orc only moves right :)
-                if game_map.my_map[orc.position[0]+1][orc.position[1]] == OPEN_SPACE:
-                    orc_position_old = orc.get_position().copy()
-                    orc.move()
-                    game_map.my_map[orc.position[0]][orc.position[1]] = ORC
-                    game_map.my_map[orc_position_old[0]][orc_position_old[1]] = OPEN_SPACE
-                
     # Clear the screen
     screen.fill(GRAY)
 
