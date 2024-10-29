@@ -6,10 +6,10 @@ MAP_HEIGHT = 40
 TILE_SIZE = 16
 
 # Define constants for tile types
-OPEN_SPACE = 0
-WALL = 1
-PLAYER = 2
-ORC = 3
+OPEN_SPACE = ' '
+WALL = '#'
+PLAYER = '@'
+ORC = 'o'
 
 # Define colors for tiles
 WHITE = (255, 255, 255)  # 
@@ -48,7 +48,7 @@ class Map:
             # Update the player position
             creature.position = new_position
             # Mark the new position with its ID
-            self.my_map[creature.position[0]][creature.position[1]] = creature.id
+            self.my_map[creature.position[0]][creature.position[1]] = creature.sign
             return True
         return False
 

@@ -24,11 +24,11 @@ font = pygame.font.SysFont(None, 22)
     
 player = Player()
 current_pos = player.get_position()
-game_map.set_location(current_pos, 2)
+game_map.set_location(current_pos, player.sign)
 
 orc = Orc()
 orc_pos = orc.get_position()
-game_map.set_location(orc_pos, 3)
+game_map.set_location(orc_pos, orc.sign)
 
 def quit_app(reason):
     print(reason)
