@@ -6,7 +6,7 @@ MAP_HEIGHT = 40
 TILE_SIZE = 16
 
 # Define constants for tile types
-OPEN_SPACE = ' '
+OPEN_SPACE = '.'
 WALL = '#'
 PLAYER = '@'
 ORC = 'o'

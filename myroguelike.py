@@ -61,12 +61,10 @@ while True:
     # Render the map
     for x in range(MAP_WIDTH):
         for y in range(MAP_HEIGHT):
-            if game_map.get_location(x,y) == WALL:
-                draw_and_blit_char(pygame, screen, font, WALL, x, y)
-            elif game_map.get_location(x,y) == PLAYER:
-                draw_and_blit_char(pygame, screen, font, PLAYER, x, y)
-            elif game_map.get_location(x,y) == ORC:
-                draw_and_blit_char(pygame, screen, font, ORC, x, y)
+            if game_map.get_location(x,y) == OPEN_SPACE:
+                pass
+            else:
+                draw_and_blit_char(pygame, screen, font, game_map.get_location(x,y), x, y)
 
     # Update the display
     pygame.display.flip()
