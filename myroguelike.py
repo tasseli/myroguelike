@@ -27,8 +27,11 @@ current_pos = player.get_position()
 game_map.set_location(current_pos, player.sign)
 
 orc = Orc([9,12])
+orc2 = Orc([1,3])
 orc_pos = orc.get_position()
+orc2_pos = orc2.get_position()
 game_map.set_location(orc_pos, orc.sign)
+game_map.set_location(orc2_pos, orc2.sign)
 
 def quit_app(reason):
     print(reason)
@@ -54,6 +57,7 @@ while True:
                 pass
             if game_map.move_if_available(new_position, player):
                 game_map.move_if_available(orc.move(), orc)
+                game_map.move_if_available(orc2.move(), orc2)
 
     # Clear the screen
     screen.fill(GRAY)
