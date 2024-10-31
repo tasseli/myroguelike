@@ -26,7 +26,7 @@ player = Player()
 current_pos = player.get_position()
 game_map.set_location(current_pos, player.sign)
 
-orc = Orc()
+orc = Orc([9,12])
 orc_pos = orc.get_position()
 game_map.set_location(orc_pos, orc.sign)
 

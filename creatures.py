@@ -12,8 +12,8 @@ class Player:
 class Orc:
     sign = "o"
 
-    def __init__(self):
-        self.position = [62, 30]
+    def __init__(self, coords):
+        self.position = [coords[0], coords[1]]
 
     def get_position(self):
         return self.position
