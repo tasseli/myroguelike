@@ -57,7 +57,9 @@ while True:
                 pass
             if game_map.move_if_available(new_position, player):
                 game_map.move_if_available(orc.move(), orc)
-                game_map.move_if_available(orc2.move(), orc2)
+                orc2_want = orc2.move_random()
+                if orc2_want != orc2.get_position():
+                    game_map.move_if_available(orc2_want, orc2)
 
     # Clear the screen
     screen.fill(GRAY)

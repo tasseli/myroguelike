@@ -1,4 +1,5 @@
 # creatures.py
+import random
 
 class Player:
     sign = "@"
@@ -21,3 +22,7 @@ class Orc:
     def move(self):
         return [self.position[0] + 1, self.position[1]]
 
+    def move_random(self):
+        x = random.randint(0,2)-1
+        y = random.randint(0,2)-1
+        return [self.position[0] + x, self.position[1] + y]
