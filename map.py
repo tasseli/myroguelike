@@ -41,9 +41,7 @@ class Map:
 
     # rough idea for the map's creature move checking function
     def move_if_available(self, new_position, creature):
-        print(new_position == creature.get_position())
         if new_position == creature.get_position():
-            print("Returning true")
             return True
         if self.my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
             # Clear the old position
