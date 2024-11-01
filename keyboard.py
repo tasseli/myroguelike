@@ -4,6 +4,7 @@
 #   regular move successful:                return "m"
 #   quit command, to be handled in called:  return "q"
 #   other, currently unhandled:             return "o"
+#   stay still, middle direction:           return "s"
 def read_moves(new_position, eventkey, pygame):
     if eventkey == pygame.K_q or eventkey == pygame.K_x:
         return "q"
@@ -35,5 +36,7 @@ def read_moves(new_position, eventkey, pygame):
         new_position[0] += 1
         new_position[1] -= 1
         return "m"
+    elif eventkey == pygame.K_5 or eventkey == pygame.K_KP5:
+        return "s"
     else:
         return "o"

@@ -55,11 +55,13 @@ while True:
             elif outcome == "m":
 #               print("Move key selected")
                 pass
+            elif outcome == "s":
+                print("Stay still key selected")
+                pass
             if game_map.move_if_available(new_position, player):
+                print("Next up: game_map.move_if_available... orc")
                 game_map.move_if_available(orc.move_right(), orc)
-                orc2_want = orc2.move_random()
-                if orc2_want != orc2.get_position():
-                    game_map.move_if_available(orc2_want, orc2)
+                game_map.move_if_available(orc2.move_random(), orc2)
 
     # Clear the screen
     screen.fill(GRAY)
