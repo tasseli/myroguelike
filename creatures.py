@@ -19,7 +19,7 @@ class Orc:
     def get_position(self):
         return self.position
 
-    def move(self):
+    def move_right(self):
         return [self.position[0] + 1, self.position[1]]
 
     def move_random(self):
