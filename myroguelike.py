@@ -29,12 +29,18 @@ game_map.set_location(current_pos, player.sign)
 orc = Orc([9,12])
 orc2 = Orc([1,3])
 orc3 = Orc([72,33])
+orc4 = Orc([37,23])
+orc5 = Orc([6,38])
 orc_pos = orc.get_position()
 orc2_pos = orc2.get_position()
 orc3_pos = orc3.get_position()
+orc4_pos = orc4.get_position()
+orc5_pos = orc5.get_position()
 game_map.set_location(orc_pos, orc.sign)
 game_map.set_location(orc2_pos, orc2.sign)
 game_map.set_location(orc3_pos, orc3.sign)
+game_map.set_location(orc4_pos, orc4.sign)
+game_map.set_location(orc5_pos, orc5.sign)
 
 def quit_app(reason):
     print(reason)
@@ -65,6 +71,8 @@ while True:
                 game_map.move_if_available(orc.move_right(), orc)
                 game_map.move_if_available(orc2.move_random(), orc2)
                 game_map.move_if_available(orc3.move_toward(player.get_position()), orc3)
+                game_map.move_if_available(orc4.move_toward(orc3.get_position()), orc4)
+                game_map.move_if_available(orc5.move_toward(orc4.get_position()), orc5)
 
     # Clear the screen
     screen.fill(GRAY)
