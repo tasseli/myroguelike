@@ -66,18 +66,14 @@ while True:
             elif outcome == "o":
 #               print("An unhandled key was pressed.")
                 pass
-            elif outcome == "m":
-#               print("Move key selected")
-                pass
-            elif outcome == "s":
-#               print("Stay still key selected")
-                pass
-            if game_map.move_if_available(new_position, player):
-                game_map.move_if_available(orc.move_right(), orc)
-                game_map.move_if_available(orc2.move_random(), orc2)
-                game_map.move_if_available(orc3.move_toward(player.get_position()), orc3)
-                game_map.move_if_available(orc4.move_toward(orc3.get_position()), orc4)
-                game_map.move_if_available(orc5.move_toward(orc4.get_position()), orc5)
+            elif outcome == "m" or outcome == "s":
+#               print("Move key or stand still key")
+                if game_map.move_if_available(new_position, player):
+                    game_map.move_if_available(orc.move_right(), orc)
+                    game_map.move_if_available(orc2.move_random(), orc2)
+                    game_map.move_if_available(orc3.move_toward(player.get_position()), orc3)
+                    game_map.move_if_available(orc4.move_toward(orc3.get_position()), orc4)
+                    game_map.move_if_available(orc5.move_toward(orc4.get_position()), orc5)
 
     # Clear the screen
     screen.fill(GRAY)

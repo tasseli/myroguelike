@@ -1,8 +1,5 @@
 planning
 
-Bug report from user:
-windows key concedes turn. That shouldn't happen so it's a bug, but it's probably not handling the logic correctly in move_if_available()
-
 Ideas
 map generation
 agent knowledge
