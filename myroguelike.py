@@ -9,11 +9,12 @@ from map import (draw_and_blit_char,
 WHITE, GRAY, DARK_GRAY, BLACK)
 from keyboard import read_moves
 from creatures import Player, Orc
+bottom_ui_height = 2
 
 # pygame setup
 pygame.init()
 # Set up the display
-screen = pygame.display.set_mode((MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE))
+screen = pygame.display.set_mode((MAP_WIDTH * TILE_SIZE, (MAP_HEIGHT+bottom_ui_height) * TILE_SIZE))
 pygame.display.set_caption("Simple Roguelike Map")
 
 # Initialize an empty map
@@ -55,6 +56,7 @@ def quit_app(reason):
 # Main loop
 
 while True:
+    y = 0
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("event.type == quit")
@@ -85,6 +87,11 @@ while True:
                 pass
             else:
                 draw_and_blit_char(pygame, screen, font, game_map.get_location(x,y), x, y)
+
+    for y in range(y, y+bottom_ui_height):
+        for x in range(MAP_WIDTH):
+            if y==MAP_HEIGHT:
+                draw_and_blit_char(pygame, screen, font, "-", x,y)
 
     # Update the display
     pygame.display.flip()
