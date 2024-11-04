@@ -29,9 +29,10 @@ def init_player(coords):
     game_map.set_sign_with_creature(player)
     return player
 
-def init_orc(coords, mood, target):
+def init_orc(coords, mood, target, creatures):
     orc = Orc(coords, mood, target)
     game_map.set_sign_with_creature(orc)
+    creatures.append(orc)
     return orc
 
 def quit_app(reason):
@@ -42,16 +43,11 @@ def quit_app(reason):
 creatures = []
 player = init_player([3,6])
 
-orc = init_orc([5,12], "run right", None)
-creatures.append(orc)
-orc2 = init_orc([1,3], None, None)
-creatures.append(orc2)
-orc3 = init_orc([72,33], "toward", player)
-creatures.append(orc3)
-orc4 = init_orc([37,23], "toward", orc3)
-creatures.append(orc4)
-orc5 = init_orc([6,38], "toward", orc4)
-creatures.append(orc5)
+orc = init_orc([5,12], "run right", None, creatures)
+orc2 = init_orc([1,3], None, None, creatures)
+orc3 = init_orc([72,33], "toward", player, creatures)
+orc4 = init_orc([37,23], "toward", orc3, creatures)
+orc5 = init_orc([6,38], "toward", orc4, creatures)
 
 # Main loop
 
