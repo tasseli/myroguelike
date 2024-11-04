@@ -9,12 +9,12 @@ from map import (draw_and_blit_char,
 WHITE, GRAY, DARK_GRAY, BLACK)
 from keyboard import read_moves
 from creatures import Player, Orc
-bottom_ui_height = 2
+BOTTOM_UI_HEIGHT = 2
 
 # pygame setup
 pygame.init()
 # Set up the display
-screen = pygame.display.set_mode((MAP_WIDTH * TILE_SIZE, (MAP_HEIGHT+bottom_ui_height) * TILE_SIZE))
+screen = pygame.display.set_mode((MAP_WIDTH * TILE_SIZE, (MAP_HEIGHT+BOTTOM_UI_HEIGHT) * TILE_SIZE))
 pygame.display.set_caption("Simple Roguelike Map")
 
 # Initialize an empty map
@@ -29,24 +29,23 @@ def init_player(coords):
     game_map.set_location(player)
     return player
 
-player = init_player([3,6])
-
 def init_orc(coords):
     orc = Orc(coords)
     game_map.set_location(orc)
     return orc
 
-#orc = Orc([5,12])
+def quit_app(reason):
+    print(reason)
+    pygame.quit()
+    sys.exit()    
+
+player = init_player([3,6])
+
 orc = init_orc([5,12])
 orc2 = init_orc([1,3])
 orc3 = init_orc([72,33])
 orc4 = init_orc([37,23])
 orc5 = init_orc([6,38])
-
-def quit_app(reason):
-    print(reason)
-    pygame.quit()
-    sys.exit()    
 
 # Main loop
 
@@ -83,7 +82,7 @@ while True:
             else:
                 draw_and_blit_char(pygame, screen, font, game_map.get_location(x,y), x, y)
 
-    for y in range(y, y+bottom_ui_height):
+    for y in range(y, y+BOTTOM_UI_HEIGHT):
         for x in range(MAP_WIDTH):
             if y==MAP_HEIGHT:
                 draw_and_blit_char(pygame, screen, font, "-", x,y)
