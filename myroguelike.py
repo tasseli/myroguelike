@@ -41,8 +41,8 @@ def quit_app(reason):
 
 creatures = []
 player = init_player([3,6])
-creatures.append(player)
-orc = init_orc([5,12], "run East", None)
+
+orc = init_orc([5,12], "run right", None)
 creatures.append(orc)
 orc2 = init_orc([1,3], None, None)
 creatures.append(orc2)
@@ -71,9 +71,10 @@ while True:
             elif outcome == "m" or outcome == "s":
 #               print("Move key or stand still key")
                 if game_map.move_if_available(player, new_position):
-#                    game_map.move_if_available_naturally(creatures[0])
-                    game_map.move_if_available(orc, orc.move_right())
-                    game_map.move_if_available(orc2, orc2.move_random())
+                    game_map.move_if_available_naturally(creatures[0])
+#                    game_map.move_if_available(orc, orc.move_right())
+                    game_map.move_if_available_naturally(creatures[1])
+#                    game_map.move_if_available(orc2, orc2.move_random())
                     game_map.move_if_available(orc3, orc3.move_toward(player.get_position()))
                     game_map.move_if_available(orc4, orc4.move_toward(orc3.get_position()))
                     game_map.move_if_available(orc5, orc5.move_toward(orc4.get_position()))

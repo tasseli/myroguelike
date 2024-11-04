@@ -3,6 +3,7 @@ import random
 
 class Player:
     sign = "@"
+    mood = "player >:)"
 
     def __init__(self, coords):
         self.position = coords
