@@ -81,10 +81,10 @@ while True:
             else:
                 draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y)
 
-    for y in range(y, y+BOTTOM_UI_HEIGHT):
+    for y in range(y, y + BOTTOM_UI_HEIGHT):
         for x in range(MAP_WIDTH):
-            if y==MAP_HEIGHT:
-                draw_and_blit_char(pygame, screen, font, "-", x,y)
+            if y == MAP_HEIGHT:
+                draw_and_blit_char(pygame, screen, font, "-", x, y)
 
     # Update the display
     pygame.display.flip()
