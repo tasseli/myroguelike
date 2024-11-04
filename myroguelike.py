@@ -40,9 +40,9 @@ def quit_app(reason):
     pygame.quit()
     sys.exit()    
 
-creatures = []
 player = init_player([3,6])
 
+creatures = []
 orc = init_orc([5,12], "run right", None, creatures)
 orc2 = init_orc([1,3], None, None, creatures)
 orc3 = init_orc([72,33], "toward", player, creatures)
