@@ -15,7 +15,7 @@ BOTTOM_UI_HEIGHT = 2
 pygame.init()
 # Set up the display
 screen = pygame.display.set_mode((MAP_WIDTH * TILE_SIZE, (MAP_HEIGHT+BOTTOM_UI_HEIGHT) * TILE_SIZE))
-pygame.display.set_caption("Simple Roguelike Map")
+pygame.display.set_caption("MYRoguelike")
 
 # Initialize an empty map
 game_map = Map()
