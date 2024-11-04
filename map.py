@@ -40,7 +40,7 @@ class Map:
             self.my_map[x][MAP_HEIGHT-1] = WALL
 
     # rough idea for the map's creature move checking function
-    def move_if_available(self, new_position, creature):
+    def move_if_available(self, creature, new_position):
         if new_position == creature.get_position():
             return True
         if self.my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
