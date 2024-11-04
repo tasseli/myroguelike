@@ -4,8 +4,8 @@ import random
 class Player:
     sign = "@"
 
-    def __init__(self):
-        self.position = [3, 6]
+    def __init__(self, coords):
+        self.position = coords
 
     def get_position(self):
         return self.position

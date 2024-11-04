@@ -22,10 +22,14 @@ game_map = Map()
 
 # Initialize a font
 font = pygame.font.SysFont(None, 22)
-    
-player = Player()
-current_pos = player.get_position()
-game_map.set_location(player)
+
+def init_player(coords):
+    player = Player(coords)
+    current_pos = player.get_position()
+    game_map.set_location(player)
+    return player
+
+player = init_player([3,6])
 
 def init_orc(coords):
     orc = Orc(coords)
