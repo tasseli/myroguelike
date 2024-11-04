@@ -57,7 +57,7 @@ class Map:
     def get_sign(self, x, y):
         return self.my_map[x][y]
         
-    def set_location(self, creature):
+    def set_sign_with_creature(self, creature):
         coords = creature.get_position()
         self.my_map[coords[0]][coords[1]] = creature.sign
 
