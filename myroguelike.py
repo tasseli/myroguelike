@@ -25,28 +25,19 @@ font = pygame.font.SysFont(None, 22)
     
 player = Player()
 current_pos = player.get_position()
-game_map.set_location(current_pos, player.sign)
+game_map.set_location(player)
 
 def init_orc(coords):
     orc = Orc(coords)
-    orc_pos = orc.get_position()
-    game_map.set_location(orc_pos, orc.sign)
+    game_map.set_location(orc)
     return orc
 
 #orc = Orc([5,12])
 orc = init_orc([5,12])
-orc2 = Orc([1,3])
-orc3 = Orc([72,33])
-orc4 = Orc([37,23])
-orc5 = Orc([6,38])
-orc2_pos = orc2.get_position()
-orc3_pos = orc3.get_position()
-orc4_pos = orc4.get_position()
-orc5_pos = orc5.get_position()
-game_map.set_location(orc2_pos, orc2.sign)
-game_map.set_location(orc3_pos, orc3.sign)
-game_map.set_location(orc4_pos, orc4.sign)
-game_map.set_location(orc5_pos, orc5.sign)
+orc2 = init_orc([1,3])
+orc3 = init_orc([72,33])
+orc4 = init_orc([37,23])
+orc5 = init_orc([6,38])
 
 def quit_app(reason):
     print(reason)
