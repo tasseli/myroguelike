@@ -56,7 +56,6 @@ class Map:
         return False
 
 #   An idea for solving moving a whole array of creatures: implement calling each creature's type of movement by their mood.
-#   Need to think through and understand cross imports with multiple file projects.
     def move_if_available_naturally(self, creature):
         new_position = creature.get_position()
         if creature.mood == "ambulate":
