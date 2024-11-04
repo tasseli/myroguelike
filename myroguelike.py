@@ -77,10 +77,10 @@ while True:
     # Render the map
     for x in range(MAP_WIDTH):
         for y in range(MAP_HEIGHT):
-            if game_map.get_location(x,y) == OPEN_SPACE:
+            if game_map.get_sign(x,y) == OPEN_SPACE:
                 pass
             else:
-                draw_and_blit_char(pygame, screen, font, game_map.get_location(x,y), x, y)
+                draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y)
 
     for y in range(y, y+BOTTOM_UI_HEIGHT):
         for x in range(MAP_WIDTH):
