@@ -35,6 +35,7 @@ class Orc:
         return [self.position[0] + x, self.position[1] + y]
         
     def move_toward(self, destination):
+        destination = destination.get_position()
         x = 0
         y = 0
         if destination[0] > self.position[0]:
