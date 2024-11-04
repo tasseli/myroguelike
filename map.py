@@ -65,19 +65,7 @@ class Map:
             new_position = creature.move_right()
         elif creature.mood == "toward":
             new_position = creature.move_toward(creature.target)
-
-        if new_position == creature.get_position():
-            return True
-        if self.my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
-            # Clear the old position
-            current_pos = creature.get_position()
-            self.my_map[current_pos[0]][current_pos[1]] = OPEN_SPACE
-            # Update the creature position
-            creature.position = new_position
-            # Mark the new position with its ID
-            self.my_map[creature.position[0]][creature.position[1]] = creature.sign
-            return True
-        return False
+        self.move_if_available(creature, new_position)
 
     def get_sign(self, x, y):
         return self.my_map[x][y]
