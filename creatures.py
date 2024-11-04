@@ -12,9 +12,15 @@ class Player:
 
 class Orc:
     sign = "o"
+    mood = "ambulate"
+    target = None
 
-    def __init__(self, coords):
+    def __init__(self, coords, mood, target):
         self.position = [coords[0], coords[1]]
+        if mood != None:
+            self.mood = mood
+        if target != None:
+            self.target = target
 
     def get_position(self):
         return self.position

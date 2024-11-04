@@ -29,8 +29,8 @@ def init_player(coords):
     game_map.set_sign_with_creature(player)
     return player
 
-def init_orc(coords):
-    orc = Orc(coords)
+def init_orc(coords, mood, target):
+    orc = Orc(coords, mood, target)
     game_map.set_sign_with_creature(orc)
     return orc
 
@@ -39,13 +39,19 @@ def quit_app(reason):
     pygame.quit()
     sys.exit()    
 
+creatures = []
 player = init_player([3,6])
-
-orc = init_orc([5,12])
-orc2 = init_orc([1,3])
-orc3 = init_orc([72,33])
-orc4 = init_orc([37,23])
-orc5 = init_orc([6,38])
+creatures.append(player)
+orc = init_orc([5,12], "run East", None)
+creatures.append(orc)
+orc2 = init_orc([1,3], None, None)
+creatures.append(orc2)
+orc3 = init_orc([72,33], "toward", player)
+creatures.append(orc3)
+orc4 = init_orc([37,23], "toward", orc3)
+creatures.append(orc4)
+orc5 = init_orc([6,38], "toward", orc4)
+creatures.append(orc5)
 
 # Main loop
 
@@ -65,6 +71,7 @@ while True:
             elif outcome == "m" or outcome == "s":
 #               print("Move key or stand still key")
                 if game_map.move_if_available(player, new_position):
+#                    game_map.move_if_available_naturally(creatures[0])
                     game_map.move_if_available(orc, orc.move_right())
                     game_map.move_if_available(orc2, orc2.move_random())
                     game_map.move_if_available(orc3, orc3.move_toward(player.get_position()))
