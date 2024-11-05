@@ -14,7 +14,7 @@ BOTTOM_UI_HEIGHT = 2
 # pygame setup
 pygame.init()
 # Set up the display
-screen = pygame.display.set_mode((MAP_WIDTH * TILE_SIZE, (MAP_HEIGHT+BOTTOM_UI_HEIGHT) * TILE_SIZE))
+screen = pygame.display.set_mode((MAP_WIDTH * TILE_SIZE, (MAP_HEIGHT) * TILE_SIZE))
 pygame.display.set_caption("MYRoguelike")
 
 # Initialize an empty map
@@ -68,7 +68,7 @@ while True:
 #               print("Move key or stand still key")
                 if game_map.move_if_available(player, new_position):
                     for i in range(0, len(creatures)):
-                        game_map.move_if_available_naturally(creatures[i])
+                        game_map.move_moodily(creatures[i])
 
     # Clear the screen
     screen.fill(GRAY)
