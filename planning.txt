@@ -3,13 +3,9 @@ planning
 Main list of issues that would merit fixing or rewriting:
 - adding messages to bottom UI
   - removing the dash row as it's visually not needed
-- x and y in map's drawing being passed
-- blitting dots for floor
-- blitting dots with floor's current color
 - adding melee
 - adding knowledge, first levels
 - adding discussion
-- renaming move_if_functions shorter
 - adding key handling for fun commands like look, say, tickle, hit
 - adding help keys
 
