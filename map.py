@@ -19,9 +19,9 @@ GRAY = (128, 128, 128)   # Open space
 DARK_GRAY = (64, 64, 64) # Wall
 BLACK = (0, 0, 0)        # Text color
 
-def draw_and_blit_char(pygame, screen, font, my_char, x, y):
-    pygame.draw.rect(screen, DARK_GRAY, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
-    # Render the my_char ('#'/'@') character on top of the background color
+def draw_and_blit_char(pygame, screen, font, my_char, x, y, color):
+    pygame.draw.rect(screen, color, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+    # Render the my_char (e.g. '#' / '@') character on top of the background color
     text_surface = font.render(my_char, True, BLACK)
     text_rect = text_surface.get_rect(center=(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2))
     screen.blit(text_surface, text_rect)
