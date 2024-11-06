@@ -10,6 +10,7 @@ Main list of issues that would merit fixing or rewriting:
 - adding help keys
 
 Ideas
+load map from file
 map generation
 agent knowledge
 agent communication (language, )
@@ -24,7 +25,6 @@ bartering based on language / abilities
  Easy steps for refactoring
 - refactor game loop 
 - plan map logic, say, for handling items etc
-- load map from file
 - consider game manager class
 - modularize rendering logic
 - consider game states
