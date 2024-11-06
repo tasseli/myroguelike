@@ -10,6 +10,7 @@ Main list of issues that would merit fixing or rewriting:
 - adding help keys
 
 Ideas
+- Game loop idea: 1) capture input 2) update game state 3) render new state 4) wait for next input
 - consider game states
 - plan map logic, say, for handling items etc
 - load map from file
@@ -37,4 +38,4 @@ Ideas
  pygame.time.Clock()        control speed of the game. Handling frame rate, checking for input.
  screen.blit()              Draw surface
  pygame.display.update()    Updates the contents of the display after drawing everything. Update the screen after action or turn.
- Game loop idea:            1 capture input 2 update game state 3 render new state 4 wait for next input
+ 
