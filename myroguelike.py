@@ -23,6 +23,11 @@ game_map = Map()
 # Initialize a font
 font = pygame.font.SysFont(None, 22)
 
+def quit_app(reason):
+    print(reason)
+    pygame.quit()
+    sys.exit()    
+
 def init_player(coords):
     player = Player(coords)
     current_pos = player.get_position()
@@ -34,11 +39,6 @@ def init_orc(coords, mood, target, creatures):
     game_map.set_sign_with_creature(orc)
     creatures.append(orc)
     return orc
-
-def quit_app(reason):
-    print(reason)
-    pygame.quit()
-    sys.exit()    
 
 player = init_player([3,6])
 
