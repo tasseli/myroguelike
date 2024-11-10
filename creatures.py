@@ -4,6 +4,7 @@ import random
 class Player:
     sign = "@"
     mood = "player >:)"
+    health = 12
 
     def __init__(self, coords):
         self.position = coords
@@ -18,6 +19,8 @@ class Orc:
 
     def __init__(self, coords, mood, target):
         self.position = [coords[0], coords[1]]
+        health = random.randint(3, 7)
+        health_max = health
         if mood != None:
             self.mood = mood
         if target != None:
