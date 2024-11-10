@@ -52,7 +52,7 @@ orc5 = init_orc([6,38], "toward", orc4, creatures)
 # Main loop
 
 while True:
-    y = 0
+#    y = 0
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("event.type == quit")
