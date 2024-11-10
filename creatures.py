@@ -5,6 +5,7 @@ class Player:
     sign = "@"
     mood = "player >:)"
     health = 12
+    health_max = health
 
     def __init__(self, coords):
         self.position = coords
