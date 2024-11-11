@@ -6,6 +6,7 @@ class Player:
     mood = "player >:)"
     health = 12
     health_max = health
+    damage = 4
 
     def __init__(self, coords):
         self.position = coords
@@ -17,6 +18,7 @@ class Orc:
     sign = "o"
     mood = "ambulate"
     target = None
+    damage = 3
 
     def __init__(self, coords, mood, target):
         self.position = [coords[0], coords[1]]
