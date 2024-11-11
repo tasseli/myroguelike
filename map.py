@@ -53,6 +53,8 @@ class Map:
             # Mark the new position with its ID
             self.my_map[creature.position[0]][creature.position[1]] = creature.sign
             return True
+#        elif self.my_map[new_position[0]][new_position[1]] == "o" OR self.my_map[new_position[0]][new_position[1]] == "@":
+#		self.hit(__target__) 
         return False
 
 #   An idea for solving moving a whole array of creatures: implement calling each creature's type of movement by their mood.
