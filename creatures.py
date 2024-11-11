@@ -14,6 +14,12 @@ class Player:
     def get_position(self):
         return self.position
 
+    def hit(self, creature):
+        creature.health -= self.damage
+
+    def take_hit(self, damage):
+        self.health -= damage
+
 class Orc:
     sign = "o"
     mood = "ambulate"
@@ -28,6 +34,12 @@ class Orc:
             self.mood = mood
         if target != None:
             self.target = target
+
+    def hit(self, creature):
+        creature.health -= self.damage
+
+    def take_hit(self, damage):
+        self.health -= damage
 
     def get_position(self):
         return self.position
