@@ -3,7 +3,7 @@ import random
 
 class Player:
     sign = "@"
-    mood = "player >:)"
+    mood = "player"
     health = 12
     health_max = health
     damage = 4
