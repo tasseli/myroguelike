@@ -55,6 +55,8 @@ class Map:
             return True
         elif self.my_map[new_position[0]][new_position[1]] == "o" and creature.sign == "@":
             print("Player wants to hit an orc at ", new_position[0], new_position[1]) 
+        elif (self.my_map[new_position[0]][new_position[1]] == "o" or self.my_map[new_position[0]][new_position[1]] == "@") and creature.sign == "o":
+            print("An orc wants to hit someone at ", new_position[0], new_position[1]) 
         return False
 
 #   An idea for solving moving a whole array of creatures: implement calling each creature's type of movement by their mood.
