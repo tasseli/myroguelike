@@ -16,6 +16,7 @@ class Player:
 
     def hit(self, creature):
         creature.health -= self.damage
+        print("Creature ", creature.sign , " hit for ", self.damage, " damage! Sincerely, -", self.sign)
 
     def take_hit(self, damage):
         self.health -= damage
