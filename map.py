@@ -53,7 +53,7 @@ class Map:
             # Mark the new position with its ID
             self.my_map[creature.position[0]][creature.position[1]] = creature.sign
             return True
-        elif self.my_map[new_position[0]][new_position[1]] == "@":
+        elif self.my_map[new_position[0]][new_position[1]] == "o" and creature.sign == "@":
             print("Player wants to hit an orc at ", new_position[0], new_position[1]) 
         return False
 
