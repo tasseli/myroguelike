@@ -8,7 +8,6 @@ OPEN_SPACE, WALL, PLAYER, ORC)
 from map import (draw_and_blit_char,
 WHITE, GRAY, DARK_GRAY, BLACK)
 from keyboard import read_moves
-from creatures import Player, Orc
 BOTTOM_UI_HEIGHT = 2
 
 # pygame setup
@@ -16,9 +15,6 @@ pygame.init()
 # Set up the display
 screen = pygame.display.set_mode((MAP_WIDTH * TILE_SIZE, (MAP_HEIGHT) * TILE_SIZE))
 pygame.display.set_caption("MYRoguelike")
-
-# Initialize an empty map
-game_map = Map()
 
 # Initialize a font
 font = pygame.font.SysFont(None, 22)
@@ -28,26 +24,8 @@ def quit_app(reason):
     pygame.quit()
     sys.exit()    
 
-def init_player(coords):
-    player = Player(coords)
-    current_pos = player.get_position()
-    game_map.set_sign_with_creature(player)
-    return player
-
-def init_orc(coords, mood, target, creatures):
-    orc = Orc(coords, mood, target)
-    game_map.set_sign_with_creature(orc)
-    creatures.append(orc)
-    return orc
-
-player = init_player([3,6])
-
-creatures = [player]
-orc = init_orc([5,12], "run right", None, creatures)
-orc2 = init_orc([1,3], None, None, creatures)
-orc3 = init_orc([72,33], "toward", player, creatures)
-orc4 = init_orc([37,23], "toward", orc3, creatures)
-orc5 = init_orc([6,38], "toward", orc4, creatures)
+# Initialize an empty map
+game_map = Map()
 
 # Main loop
 
@@ -57,7 +35,7 @@ while True:
         if event.type == pygame.QUIT:
             quit_app("event.type == quit")
         if event.type == pygame.KEYDOWN:
-            new_position = player.get_position().copy()
+            new_position = game_map.player.get_position().copy()
             outcome = read_moves(new_position, event.key, pygame)
             if outcome == "q":
                 quit_app("q or x pressed")
@@ -66,9 +44,9 @@ while True:
                 pass
             elif outcome == "m" or outcome == "s":
 #               print("Move key or stand still key")
-                if game_map.move_if_available(player, new_position, creatures):
-                    for i in range(1, len(creatures)): #don't move the player - the first creature
-                        game_map.move_moodily(i, creatures)
+                if game_map.move_if_available(game_map.player, new_position, game_map.creatures):
+                    for i in range(1, len(game_map.creatures)): #don't move the player - the first creature
+                        game_map.move_moodily(i, game_map.creatures)
 
     # Clear the screen
     screen.fill(GRAY)

@@ -1,6 +1,6 @@
 # map.py
 
-from creatures import Orc
+from creatures import Player, Orc
 
 # Define the dimensions of the map
 MAP_WIDTH = 80
@@ -46,6 +46,27 @@ class Map:
         for x in range(MAP_WIDTH):
             self.my_map[x][0] = WALL
             self.my_map[x][MAP_HEIGHT-1] = WALL
+
+        def init_player(coords):
+            player = Player(coords)
+            current_pos = player.get_position()
+            self.set_sign_with_creature(player)
+            return player
+
+        def init_orc(coords, mood, target, creatures):
+            orc = Orc(coords, mood, target)
+            self.set_sign_with_creature(orc)
+            creatures.append(orc)
+            return orc
+
+        self.player = init_player([3,6])
+
+        self.creatures = [self.player]
+        orc = init_orc([5,12], "run right", None, self.creatures)
+        orc2 = init_orc([1,3], None, None, self.creatures)
+        orc3 = init_orc([72,33], "toward", self.player, self.creatures)
+        orc4 = init_orc([37,23], "toward", orc3, self.creatures)
+        orc5 = init_orc([6,38], "toward", orc4, self.creatures)
 
     def move_if_available(self, creature, new_position, creatures):
         if new_position == creature.get_position():
