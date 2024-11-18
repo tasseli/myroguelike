@@ -27,9 +27,11 @@ def draw_and_blit_char(pygame, screen, font, my_char, x, y, color):
     screen.blit(text_surface, text_rect)
 
 def find_creature_at(creatures, x, y):
+    i = 1
     for creature in creatures:
         if creature.position[0] == x and creature.position[1] == y:
-            return creature
+            return i
+        i += 1
     return 0
 
 class Map:
@@ -68,7 +70,8 @@ class Map:
         orc4 = init_orc([37,23], "toward", orc3, self.creatures)
         orc5 = init_orc([6,38], "toward", orc4, self.creatures)
 
-    def move_if_available(self, creature, new_position, creatures):
+    def move_if_available(self, i, new_position, creatures):
+        creature = creatures[i]
         if new_position == creature.get_position():
             return True
         if self.my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
@@ -84,25 +87,26 @@ class Map:
             print("Player wants to hit an orc at ", new_position[0], new_position[1]) 
             target = find_creature_at(creatures, new_position[0], new_position[1])
             if target:
-                creature.hit(target)
+                creature.hit(self.creatures[i])
         elif (self.my_map[new_position[0]][new_position[1]] == "o" or self.my_map[new_position[0]][new_position[1]] == "@") and creature.sign == "o":
             print("An orc wants to hit someone at ", new_position[0], new_position[1]) 
             target = find_creature_at(creatures, new_position[0], new_position[1])
             if target:
-                creature.hit(target)
+                creature.hit(self.creatures[i])
         return False
 
 #   An idea for solving moving a whole array of creatures: implement calling each creature's type of movement by their mood.
     def move_moodily(self, creature_i, creatures):
         creature = creatures[creature_i]
         new_position = creature.get_position()
-        if creature.mood == "ambulate":
-            new_position = creature.move_random()
-        elif creature.mood == "run right":
-            new_position = creature.move_right()
-        elif creature.mood == "toward":
-            new_position = creature.move_toward(creature.target)
-        self.move_if_available(creature, new_position, creatures)
+        if not creature.check_death():
+            if creature.mood == "ambulate":
+                new_position = creature.move_random()
+            elif creature.mood == "run right":
+                new_position = creature.move_right()
+            elif creature.mood == "toward":
+                new_position = creature.move_toward(creature.target)
+            self.move_if_available(creature_i, new_position, creatures)
 
     def get_sign(self, x, y):
         return self.my_map[x][y]

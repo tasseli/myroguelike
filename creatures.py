@@ -20,6 +20,11 @@ class Player:
 
     def take_hit(self, damage):
         self.health -= damage
+    
+    def check_death(self):
+        if self.health < 1:
+            return True
+        return False
 
 class Orc:
     sign = "o"
@@ -38,8 +43,10 @@ class Orc:
             self.target = target
 
     def hit(self, creature):
+        print("Creature ", creature.sign, " had ", creature.health, " health")
         creature.health -= self.damage
         print("Creature ", creature.sign , " hit for ", self.damage, " damage! Sincerely, -", self.sign)
+        print("Creature ", creature.sign, " has ", creature.health, " health")
 
     def take_hit(self, damage):
         self.health -= damage
@@ -68,3 +75,9 @@ class Orc:
         elif destination[1] < self.position[1]:
             y = -1
         return [self.position[0] + x, self.position[1] + y]
+
+    def check_death(self):
+        if self.health < 1:
+            return True
+        return False
+
