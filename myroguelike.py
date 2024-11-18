@@ -42,7 +42,7 @@ def init_orc(coords, mood, target, creatures):
 
 player = init_player([3,6])
 
-creatures = []
+creatures = [player]
 orc = init_orc([5,12], "run right", None, creatures)
 orc2 = init_orc([1,3], None, None, creatures)
 orc3 = init_orc([72,33], "toward", player, creatures)
@@ -67,7 +67,7 @@ while True:
             elif outcome == "m" or outcome == "s":
 #               print("Move key or stand still key")
                 if game_map.move_if_available(player, new_position, creatures):
-                    for i in range(0, len(creatures)):
+                    for i in range(1, len(creatures)): #don't move the player - the first creature
                         game_map.move_moodily(i, creatures)
 
     # Clear the screen
