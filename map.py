@@ -26,6 +26,12 @@ def draw_and_blit_char(pygame, screen, font, my_char, x, y, color):
     text_rect = text_surface.get_rect(center=(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2))
     screen.blit(text_surface, text_rect)
 
+def find_creature_at(creatures, x, y):
+    for creature in creatures:
+        if creature.position[0] == x and creature.position[1] == y:
+            return creature
+    return 0
+
 class Map:
 
     def __init__(self):
@@ -41,7 +47,7 @@ class Map:
             self.my_map[x][0] = WALL
             self.my_map[x][MAP_HEIGHT-1] = WALL
 
-    def move_if_available(self, creature, new_position):
+    def move_if_available(self, creature, new_position, creatures):
         if new_position == creature.get_position():
             return True
         if self.my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
@@ -55,12 +61,19 @@ class Map:
             return True
         elif self.my_map[new_position[0]][new_position[1]] == "o" and creature.sign == "@":
             print("Player wants to hit an orc at ", new_position[0], new_position[1]) 
+            target = find_creature_at(creatures, new_position[0], new_position[1])
+            if target:
+                creature.hit(target)
         elif (self.my_map[new_position[0]][new_position[1]] == "o" or self.my_map[new_position[0]][new_position[1]] == "@") and creature.sign == "o":
             print("An orc wants to hit someone at ", new_position[0], new_position[1]) 
+            target = find_creature_at(creatures, new_position[0], new_position[1])
+            if target:
+                creature.hit(target)
         return False
 
 #   An idea for solving moving a whole array of creatures: implement calling each creature's type of movement by their mood.
-    def move_moodily(self, creature):
+    def move_moodily(self, creature_i, creatures):
+        creature = creatures[creature_i]
         new_position = creature.get_position()
         if creature.mood == "ambulate":
             new_position = creature.move_random()
@@ -68,7 +81,7 @@ class Map:
             new_position = creature.move_right()
         elif creature.mood == "toward":
             new_position = creature.move_toward(creature.target)
-        self.move_if_available(creature, new_position)
+        self.move_if_available(creature, new_position, creatures)
 
     def get_sign(self, x, y):
         return self.my_map[x][y]

@@ -26,6 +26,7 @@ class Orc:
     mood = "ambulate"
     target = None
     damage = 3
+    health = 5
 
     def __init__(self, coords, mood, target):
         self.position = [coords[0], coords[1]]

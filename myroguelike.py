@@ -66,9 +66,9 @@ while True:
                 pass
             elif outcome == "m" or outcome == "s":
 #               print("Move key or stand still key")
-                if game_map.move_if_available(player, new_position):
+                if game_map.move_if_available(player, new_position, creatures):
                     for i in range(0, len(creatures)):
-                        game_map.move_moodily(creatures[i])
+                        game_map.move_moodily(i, creatures)
 
     # Clear the screen
     screen.fill(GRAY)
