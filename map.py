@@ -84,12 +84,10 @@ class Map:
             self.my_map[creature.position[0]][creature.position[1]] = creature.sign
             return True
         elif self.my_map[new_position[0]][new_position[1]] == "o" and creature.sign == "@":
-            print("Player wants to hit an orc at ", new_position[0], new_position[1]) 
             target = find_creature_at(creatures, new_position[0], new_position[1])
             if target != -1:
                 creature.hit(self.creatures[target])
         elif (self.my_map[new_position[0]][new_position[1]] == "o" or self.my_map[new_position[0]][new_position[1]] == "@"):
-            print("An orc wants to hit someone at ", new_position[0], new_position[1]) 
             target = find_creature_at(creatures, new_position[0], new_position[1])
             if target != -1:
                 creature.hit(self.creatures[target])

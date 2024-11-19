@@ -34,17 +34,12 @@ def check_deaths(game_map, moves_bool):
             game_map.move_moodily(i, game_map.creatures)
     for i in range(1, len(game_map.creatures)):
         if game_map.creatures[i].check_death():
-            print("Looks like ", game_map.creatures[i].sign, " took so much damage it dies!")
             dying.append(i)
-            print("dying: ", dying)
     deaths = len(dying)
-    print("deaths: ", deaths)
     for i in range(0, deaths):
         death_location = game_map.creatures[dying[deaths-i-1]].get_position()
         game_map.my_map[death_location[0]][death_location[1]] = OPEN_SPACE
-        print("popping: ", dying[deaths-i-1], " with creatures looking like ", game_map.creatures)
         game_map.creatures.pop(dying[deaths-i-1])
-        print("popped. with creatures looking like ", game_map.creatures)
 
 # Main loop
 
@@ -57,7 +52,6 @@ while True:
             new_position = game_map.player.get_position().copy()
             outcome = read_moves(new_position, event.key, pygame)
             if outcome == "q":
-                quit_app("q or x pressed")
             elif outcome == "o":
 #               print("An unhandled key was pressed.")
                 pass

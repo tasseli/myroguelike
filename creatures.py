@@ -45,10 +45,9 @@ class Orc:
             self.target = target
 
     def hit(self, target_creature):
-        print("Creature ", target_creature.sign, " had ", target_creature.health, " health")
         target_creature.health -= self.damage
         print("Creature ", target_creature.sign , " hit for ", self.damage, " damage! Sincerely, -", self.sign)
-        print("Creature ", target_creature.sign, " has ", target_creature.health, " health")
+        print("Creature ", target_creature.sign, " has ", target_creature.health, " health remaining")
 
     def take_hit(self, damage):
         self.health -= damage
