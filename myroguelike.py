@@ -27,6 +27,25 @@ def quit_app(reason):
 # Initialize an empty map
 game_map = Map()
 
+def check_deaths(game_map, moves_bool):
+    dying = []
+    if moves_bool:
+        for i in range(1, len(game_map.creatures)):                     # don't move the player in a loop
+            game_map.move_moodily(i, game_map.creatures)
+    for i in range(1, len(game_map.creatures)):
+        if game_map.creatures[i].check_death():
+            print("Looks like ", game_map.creatures[i].sign, " took so much damage it dies!")
+            dying.append(i)
+            print("dying: ", dying)
+    deaths = len(dying)
+    print("deaths: ", deaths)
+    for i in range(0, deaths):
+        death_location = game_map.creatures[dying[deaths-i-1]].get_position()
+        game_map.my_map[death_location[0]][death_location[1]] = OPEN_SPACE
+        print("popping: ", dying[deaths-i-1], " with creatures looking like ", game_map.creatures)
+        game_map.creatures.pop(dying[deaths-i-1])
+        print("popped. with creatures looking like ", game_map.creatures)
+
 # Main loop
 
 while True:
@@ -45,36 +64,8 @@ while True:
             elif outcome == "m" or outcome == "s":
 #               print("Move key or stand still key")
                 if game_map.move_to(0, new_position, game_map.creatures): # 0 refers to the player
-                    dying = []
-                    for i in range(1, len(game_map.creatures)):
-                        if game_map.creatures[i].check_death():
-                            print("Looks like ", game_map.creatures[i].sign, " took so much damage it dies!")
-                            dying.append(i)
-                            print("dying: ", dying)
-                        deaths = len(dying)
-                        print("deaths: ", deaths)
-                    for i in range(0, deaths):
-                        death_location = game_map.creatures[dying[deaths-i-1]].get_position()
-                        game_map.my_map[death_location[0]][death_location[1]] = OPEN_SPACE
-                        print("popping: ", dying[deaths-i-1], " with creatures looking like ", game_map.creatures)
-                        game_map.creatures.pop(dying[deaths-i-1])
-                        print("popped. with creatures looking like ", game_map.creatures)
-                    dying = []
-                    for i in range(1, len(game_map.creatures)):                     # don't move the player in a loop
-                        game_map.move_moodily(i, game_map.creatures)
-                        if game_map.creatures[i].check_death():
-                            print("Looks like ", game_map.creatures[i].sign, " took so much damage it dies!")
-                            dying.append(i)
-                            print("dying: ", dying)
-                    deaths = len(dying)
-                    print("deaths: ", deaths)
-                    for i in range(0, deaths):
-                        death_location = game_map.creatures[dying[deaths-i-1]].get_position()
-                        game_map.my_map[death_location[0]][death_location[1]] = OPEN_SPACE
-                        print("popping: ", dying[deaths-i-1], " with creatures looking like ", game_map.creatures)
-                        game_map.creatures.pop(dying[deaths-i-1])
-                        print("popped. with creatures looking like ", game_map.creatures)
-                        
+                    check_deaths(game_map, False)   # check if player killed anyone
+                    check_deaths(game_map, True)    # have all creatures move and check if they killed anyone
 
     # Clear the screen
     screen.fill(GRAY)
