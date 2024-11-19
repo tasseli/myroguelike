@@ -87,10 +87,12 @@ class Map:
             target = find_creature_at(creatures, new_position[0], new_position[1])
             if target != -1:
                 creature.hit(self.creatures[target])
+            return True
         elif (self.my_map[new_position[0]][new_position[1]] == "o" or self.my_map[new_position[0]][new_position[1]] == "@"):
             target = find_creature_at(creatures, new_position[0], new_position[1])
             if target != -1:
                 creature.hit(self.creatures[target])
+            return True
         return False
 
 #   An idea for solving moving a whole array of creatures: implement calling each creature's type of movement by their mood.
