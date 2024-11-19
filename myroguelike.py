@@ -52,6 +52,7 @@ while True:
             new_position = game_map.player.get_position().copy()
             outcome = read_moves(new_position, event.key, pygame)
             if outcome == "q":
+                quit_app("q or x pressed")
             elif outcome == "o":
 #               print("An unhandled key was pressed.")
                 pass
