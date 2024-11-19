@@ -14,9 +14,11 @@ class Player:
     def get_position(self):
         return self.position
 
-    def hit(self, creature):
-        creature.health -= self.damage
-        print("Creature ", creature.sign , " hit for ", self.damage, " damage! Sincerely, -", self.sign)
+    def hit(self, target_creature):
+        print("Creature ", target_creature.sign, " had ", target_creature.health, " health")
+        target_creature.health -= self.damage
+        print("Creature ", target_creature.sign , " hit for ", self.damage, " damage! Sincerely, -", self.sign)
+        print("Creature ", target_creature.sign, " has ", target_creature.health, " health")
 
     def take_hit(self, damage):
         self.health -= damage
@@ -42,11 +44,11 @@ class Orc:
         if target != None:
             self.target = target
 
-    def hit(self, creature):
-        print("Creature ", creature.sign, " had ", creature.health, " health")
-        creature.health -= self.damage
-        print("Creature ", creature.sign , " hit for ", self.damage, " damage! Sincerely, -", self.sign)
-        print("Creature ", creature.sign, " has ", creature.health, " health")
+    def hit(self, target_creature):
+        print("Creature ", target_creature.sign, " had ", target_creature.health, " health")
+        target_creature.health -= self.damage
+        print("Creature ", target_creature.sign , " hit for ", self.damage, " damage! Sincerely, -", self.sign)
+        print("Creature ", target_creature.sign, " has ", target_creature.health, " health")
 
     def take_hit(self, damage):
         self.health -= damage
