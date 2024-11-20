@@ -1,15 +1,19 @@
 planning
 
-Main list of issues that would merit fixing or rewriting:
+Fix / rewrite:
 - adding messages to bottom UI
     - add bottom-ui as visible again when it gets content
-- adding melee
+- do I need to have both class parameters and initiated parameters?
+- do I need to pass coordinates as a list instead of tuple, everywhere?
+- refactor game loop 
+- consider game manager class
+- modularize rendering logic
+
+Add features:
 - adding knowledge, first levels
 - adding discussion
 - adding key handling for fun commands like look, say, tickle, hit
 - adding help keys
-
-Ideas
 - Game loop idea: 1) capture input 2) update game state 3) render new state 4) wait for next input
 - consider game states
 - plan map logic, say, for handling items etc
@@ -25,13 +29,7 @@ Ideas
 - bartering based on language / abilities
 - "Look at ..." "It doesn't make sense to you" / "you see another Dwarven healer with a spellbook of second circle on their backpack, probably"It would be very cool if there'd be stat potions lying around, and raising a stat did show, but everything else changed based on the stats.
 
- Easy steps for refactoring
-- do I need to have both class parameters and initiated parameters?
-- do I need to pass coordinates as a list instead of tuple, everywhere?
-- refactor game loop 
-- consider game manager class
-- modularize rendering logic
-
+Recap:
  pygame.display.set_mode()  can be used to create the grid
  pygame.Surface             represents an off-screen image I can draw before blitting it to display. Frames, as it were.
  pygame.event.get()         capture inputs. Most commands use up a turn, some don't.
