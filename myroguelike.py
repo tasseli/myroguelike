@@ -34,6 +34,8 @@ def check_deaths(game_map, moves_bool):
             game_map.move_moodily(i, game_map.creatures)
     for i in range(0, len(game_map.creatures)):
         if game_map.creatures[i].check_death():
+            if i == 0:
+                quit_app("You died!")
             dying.append(i)
     deaths = len(dying)
     for i in range(0, deaths):
