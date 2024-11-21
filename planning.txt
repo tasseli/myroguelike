@@ -1,6 +1,8 @@
 planning
 
 Fix / rewrite:
+- plan player death
+- plan game ending
 - adding messages to bottom UI
     - add bottom-ui as visible again when it gets content
 - do I need to have both class parameters and initiated parameters?
