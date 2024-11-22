@@ -78,6 +78,9 @@ while True:
     for y in range(y + 1, y + 1 + BOTTOM_UI_HEIGHT):
         for x in range(MAP_WIDTH):
             draw_and_blit_char(pygame, screen, font, " ", x, y, GRAY)
+    message = "Hello world!"
+    for i in range(len(message)):
+        draw_and_blit_char(pygame, screen, font, message[i], i+1, y-1, GRAY)
 
     # Update the display
     pygame.display.flip()
