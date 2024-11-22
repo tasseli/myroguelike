@@ -2,7 +2,9 @@ planning
 
 Fix / rewrite:
 - adding messages to bottom UI
-    - add bottom-ui as visible again when it gets content
+  - handle multiple messages
+  - decide which messages to output
+- end game in a better fashion using bottom UI messages
 - do I need to have both class parameters and initiated parameters?
 - do I need to pass coordinates as a list instead of tuple, everywhere?
 - refactor game loop 
