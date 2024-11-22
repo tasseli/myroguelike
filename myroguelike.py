@@ -13,7 +13,7 @@ BOTTOM_UI_HEIGHT = 2
 # pygame setup
 pygame.init()
 # Set up the display
-screen = pygame.display.set_mode((MAP_WIDTH * TILE_SIZE, (MAP_HEIGHT) * TILE_SIZE))
+screen = pygame.display.set_mode((MAP_WIDTH * TILE_SIZE, (MAP_HEIGHT + BOTTOM_UI_HEIGHT) * TILE_SIZE))
 pygame.display.set_caption("MYRoguelike")
 
 # Initialize a font
@@ -46,7 +46,6 @@ def check_deaths(game_map, moves_bool):
 # Main loop
 
 while True:
-#    y = 0
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("event.type == quit")
@@ -68,17 +67,17 @@ while True:
     screen.fill(GRAY)
 
     # Render the map
-    for x in range(MAP_WIDTH):
-        for y in range(MAP_HEIGHT):
+    y = 0
+    for x in range(0, MAP_WIDTH):
+        for y in range(0, MAP_HEIGHT):
             if game_map.get_sign(x,y) == OPEN_SPACE:
                 draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y, GRAY)
             else:
                 draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y, DARK_GRAY)
 
-#    for y in range(y, y + BOTTOM_UI_HEIGHT):
-#        for x in range(MAP_WIDTH):
-#            if y == MAP_HEIGHT:
-##                draw_and_blit_char(pygame, screen, font, "-", x, y)
+    for y in range(y + 1, y + 1 + BOTTOM_UI_HEIGHT):
+        for x in range(MAP_WIDTH):
+            draw_and_blit_char(pygame, screen, font, " ", x, y, GRAY)
 
     # Update the display
     pygame.display.flip()
