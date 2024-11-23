@@ -2,6 +2,7 @@ planning
 
 Fix / rewrite:
 - adding messages to bottom UI
+  - implement log prints as messages instead
   - handle multiple messages
   - decide which messages to output
 - end game in a better fashion using bottom UI messages
