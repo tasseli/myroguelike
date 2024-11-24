@@ -8,7 +8,7 @@ OPEN_SPACE, WALL, PLAYER, ORC)
 from map import (draw_and_blit_char,
 WHITE, GRAY, DARK_GRAY, BLACK)
 from keyboard import read_moves
-BOTTOM_UI_HEIGHT = 2
+BOTTOM_UI_HEIGHT = 4
 
 # pygame setup
 pygame.init()
