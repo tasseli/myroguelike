@@ -15,13 +15,11 @@ class Player:
         return self.position
 
     def hit(self, target_creature):
-        message = "Creature " + target_creature.sign + " had " + str(target_creature.health) + " health"
-        print(message)
         target_creature.health -= self.damage
-        message2 = "Creature " + target_creature.sign + " hit for " + str(self.damage) + " damage! Sincerely, -" + self.sign
+        message1 = "Creature " + target_creature.sign + " hit for " + str(self.damage) + " damage! Sincerely, -" + self.sign
+        print(message1)
+        message2 = "Creature " + target_creature.sign + " has " + str(target_creature.health) + " health"
         print(message2)
-        message3 = "Creature " + target_creature.sign + " has " + str(target_creature.health) + " health"
-        print(message3)
 
     def check_death(self):
         if self.health < 1:
@@ -45,13 +43,11 @@ class Orc:
             self.target = target
 
     def hit(self, target_creature):
-        message = "Creature " + target_creature.sign + " had " + str(target_creature.health) + " health"
-        print(message)
         target_creature.health -= self.damage
-        message2 = "Creature " + target_creature.sign + " hit for " + str(self.damage) + " damage! Sincerely, -" + self.sign
+        message1 = "Creature " + target_creature.sign + " hit for " + str(self.damage) + " damage! Sincerely, -" + self.sign
+        print(message1)
+        message2 = "Creature " + target_creature.sign + " has " + str(target_creature.health) + " health"
         print(message2)
-        message3 = "Creature " + target_creature.sign + " has " + str(target_creature.health) + " health"
-        print(message3)
 
     def take_hit(self, damage):
         self.health -= damage

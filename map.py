@@ -70,6 +70,7 @@ class Map:
         orc4 = init_orc([37,23], "toward", orc3, self.creatures)
         orc5 = init_orc([6,38], "toward", orc4, self.creatures)
 
+    # return True if something happened and time passed, False if no clause managed to do something worthwhile
     def move_to(self, i, new_position, creatures):
         creature = creatures[i]
         if new_position == creature.get_position():
@@ -85,7 +86,8 @@ class Map:
             return True
         elif self.my_map[new_position[0]][new_position[1]] == "o" and creature.sign == "@":
             target = find_creature_at(creatures, new_position[0], new_position[1])
-            if target != -1:
+            if target != -1: 
+            # -1 stands for "no creature"
                 creature.hit(self.creatures[target])
             return True
         elif (self.my_map[new_position[0]][new_position[1]] == "o" or self.my_map[new_position[0]][new_position[1]] == "@"):

@@ -14,6 +14,7 @@ Fix / rewrite:
 - modularize rendering logic
 
 Add features:
+- add changing moods at least once destination becomes ineligible
 - plan game ending
 - adding knowledge, first levels
 - adding discussion
