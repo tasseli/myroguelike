@@ -55,10 +55,10 @@ while True:
             if outcome == "q":
                 quit_app("q or x pressed")
             elif outcome == "o":
-#               print("An unhandled key was pressed.")
+#               An unhandled key was pressed
                 pass
             elif outcome == "m" or outcome == "s":
-#               print("Move key or stand still key")
+#               Move key or stand still key
                 if game_map.move_to(0, new_position, game_map.creatures): # 0 refers to the player
                     check_deaths(game_map, False)   # check if player killed anyone
                     check_deaths(game_map, True)    # have all creatures move and check if they killed anyone
