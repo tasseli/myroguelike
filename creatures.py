@@ -23,8 +23,8 @@ class Player:
 
     def check_death(self):
         if self.health < 1:
-            return True
-        return False
+            return self.sign + " dies!"
+        return ""
 
 class Orc:
     sign = "o"
@@ -79,6 +79,6 @@ class Orc:
 
     def check_death(self):
         if self.health < 1:
-            return True
-        return False
+            return self.sign + " dies!"
+        return ""
 

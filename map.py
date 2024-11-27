@@ -101,7 +101,8 @@ class Map:
     def move_moodily(self, creature_i, creatures):
         creature = creatures[creature_i]
         new_position = creature.get_position()
-        if not creature.check_death():
+        death_note = creature.check_death()
+        if death_note == "":
             if creature.mood == "ambulate":
                 new_position = creature.move_random()
             elif creature.mood == "run right":
@@ -109,6 +110,8 @@ class Map:
             elif creature.mood == "toward":
                 new_position = creature.move_toward(creature.target)
             self.move_to(creature_i, new_position, creatures)
+            return death_note
+        return death_note
 
     def get_sign(self, x, y):
         return self.my_map[x][y]
