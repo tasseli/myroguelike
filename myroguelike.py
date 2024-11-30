@@ -29,11 +29,13 @@ game_map = Map()
 
 def check_deaths(game_map, moves_bool):
     dying = []
+    death_notes = []
     if moves_bool:
         for i in range(1, len(game_map.creatures)):                     # don't move the player in a loop
             death_note = game_map.move_moodily(i, game_map.creatures)
             if death_note != "":
                 print("Death note works: " + death_note)
+                death_notes.append(death_note)
     for i in range(0, len(game_map.creatures)):
         death_note = game_map.creatures[i].check_death()
         if death_note != "":
@@ -41,15 +43,18 @@ def check_deaths(game_map, moves_bool):
                 quit_app("You died!")
             dying.append(i)
             print("Death note works: " + death_note)
+            death_notes.append(death_note)
     deaths = len(dying)
     for i in range(0, deaths):
         death_location = game_map.creatures[dying[deaths-i-1]].get_position()
         game_map.my_map[death_location[0]][death_location[1]] = OPEN_SPACE
         game_map.creatures.pop(dying[deaths-i-1])
+    return death_notes
 
 # Main loop
 
 while True:
+    message = ""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("event.type == quit")
@@ -63,9 +68,14 @@ while True:
                 pass
             elif outcome == "m" or outcome == "s":
 #               Move key or stand still key
+                death_notes1 = ""
                 if game_map.move_to(0, new_position, game_map.creatures): # 0 refers to the player
-                    check_deaths(game_map, False)   # check if player killed anyone
-                    check_deaths(game_map, True)    # have all creatures move and check if they killed anyone
+                    death_notes1 = check_deaths(game_map, False)   # check if player killed anyone
+                death_notes2 = check_deaths(game_map, True)    # have all creatures move and check if they killed anyone
+                if len(death_notes1) > 0:
+                    message = death_notes1
+                if len(death_notes1) > 0:
+                    message += death_notes2
 
     # Clear the screen
     screen.fill(GRAY)
@@ -82,9 +92,10 @@ while True:
     for y in range(y + 1, y + 1 + BOTTOM_UI_HEIGHT):
         for x in range(MAP_WIDTH):
             draw_and_blit_char(pygame, screen, font, " ", x, y, GRAY)
-    message = "Hello world!"
-    for i in range(len(message)):
-        draw_and_blit_char(pygame, screen, font, message[i], i+1, y-1, GRAY)
-
+    if message != "":
+        for a_string in message:
+            for i in range(len(a_string)):
+                draw_and_blit_char(pygame, screen, font, a_string[i], i+1, y-1, GRAY)
+    message = ""
     # Update the display
     pygame.display.flip()
