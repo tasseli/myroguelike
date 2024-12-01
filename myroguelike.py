@@ -81,6 +81,8 @@ while True:
                     message = death_notes1
                 if len(death_notes1) > 0:
                     message += death_notes2
+    if len(message) > 0:
+        print("Message currently: " + message[0])
 
     # Clear the screen
     screen.fill(GRAY)
@@ -98,8 +100,9 @@ while True:
         for x in range(MAP_WIDTH):
             draw_and_blit_char(pygame, screen, font, " ", x, y, GRAY)
     if message != "":
+        print("msg got thru")
         for a_string in message:
             for i in range(0, len(a_string)):
-                draw_and_blit_char(pygame, screen, font, a_string[i], i+1, y-1, DARK_GRAY)
+                draw_and_blit_char(pygame, screen, font, a_string[i], i+1, MAP_HEIGHT+BOTTOM_UI_HEIGHT-1, DARK_GRAY)
     # Update the display
     pygame.display.flip()
