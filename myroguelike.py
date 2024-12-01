@@ -36,6 +36,8 @@ def check_deaths(game_map, moves_bool):
             if death_note != "":
                 print("Death note works: " + death_note)
                 death_notes.append(death_note)
+                for note in death_notes:
+                    print(note)
     for i in range(0, len(game_map.creatures)):
         death_note = game_map.creatures[i].check_death()
         if death_note != "":
@@ -44,6 +46,9 @@ def check_deaths(game_map, moves_bool):
             dying.append(i)
             print("Death note works: " + death_note)
             death_notes.append(death_note)
+            print("death_notes: ")
+            for note in death_notes:
+                print(note)
     deaths = len(dying)
     for i in range(0, deaths):
         death_location = game_map.creatures[dying[deaths-i-1]].get_position()
@@ -94,8 +99,7 @@ while True:
             draw_and_blit_char(pygame, screen, font, " ", x, y, GRAY)
     if message != "":
         for a_string in message:
-            for i in range(len(a_string)):
-                draw_and_blit_char(pygame, screen, font, a_string[i], i+1, y-1, GRAY)
-    message = ""
+            for i in range(0, len(a_string)):
+                draw_and_blit_char(pygame, screen, font, a_string[i], i+1, y-1, DARK_GRAY)
     # Update the display
     pygame.display.flip()
