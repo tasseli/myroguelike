@@ -96,13 +96,18 @@ while True:
             else:
                 draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y, DARK_GRAY)
 
-    for y in range(y + 1, y + 1 + BOTTOM_UI_HEIGHT):
-        for x in range(MAP_WIDTH):
-            draw_and_blit_char(pygame, screen, font, " ", x, y, GRAY)
-    if message != "":
-        print("msg got thru")
+    if len(message) > 0:
+        if len(message) < 4:
+            for i in range(4 - len(message)):
+                message.append("")
+                #now there are 4 strings in message
+        string_index = 0
+        draw_and_blit_char(pygame, screen, font, " ", 0, MAP_HEIGHT + string_index, GRAY)
         for a_string in message:
             for i in range(0, len(a_string)):
-                draw_and_blit_char(pygame, screen, font, a_string[i], i+1, MAP_HEIGHT+BOTTOM_UI_HEIGHT-1, DARK_GRAY)
+                draw_and_blit_char(pygame, screen, font, a_string[i], 1 + i, MAP_HEIGHT + string_index, DARK_GRAY)
+            for j in range(len(a_string), MAP_WIDTH):
+                draw_and_blit_char(pygame, screen, font, " ", j, MAP_HEIGHT + string_index, GRAY)
+            string_index += 1
     # Update the display
     pygame.display.flip()
