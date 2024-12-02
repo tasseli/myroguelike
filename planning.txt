@@ -2,6 +2,7 @@ planning
 
 Fix / rewrite:
 - adding messages to bottom UI
+  - troubleshoot printing messages by again writing the test message, then a test message in a list, if needed
   - handle a single message
   - handle multiple messages
   - pick a good function setup
