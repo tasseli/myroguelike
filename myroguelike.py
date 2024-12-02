@@ -59,7 +59,7 @@ def check_deaths(game_map, moves_bool):
 # Main loop
 
 while True:
-    message = ""
+    messages = []
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("event.type == quit")
@@ -73,16 +73,16 @@ while True:
                 pass
             elif outcome == "m" or outcome == "s":
 #               Move key or stand still key
-                death_notes1 = ""
+                death_notes1 = []
                 if game_map.move_to(0, new_position, game_map.creatures): # 0 refers to the player
                     death_notes1 = check_deaths(game_map, False)   # check if player killed anyone
                 death_notes2 = check_deaths(game_map, True)    # have all creatures move and check if they killed anyone
                 if len(death_notes1) > 0:
-                    message = death_notes1
+                    messages = death_notes1
                 if len(death_notes1) > 0:
-                    message += death_notes2
-    if len(message) > 0:
-        print("Message currently: " + message[0])
+                    messages += death_notes2
+    if len(messages) > 0:
+        print("Messages0 currently: " + messages[0])
 
     # Clear the screen
     screen.fill(GRAY)
@@ -96,14 +96,14 @@ while True:
             else:
                 draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y, DARK_GRAY)
 
-    if len(message) > 0:
-        if len(message) < 4:
-            for i in range(4 - len(message)):
-                message.append("")
+    if len(messages) > 0:
+        if len(messages) < 4:
+            for i in range(4 - len(messages)):
+                messages.append("")
                 #now there are 4 strings in message
         string_index = 0
-        draw_and_blit_char(pygame, screen, font, " ", 0, MAP_HEIGHT + string_index, GRAY)
-        for a_string in message:
+        for a_string in messages:
+            draw_and_blit_char(pygame, screen, font, " ", 0, MAP_HEIGHT + string_index, GRAY)
             for i in range(0, len(a_string)):
                 draw_and_blit_char(pygame, screen, font, a_string[i], 1 + i, MAP_HEIGHT + string_index, DARK_GRAY)
             for j in range(len(a_string), MAP_WIDTH):
