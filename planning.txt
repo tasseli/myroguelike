@@ -5,6 +5,10 @@ Fix / rewrite:
   - Think through the exact phases of turn
     - when should the messages be gotten? What should show on bottom ui and when? When is log cleared? How does it draw nicely and stay visible max time?
     - draw a graph of flow
+      - draw map
+      - draw logs (previous turn)
+      - ask for move
+      - process move
   - troubleshoot printing messages by again writing the test message, then a test message in a list, if needed
   - handle a single message
   - handle multiple messages
