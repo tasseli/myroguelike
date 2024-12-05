@@ -9,7 +9,7 @@ Fix / rewrite:
       - draw logs (previous turn)
       - ask for move
       - process move
-  - troubleshoot printing messages by again writing the test message, then a test message in a list, if needed
+  - retry
   - handle a single message
   - handle multiple messages
   - pick a good function setup
