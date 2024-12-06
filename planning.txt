@@ -1,6 +1,7 @@
 planning
 
 Fix / rewrite:
+- split into more files to regain glancability
 - adding messages to bottom UI
   - Think through the exact phases of turn
     - when should the messages be gotten? What should show on bottom ui and when? When is log cleared? How does it draw nicely and stay visible max time?
