@@ -51,10 +51,10 @@ def check_deaths(game_map, moves_bool):
 
 # Main loop
 
-previous_messages = []
+messages = ["Test 1", "", "", ""]
 while True:
-    messages = previous_messages.copy()
-    previous_messages = []
+    # Clear the screen
+    screen.fill(GRAY)
 
 # print message log (previous)
     if len(messages) > 0:
@@ -70,9 +70,7 @@ while True:
             for j in range(len(a_string), MAP_WIDTH):
                 draw_and_blit_char(pygame, screen, font, " ", j, MAP_HEIGHT + string_index, GRAY)
             string_index += 1
-    # Update the display
-    pygame.display.flip()
-    
+
 # handle events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -95,9 +93,6 @@ while True:
                     messages = death_notes1
                 if len(death_notes1) > 0:
                     messages += death_notes2
-
-    # Clear the screen
-    screen.fill(GRAY)
 
     # Render the map
     y = 0
