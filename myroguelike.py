@@ -51,7 +51,7 @@ def check_deaths(game_map, moves_bool):
 
 # Main loop
 
-messages = ["Test 1", "", "", ""]
+messages = ["Welcome to Myr!", "Move around with arrows or numpad.", "Moving towards an 'o'rc attacks.", "Good luck!"]
 while True:
     # Clear the screen
     screen.fill(GRAY)
@@ -85,6 +85,7 @@ while True:
                 pass
             elif outcome == "m" or outcome == "s":
 #               Move key or stand still key
+                messages = [""]
                 death_notes1 = []
                 if game_map.move_to(0, new_position, game_map.creatures): # 0 refers to the player
                     death_notes1 = check_deaths(game_map, False)   # check if player killed anyone
