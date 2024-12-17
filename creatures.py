@@ -4,6 +4,7 @@ import random
 class Player:
     sign = "@"
     mood = "player"
+    name = "player"
     health = 12
     health_max = health
     damage = 4
@@ -16,18 +17,19 @@ class Player:
 
     def hit(self, target_creature):
         target_creature.health -= self.damage
-        message1 = "Creature " + target_creature.sign + " hit for " + str(self.damage) + " damage! Sincerely, -" + self.sign
+        message1 = "Creature " + target_creature.name + " hit for " + str(self.damage) + " damage! Sincerely, -" + self.name
         print(message1)
-        message2 = "Creature " + target_creature.sign + " has " + str(target_creature.health) + " health"
+        message2 = "Creature " + target_creature.name + " has " + str(target_creature.health) + " health"
         print(message2)
 
     def check_death(self):
         if self.health < 1:
-            return self.sign + " dies!"
+            return self.name + " dies!"
         return ""
 
 class Orc:
     sign = "o"
+    name = "orc"
     mood = "ambulate"
     target = None
     damage = 3
@@ -44,9 +46,9 @@ class Orc:
 
     def hit(self, target_creature):
         target_creature.health -= self.damage
-        message1 = "Creature " + target_creature.sign + " hit for " + str(self.damage) + " damage! Sincerely, -" + self.sign
+        message1 = "Creature " + target_creature.name + " hit for " + str(self.damage) + " damage! Sincerely, -" + self.name
         print(message1)
-        message2 = "Creature " + target_creature.sign + " has " + str(target_creature.health) + " health"
+        message2 = "Creature " + target_creature.name + " has " + str(target_creature.health) + " health"
         print(message2)
 
     def take_hit(self, damage):
@@ -79,6 +81,6 @@ class Orc:
 
     def check_death(self):
         if self.health < 1:
-            return self.sign + " dies!"
+            return self.name + " dies!"
         return ""
 
