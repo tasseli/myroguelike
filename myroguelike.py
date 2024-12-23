@@ -1,4 +1,5 @@
 # myroguelike.py
+# consider renaming to gameloop.py
 
 import pygame
 import sys
@@ -26,20 +27,7 @@ def quit_app(reason):
     pygame.quit()
     sys.exit()    
 
-# Initialize an empty map
-game_map = Map()
-
-# Main loop
-
-messages = ["Welcome to Myr!", "Move around with arrows or numpad.", "Moving towards an 'o'rc attacks.", "Good luck!"]
-while True:
-    # Clear the screen
-    screen.fill(GRAY)
-
-    # print message log
-    render_message_log(messages, pygame, screen, font)
-    
-    # handle events
+def handle_events(pygame, game_map, messages):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("event.type == quit")
@@ -62,6 +50,23 @@ while True:
                     messages = death_notes1
                 if len(death_notes1) > 0:
                     messages += death_notes2
+    return messages
+
+# Initialize an empty map
+game_map = Map()
+
+# Main loop
+
+messages = ["Welcome to Myr!", "Move around with arrows or numpad.", "Moving towards an 'o'rc attacks.", "Good luck!"]
+while True:
+    # Clear the screen
+    screen.fill(GRAY)
+
+    # print message log
+    render_message_log(messages, pygame, screen, font)
+    
+    # handle events
+    messages = handle_events(pygame, game_map, messages)
 
     # Render the map
     render_map(game_map, pygame, screen, font)
