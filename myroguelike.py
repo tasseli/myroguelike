@@ -3,6 +3,7 @@
 import pygame
 import sys
 from death import check_deaths
+from draw import render_map, render_message_log
 from map import (Map, 
 MAP_WIDTH, MAP_HEIGHT, TILE_SIZE,
 OPEN_SPACE, WALL, PLAYER, ORC)
@@ -35,22 +36,10 @@ while True:
     # Clear the screen
     screen.fill(GRAY)
 
-# print message log
-    if len(messages) > 0:
-        if len(messages) < 4:
-            for i in range(4 - len(messages)):
-                messages.append("")
-                #now there are 4 strings in message
-        string_index = 0
-        for a_string in messages:
-            draw_and_blit_char(pygame, screen, font, " ", 0, MAP_HEIGHT + string_index, GRAY)
-            for i in range(0, len(a_string)):
-                draw_and_blit_char(pygame, screen, font, a_string[i], 1 + i, MAP_HEIGHT + string_index, DARK_GRAY)
-            for j in range(len(a_string), MAP_WIDTH):
-                draw_and_blit_char(pygame, screen, font, " ", j, MAP_HEIGHT + string_index, GRAY)
-            string_index += 1
-
-# handle events
+    # print message log
+    render_message_log(messages, pygame, screen, font)
+    
+    # handle events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("event.type == quit")
@@ -75,14 +64,8 @@ while True:
                     messages += death_notes2
 
     # Render the map
-    y = 0
-    for x in range(0, MAP_WIDTH):
-        for y in range(0, MAP_HEIGHT):
-            if game_map.get_sign(x,y) == OPEN_SPACE:
-                draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y, GRAY)
-            else:
-                draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y, DARK_GRAY)
-
+    render_map(game_map, pygame, screen, font)
+    
     # Update the display
     pygame.display.flip()
 
