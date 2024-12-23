@@ -3,6 +3,7 @@
 
 import pygame
 import sys
+from loop_utils import quit_app, handle_events
 from death import check_deaths
 from draw import render_map, render_message_log
 from map import (Map, 
@@ -22,7 +23,7 @@ pygame.display.set_caption("MYRoguelike")
 # Initialize a font
 font = pygame.font.SysFont(None, 22)
 
-def quit_app(reason):
+def quit_app(reason, pygame):
     print(reason)
     pygame.quit()
     sys.exit()    
@@ -35,7 +36,7 @@ def handle_events(pygame, game_map, messages):
             new_position = game_map.player.get_position().copy()
             outcome = read_moves(new_position, event.key, pygame)
             if outcome == "q":
-                quit_app("q or x pressed")
+                quit_app("q or x pressed", pygame)
             elif outcome == "o":
 #               An unhandled key was pressed
                 pass
