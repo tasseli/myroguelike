@@ -2,15 +2,11 @@
 # consider renaming to gameloop.py
 
 import pygame
-from loop_utils import quit_app, handle_events
-from death import check_deaths
+from loop_utils import handle_events
 from draw import render_map, render_message_log
 from map import (Map, 
-MAP_WIDTH, MAP_HEIGHT, TILE_SIZE,
-OPEN_SPACE, WALL, PLAYER, ORC)
-from map import (draw_and_blit_char,
-WHITE, GRAY, DARK_GRAY, BLACK)
-from keyboard import read_moves
+MAP_WIDTH, MAP_HEIGHT, TILE_SIZE)
+from map import (WHITE, GRAY, DARK_GRAY, BLACK)
 BOTTOM_UI_HEIGHT = 4
 
 # pygame setup
@@ -43,4 +39,3 @@ while True:
     
     # Update the display
     pygame.display.flip()
-
