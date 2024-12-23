@@ -104,20 +104,6 @@ while True:
             else:
                 draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y, DARK_GRAY)
 
-# print message log (current again)
-    if len(messages) > 0:
-        if len(messages) < 4:
-            for i in range(4 - len(messages)):
-                messages.append("")
-                #now there are 4 strings in message
-        string_index = 0
-        for a_string in messages:
-            draw_and_blit_char(pygame, screen, font, " ", 0, MAP_HEIGHT + string_index, GRAY)
-            for i in range(0, len(a_string)):
-                draw_and_blit_char(pygame, screen, font, a_string[i], 1 + i, MAP_HEIGHT + string_index, DARK_GRAY)
-            for j in range(len(a_string), MAP_WIDTH):
-                draw_and_blit_char(pygame, screen, font, " ", j, MAP_HEIGHT + string_index, GRAY)
-            string_index += 1
     # Update the display
     pygame.display.flip()
 
