@@ -33,4 +33,3 @@ def handle_events(pygame, game_map, messages):
                 if len(death_notes1) > 0:
                     messages += death_notes2
     return messages
-
