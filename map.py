@@ -12,6 +12,7 @@ OPEN_SPACE = '.'
 WALL = '#'
 PLAYER = '@'
 ORC = 'o'
+KOBOLD = 'k'
 
 # Define colors for tiles
 WHITE = (255, 255, 255)  # 

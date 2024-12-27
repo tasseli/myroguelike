@@ -3,7 +3,8 @@
 from map import (OPEN_SPACE,
 WALL,
 PLAYER,
-ORC)
+ORC,
+KOBOLD)
 
 def check_deaths(game_map, moves_bool):
     dying = []
