@@ -1,6 +1,6 @@
 # map.py
 
-from creatures import Player, Orc
+from creatures import Player, Orc, Kobold
 
 # Define the dimensions of the map
 MAP_WIDTH = 80
@@ -55,6 +55,12 @@ class Map:
             creatures.append(orc)
             return orc
 
+        def init_kobold(coords, mood, target, creatures):
+            kobold = Kobold(coords, mood, target)
+            self.set_sign_with_creature(kobold)
+            creatures.append(kobold)
+            return kobold
+
         self.player = init_player([3,6])
 
         self.creatures = [self.player]
@@ -63,6 +69,7 @@ class Map:
         orc3 = init_orc([72,33], "toward", self.player, self.creatures)
         orc4 = init_orc([37,23], "toward", orc3, self.creatures)
         orc5 = init_orc([6,38], "toward", orc4, self.creatures)
+        kobold = init_kobold([49,29], "toward", self.player, self.creatures)
 
     # return True if something happened and time passed, False if no clause managed to do something worthwhile
     def move_to(self, i, new_position, creatures):
