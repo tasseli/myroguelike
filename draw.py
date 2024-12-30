@@ -2,7 +2,8 @@
 
 from map import (WHITE, GRAY, DARK_GRAY, BLACK)
 from map import (MAP_WIDTH, MAP_HEIGHT, TILE_SIZE)
-from map import (OPEN_SPACE, WALL, PLAYER, ORC)
+from map import (OPEN_SPACE, WALL)
+#, PLAYER, ORC)
 
 def render_message_log(messages, pygame, screen, font):
     if len(messages) > 0:
