@@ -17,9 +17,9 @@ class Player:
 
     def hit(self, target_creature):
         target_creature.health -= self.damage
-        message1 = "Creature " + target_creature.name + " hit for " + str(self.damage) + " damage! Sincerely, -" + self.name
+        message1 = target_creature.name + " hit for " + str(self.damage) + " damage by " + self.name
         print(message1)
-        message2 = "Creature " + target_creature.name + " has " + str(target_creature.health) + " health"
+        message2 = target_creature.name + " has " + str(target_creature.health) + " health"
         print(message2)
 
     def check_death(self):
@@ -46,9 +46,9 @@ class Orc:
 
     def hit(self, target_creature):
         target_creature.health -= self.damage
-        message1 = "Creature " + target_creature.name + " hit for " + str(self.damage) + " damage! Sincerely, -" + self.name
+        message1 = target_creature.name + " hit for " + str(self.damage) + " damage by " + self.name
         print(message1)
-        message2 = "Creature " + target_creature.name + " has " + str(target_creature.health) + " health"
+        message2 = target_creature.name + " has " + str(target_creature.health) + " health"
         print(message2)
 
     def take_hit(self, damage):
@@ -103,9 +103,9 @@ class Kobold:
 
     def hit(self, target_creature):
         target_creature.health -= self.damage
-        message1 = "Creature " + target_creature.name + " hit for " + str(self.damage) + " damage! Sincerely, -" + self.name
+        message1 = target_creature.name + " hit for " + str(self.damage) + " damage by " + self.name
         print(message1)
-        message2 = "Creature " + target_creature.name + " has " + str(target_creature.health) + " health"
+        message2 = target_creature.name + " has " + str(target_creature.health) + " health"
         print(message2)
 
     def take_hit(self, damage):
