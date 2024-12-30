@@ -3,7 +3,6 @@
 import sys
 from keyboard import read_moves
 from map import (OPEN_SPACE, WALL)
-#, PLAYER, ORC, KOBOLD)
 
 def quit_app(reason, pygame):
     print(reason)
