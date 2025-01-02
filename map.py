@@ -95,6 +95,7 @@ class Map:
             return True
         return False
 
+#this belongs under creatures
 #   An idea for solving moving a whole array of creatures: implement calling each creature's type of movement by their mood.
     def move_moodily(self, creature_i, creatures):
         creature = creatures[creature_i]
