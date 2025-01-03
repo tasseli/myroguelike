@@ -42,7 +42,7 @@ def check_deaths(game_map, other_creatures_move_bool):
     deaths = 0
     if other_creatures_move_bool:
         for i in range(1, len(game_map.creatures)):                     # don't move the player in a loop
-            death_note = game_map.move_moodily(i, game_map.creatures)
+            death_note = move_moodily(game_map, i)
             if death_note != "":
                 dying.append(i)
                 death_notes.append(death_note)
@@ -61,3 +61,21 @@ def check_deaths(game_map, other_creatures_move_bool):
         game_map.my_map[death_location[0]][death_location[1]] = OPEN_SPACE
         game_map.creatures.pop(dying[deaths-i-1])
     return death_notes
+
+#   An idea for solving moving a whole array of creatures: implement calling each creature's type of movement by their mood.
+def move_moodily(map, creature_i):
+    creatures = map.creatures
+    creature = creatures[creature_i]
+    new_position = creature.get_position()
+    death_note = creature.check_death()
+    if death_note == "":
+        if creature.mood == "ambulate":
+            new_position = creature.move_random()
+        elif creature.mood == "run right":
+            new_position = creature.move_right()
+        elif creature.mood == "toward":
+            new_position = creature.move_toward(creature.target)
+        map.move_to(creature_i, new_position, creatures)
+        #I need to check here if the hit creature died, and return the data if they did
+    return death_note
+
