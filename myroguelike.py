@@ -23,7 +23,7 @@ game_map = Map()
 
 # Main loop
 
-messages = ["Welcome to Myr!", "Move around with arrows or numpad.", "Moving towards an 'o'rc attacks.", "Good luck!"]
+messages = ["Welcome to Myr!", "Move around with arrows or numpad.", "Moving towards an 'o'rc or other creatures attacks.", "Good luck!"]
 while True:
     # Clear the screen
     screen.fill(GRAY)

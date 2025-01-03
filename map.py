@@ -68,9 +68,15 @@ class Map:
         orc5 = init_orc([6,38], "toward", orc4, self.creatures)
         kobold = init_kobold([49,29], "toward", self.player, self.creatures)
 
+    def position_filled_by_creature(self, x, y):
+        # if position is either open or wall, false
+        # if position is not open and not wall, it's a creature (true)
+        return self.my_map[x][y] != OPEN_SPACE and self.my_map[x][y] != WALL
+
     # return True if something happened and time passed, False if no clause managed to do something worthwhile
     def move_to(self, i, new_position, creatures):
         creature = creatures[i]
+        
         if new_position == creature.get_position():
             return True
         if self.my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
@@ -82,13 +88,13 @@ class Map:
             # Mark the new position with its ID
             self.my_map[creature.position[0]][creature.position[1]] = creature.sign
             return True
-        elif self.my_map[new_position[0]][new_position[1]] == "o" and creature.sign == "@":
+        elif self.position_filled_by_creature(new_position[0], new_position[1]) and creature.sign == "@":
             target = find_creature_at(creatures, new_position[0], new_position[1])
             if target != -1: 
             # -1 stands for "no creature"
                 creature.hit(self.creatures[target])
             return True
-        elif (self.my_map[new_position[0]][new_position[1]] == "o" or self.my_map[new_position[0]][new_position[1]] == "@"):
+        elif self.position_filled_by_creature(new_position[0], new_position[1]) or self.my_map[new_position[0]][new_position[1]] == "@":
             target = find_creature_at(creatures, new_position[0], new_position[1])
             if target != -1:
                 creature.hit(self.creatures[target])
