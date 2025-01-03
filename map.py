@@ -74,6 +74,8 @@ class Map:
         return self.my_map[x][y] != OPEN_SPACE and self.my_map[x][y] != WALL
 
     # return True if something happened and time passed, False if no clause managed to do something worthwhile
+    # move_to may hurt the target creature. Dying needs to be checked outside of it. Target is at new_position, self.creatures[target]
+    # target = find_creature_at(creatures, new_position[0], new_position[1])
     def move_to(self, i, new_position, creatures):
         creature = creatures[i]
         
