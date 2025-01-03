@@ -78,6 +78,7 @@ def move_moodily(map, creature_i):
             new_position = creature.move_toward(creature.target)
         map.move_to(creature_i, new_position, creatures)
         #I need to check here if the hit creature died, and return the data if they did
-        death_note += creatures[find_creature_at(creatures, new_position[0], new_position[1])].check_death()
+        death_note = creatures[find_creature_at(creatures, new_position[0], new_position[1])].check_death()
+        #the problem is this will be taken as death of creature_i. Need to solve it outside.
     return death_note
 
