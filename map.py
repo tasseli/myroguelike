@@ -88,12 +88,6 @@ class Map:
             # Mark the new position with its ID
             self.my_map[creature.position[0]][creature.position[1]] = creature.sign
             return True
-        elif self.position_filled_by_creature(new_position[0], new_position[1]) and creature.sign == "@":
-            target = find_creature_at(creatures, new_position[0], new_position[1])
-            if target != -1: 
-            # -1 stands for "no creature"
-                creature.hit(self.creatures[target])
-            return True
         elif self.position_filled_by_creature(new_position[0], new_position[1]) or self.my_map[new_position[0]][new_position[1]] == "@":
             target = find_creature_at(creatures, new_position[0], new_position[1])
             if target != -1:
