@@ -19,12 +19,12 @@ class Player:
         target_creature.health -= self.damage
         message1 = target_creature.name + " hit for " + str(self.damage) + " damage by " + self.name
         print(message1)
-        message2 = target_creature.name + " has " + str(target_creature.health) + " health"
+        message2 = target_creature.name + " has " + str(target_creature.health) + " health. "
         print(message2)
 
     def check_death(self):
         if self.health < 1:
-            return self.name + " dies!"
+            return self.name + " dies! "
         return ""
 
 class Orc:
@@ -48,7 +48,7 @@ class Orc:
         target_creature.health -= self.damage
         message1 = target_creature.name + " hit for " + str(self.damage) + " damage by " + self.name
         print(message1)
-        message2 = target_creature.name + " has " + str(target_creature.health) + " health"
+        message2 = target_creature.name + " has " + str(target_creature.health) + " health. "
         print(message2)
 
     def take_hit(self, damage):
@@ -81,7 +81,7 @@ class Orc:
 
     def check_death(self):
         if self.health < 1:
-            return self.name + " dies!"
+            return self.name + " dies! "
         return ""
 
 class Kobold:
@@ -105,7 +105,7 @@ class Kobold:
         target_creature.health -= self.damage
         message1 = target_creature.name + " hit for " + str(self.damage) + " damage by " + self.name
         print(message1)
-        message2 = target_creature.name + " has " + str(target_creature.health) + " health"
+        message2 = target_creature.name + " has " + str(target_creature.health) + " health. "
         print(message2)
 
     def take_hit(self, damage):
@@ -138,6 +138,6 @@ class Kobold:
 
     def check_death(self):
         if self.health < 1:
-            return self.name + " dies!"
+            return self.name + " dies! "
         return ""
 
