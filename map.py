@@ -109,7 +109,6 @@ class Map:
             elif creature.mood == "toward":
                 new_position = creature.move_toward(creature.target)
             self.move_to(creature_i, new_position, creatures)
-            return death_note
         return death_note
 
     def get_sign(self, x, y):
