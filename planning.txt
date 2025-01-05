@@ -1,35 +1,28 @@
 planning
 
 Fix / rewrite:
-- split into more files to regain glancability
+- remove prints
+- work best prints into messages
 - adding messages to bottom UI
-  - Think through the exact phases of turn
-    - when should the messages be gotten? What should show on bottom ui and when? When is log cleared? How does it draw nicely and stay visible max time?
-    - draw a graph of flow
-      - draw map
-      - draw logs (previous turn)
-      - ask for move
-      - process move
-  - retry
-  - handle a single message
-  - handle multiple messages
-  - pick a good function setup
-- end game in a better fashion using bottom UI messages
+    - simplify
+    - pick a good function setup
 - do I need to have both class parameters and initiated parameters?
 - do I need to pass coordinates as a list instead of tuple, everywhere?
-- refactor game loop 
-- consider game manager class
 - modularize rendering logic
+    - draw smarter than one char at a time
 
 Add features:
+- create a better message system
+- write a superclass to creatures
+- end game in a better fashion using bottom UI messages
+    - create end state that takes no commands, other than exiting game
+- consider game manager class
 - add changing moods at least once destination becomes ineligible
 - plan game ending
 - adding knowledge, first levels
 - adding discussion
 - adding key handling for fun commands like look, say, tickle, hit
 - adding help keys
-- Game loop idea: 1) capture input 2) update game state 3) render new state 4) wait for next input
-- consider game states
 - plan map logic, say, for handling items etc
 - load map from file
 - map generation
