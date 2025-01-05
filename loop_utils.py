@@ -33,7 +33,7 @@ def handle_events(pygame, game_map, messages):
                     quit_app("You die!", pygame)
                 if len(death_notes1) > 0:
                     messages += death_notes1
-                if len(death_notes1) > 0:
+                if len(death_notes2) > 0:
                     messages += death_notes2
     return messages
     
