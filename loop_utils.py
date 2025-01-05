@@ -16,6 +16,9 @@ def move_moodily(map, creature_i):
     creature = creatures[creature_i]
     new_position = creature.get_position()
     death_note = creature.check_death()
+    # handle possible creature index of a neighboring death. -1 stands for "no creature killed", otherwise pass the index of the creature to later kill in calling function.
+    creature_index = -1
+    neighbor_death_note = ""
     if death_note == "":
         if creature.mood == "ambulate":
             new_position = creature.move_random()
@@ -25,20 +28,26 @@ def move_moodily(map, creature_i):
             new_position = creature.move_toward(creature.target)
         map.move_to(creature_i, new_position, creatures)
         #I need to check here if the hit creature died, and return the data if they did
-        death_note = creatures[find_creature_at(creatures, new_position[0], new_position[1])].check_death()
-        #the problem is this will be taken as death of creature_i. Need to solve it outside.
-    return death_note
+        neighbor_death_note, creature_index = map.check_death_for_coords(new_position[0], new_position[1])
+    return death_note, neighbor_death_note, creature_index
 
 def check_deaths(game_map, other_creatures_move_bool):
     dying = []
     death_notes = []
     deaths = 0
+    neighbor_death_note = ""
     if other_creatures_move_bool:
         for i in range(1, len(game_map.creatures)):                     # don't move the player in a loop
-            death_note = move_moodily(game_map, i)
+            death_note, neighbor_death_note, neighbor_creature_index = move_moodily(game_map, i)
+            if neighbor_death_note != "":
+                dying.append(neighbor_creature_index)
+                death_notes.append(neighbor_death_note)                
+                print(str(neighbor_creature_index) + " is dying")
             if death_note != "":
-                dying.append(i)
-                death_notes.append(death_note)
+                if i not in dying:
+                    dying.append(i)
+                    death_notes.append(death_note)
+                    print(str(i) + " is dying")
         deaths = len(dying)
     else: 
         for i in range(0, len(game_map.creatures)):
@@ -46,8 +55,10 @@ def check_deaths(game_map, other_creatures_move_bool):
             if death_note != "":
                 if i == 0:
                     return "You die!"
-                dying.append(i)
-                death_notes.append(death_note)
+                if i not in dying:
+                    dying.append(i)
+                    death_notes.append(death_note)
+                    print(str(i) + " is dying")
         deaths = len(dying)
     for i in range(0, deaths):
         death_location = game_map.creatures[dying[deaths-i-1]].get_position()

@@ -104,10 +104,12 @@ class Map:
         coords = creature.get_position()
         self.my_map[coords[0]][coords[1]] = creature.sign
 
+    # return a death_note for passing a message to UI, and the index of creature that dies, to be handled in the calling function. -1 means none.
     def check_death_for_coords(self, x, y):
         creature_index = find_creature_at(self.creatures, x, y)
         if creature_index != -1:
-            if self.creatures[i].check_death() != "":
-                self.creatures.pop(i)
-                self.my_map[x][y] = OPEN_SPACE
+            message = self.creatures[creature_index].check_death()
+            if message != "":
+                return (message, creature_index)
+        return ("", -1)
         # a function call to print a message would make sense, but there's no function like that yet.
