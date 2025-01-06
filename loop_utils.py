@@ -82,6 +82,7 @@ def handle_events(pygame, game_map, messages):
 #               Move key or stand still key
                 messages = []
                 death_notes1 = []
+                # move creature_0, the player
                 if game_map.move_to(0, new_position, game_map.creatures): # 0 refers to the player
                     death_notes1 = check_deaths(game_map, False)   # check if player killed anyone
                 death_notes2 = check_deaths(game_map, True)    # have all creatures move and check if they killed anyone
