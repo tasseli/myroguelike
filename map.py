@@ -31,6 +31,8 @@ class Map:
         self.my_map = [[OPEN_SPACE for y in range(MAP_HEIGHT)] for x in range(MAP_WIDTH)]
         # Set a wall at position (3, 5)
         self.my_map[3][5] = WALL
+        for i in range(6, 14):
+            self.my_map[55][i] = WALL
         # wall for left side
         self.my_map[0] = [WALL for x in range(MAP_HEIGHT)]
         # wall for right side
