@@ -4,7 +4,6 @@ import sys
 from keyboard import read_moves
 from map import (OPEN_SPACE, WALL)
 from map import find_creature_at
-GAME_ON = True
 
 def quit_app(reason, pygame):
     print(reason)
@@ -41,6 +40,8 @@ def check_deaths(game_map, other_creatures_move_bool):
         for i in range(1, len(game_map.creatures)):                     # don't move the player in a loop
             death_note, neighbor_death_note, neighbor_creature_index = move_moodily(game_map, i)
             if neighbor_death_note != "":
+                if neighbor_creature_index == 0:
+                    return "You die!"
                 dying.append(neighbor_creature_index)
                 death_notes.append(neighbor_death_note)                
                 print(str(neighbor_creature_index) + " is dying")
@@ -67,7 +68,7 @@ def check_deaths(game_map, other_creatures_move_bool):
         game_map.creatures.pop(dying[deaths-i-1])
     return death_notes
 
-def handle_events(pygame, game_map, messages):
+def handle_events(pygame, game_map, messages, game_state):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("event.type == quit", pygame)
@@ -87,8 +88,9 @@ def handle_events(pygame, game_map, messages):
                 if game_map.move_to(0, new_position, game_map.creatures): # 0 refers to the player
                     death_notes1 = check_deaths(game_map, False)   # check if player killed anyone
                 death_notes2 = check_deaths(game_map, True)    # have all creatures move and check if they killed anyone
-                if "You die!" in death_notes2:
-                    GAME_ON = False
+                if "You die!" in death_notes2 or "player dies!" in death_notes2 or "You die!" in death_notes1 or "player dies!" in death_notes1:
+                    print("We mean to kill the player.")
+                    game_state["GAME_ON"] = False
                 if len(death_notes1) > 0:
                     messages += death_notes1
                 if len(death_notes2) > 0:

@@ -8,7 +8,7 @@ from map import (Map,
 MAP_WIDTH, MAP_HEIGHT, TILE_SIZE)
 from map import (WHITE, GRAY, DARK_GRAY, BLACK)
 BOTTOM_UI_HEIGHT = 4
-from loop_utils import GAME_ON
+from loop_utils import quit_app
 
 # pygame setup
 pygame.init()
@@ -25,8 +25,8 @@ game_map = Map()
 # Main loop
 
 messages = ["Welcome to Myr!", "Move around with arrows or numpad.", "Moving towards an 'o'rc or other creatures attacks.", "Good luck!"]
-
-while GAME_ON:
+game_state = {"GAME_ON": True}
+while game_state["GAME_ON"]:
     # Clear the screen
     screen.fill(GRAY)
 
@@ -34,7 +34,7 @@ while GAME_ON:
     render_message_log(messages, pygame, screen, font)
     
     # handle events
-    messages = handle_events(pygame, game_map, messages)
+    messages = handle_events(pygame, game_map, messages, game_state)
 
     # Render the map
     render_map(game_map, pygame, screen, font)
