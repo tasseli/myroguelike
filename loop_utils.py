@@ -4,6 +4,7 @@ import sys
 from keyboard import read_moves
 from map import (OPEN_SPACE, WALL)
 from map import find_creature_at
+GAME_ON = True
 
 def quit_app(reason, pygame):
     print(reason)
@@ -87,7 +88,7 @@ def handle_events(pygame, game_map, messages):
                     death_notes1 = check_deaths(game_map, False)   # check if player killed anyone
                 death_notes2 = check_deaths(game_map, True)    # have all creatures move and check if they killed anyone
                 if "You die!" in death_notes2:
-                    quit_app("You die!", pygame)
+                    GAME_ON = False
                 if len(death_notes1) > 0:
                     messages += death_notes1
                 if len(death_notes2) > 0:

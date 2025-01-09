@@ -8,6 +8,7 @@ from map import (Map,
 MAP_WIDTH, MAP_HEIGHT, TILE_SIZE)
 from map import (WHITE, GRAY, DARK_GRAY, BLACK)
 BOTTOM_UI_HEIGHT = 4
+from loop_utils import GAME_ON
 
 # pygame setup
 pygame.init()
@@ -24,8 +25,8 @@ game_map = Map()
 # Main loop
 
 messages = ["Welcome to Myr!", "Move around with arrows or numpad.", "Moving towards an 'o'rc or other creatures attacks.", "Good luck!"]
-game_on = True
-while game_on:
+
+while GAME_ON:
     # Clear the screen
     screen.fill(GRAY)
 
@@ -40,3 +41,5 @@ while game_on:
     
     # Update the display
     pygame.display.flip()
+
+quit_app("You die!", pygame)
