@@ -42,4 +42,13 @@ while game_state["GAME_ON"]:
     # Update the display
     pygame.display.flip()
 
-quit_app("You die!", pygame)
+# game_state is GAME_ON==False, player has died
+messages = ["You died gloriously on the battlefield!", "Quitting button remains to be implemented when game ends.", "Thank you for playing. Better luck next time."]
+render_message_log(messages, pygame, screen, font)
+render_map(game_map, pygame, screen, font)
+pygame.display.flip()
+while True:
+    render_map(game_map, pygame, screen, font)
+    pygame.display.flip()
+
+#quit_app("You die!", pygame)
