@@ -59,6 +59,3 @@ while True:
     
     # Update the display
     pygame.display.flip()
-
-
-#quit_app("You die!", pygame)
