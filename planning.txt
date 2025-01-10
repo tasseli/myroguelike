@@ -7,18 +7,15 @@ Fix / rewrite:
     - simplify
     - pick a good function setup
 - do I need to have both class parameters and initiated parameters?
+    - at least I don't have to have conflicting ones like in health
 - do I need to pass coordinates as a list instead of tuple, everywhere?
 - modularize rendering logic
     - draw smarter than one char at a time
 
 Add features:
 - create a better message system
-- write a superclass to creatures
-- end game in a better fashion using bottom UI messages
-    - create end state that takes no commands, other than exiting game
 - consider game manager class
 - add changing moods at least once destination becomes ineligible
-- plan game ending
 - adding knowledge, first levels
 - adding discussion
 - adding key handling for fun commands like look, say, tickle, hit
