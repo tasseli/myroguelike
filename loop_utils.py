@@ -1,7 +1,7 @@
 # loop_utils.py
 
 import sys
-from keyboard import read_moves
+from keyboard import read_moves, read_q_only
 from map import (OPEN_SPACE, WALL)
 from map import find_creature_at
 
@@ -95,4 +95,14 @@ def handle_events(pygame, game_map, messages, game_state):
                     messages += death_notes1
                 if len(death_notes2) > 0:
                     messages += death_notes2
+    return messages
+    
+def handle_quit_key(pygame, game_map, messages, game_state):
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            quit_app("event.type == quit", pygame)
+        if event.type == pygame.KEYDOWN:
+            outcome = read_q_only(event.key, pygame)
+            if outcome == "q":
+                quit_app("q or x pressed", pygame)
     return messages

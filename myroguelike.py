@@ -2,7 +2,7 @@
 # consider renaming to gameloop.py
 
 import pygame
-from loop_utils import handle_events
+from loop_utils import handle_events, handle_quit_key
 from draw import render_map, render_message_log
 from map import (Map, 
 MAP_WIDTH, MAP_HEIGHT, TILE_SIZE)
@@ -43,12 +43,22 @@ while game_state["GAME_ON"]:
     pygame.display.flip()
 
 # game_state is GAME_ON==False, player has died
-messages = ["You died gloriously on the battlefield!", "Quitting button remains to be implemented when game ends.", "Thank you for playing. Better luck next time."]
-render_message_log(messages, pygame, screen, font)
-render_map(game_map, pygame, screen, font)
-pygame.display.flip()
+messages = ["You died gloriously on the battlefield!", "Thank you for playing. Better luck next time.", "Press 'q' to quit."]
 while True:
+    # Clear the screen
+    screen.fill(GRAY)
+
+    # print message log
+    render_message_log(messages, pygame, screen, font)
+    
+    # handle events
+    messages = handle_quit_key(pygame, game_map, messages, game_state)
+
+    # Render the map
     render_map(game_map, pygame, screen, font)
+    
+    # Update the display
     pygame.display.flip()
+
 
 #quit_app("You die!", pygame)

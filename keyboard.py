@@ -40,3 +40,7 @@ def read_moves(new_position, eventkey, pygame):
         return "s"
     else:
         return "o"
+        
+def read_q_only(eventkey, pygame):
+    if eventkey == pygame.K_q or eventkey == pygame.K_x:
+        return "q"
