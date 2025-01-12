@@ -20,12 +20,15 @@ def move_moodily(map, creature_i):
     creature_index = -1
     neighbor_death_note = ""
     if death_note == "":
+        if creature.mood == "toward":
+            if creature.target.alive == False:
+                creature.mood = "ambulate"
+            else:
+                new_position = creature.move_toward(creature.target)
         if creature.mood == "ambulate":
             new_position = creature.move_random()
         elif creature.mood == "run right":
             new_position = creature.move_right()
-        elif creature.mood == "toward":
-            new_position = creature.move_toward(creature.target)
         map.move_to(creature_i, new_position, creatures)
         #I need to check here if the hit creature died, and return the data if they did
         neighbor_death_note, creature_index = map.check_death_for_coords(new_position[0], new_position[1])
