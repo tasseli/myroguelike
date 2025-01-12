@@ -45,11 +45,13 @@ def check_deaths(game_map, other_creatures_move_bool):
                 dying.append(neighbor_creature_index)
                 death_notes.append(neighbor_death_note)                
                 print(str(neighbor_creature_index) + " is dying")
+                game_map.creatures[neighbor_creature_index].alive = False
             if death_note != "":
                 if i not in dying:
                     dying.append(i)
                     death_notes.append(death_note)
                     print(str(i) + " is dying")
+                    game_map.creatures[i].alive = False
         deaths = len(dying)
     else: 
         for i in range(0, len(game_map.creatures)):
@@ -61,6 +63,7 @@ def check_deaths(game_map, other_creatures_move_bool):
                     dying.append(i)
                     death_notes.append(death_note)
                     print(str(i) + " is dying")
+                    game_map.creatures[i].alive = False
         deaths = len(dying)
     for i in range(0, deaths):
         death_location = game_map.creatures[dying[deaths-i-1]].get_position()

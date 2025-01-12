@@ -5,6 +5,7 @@ class Creature:
     sign = "c"
     mood = "ambulate"
     name = "generic creature"
+    alive = True
     target = None
     health = 2
     health_max = health
