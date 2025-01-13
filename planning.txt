@@ -7,7 +7,6 @@ Fix / rewrite:
     - simplify
     - pick a good function setup
 - do I need to have both class parameters and initiated parameters?
-    - at least I don't have to have conflicting ones like in health
 - do I need to pass coordinates as a list instead of tuple, everywhere?
 - modularize rendering logic
     - draw smarter than one char at a time
