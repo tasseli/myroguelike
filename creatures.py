@@ -63,7 +63,6 @@ class Orc(Creature):
     sign = "o"
     name = "orc"
     damage = 3
-    health = 5
 
     def __init__(self, coords, mood, target):
         self.position = [coords[0], coords[1]]
@@ -78,7 +77,6 @@ class Kobold(Creature):
     sign = "k"
     name = "kobold"
     damage = 2
-    health = 4
 
     def __init__(self, coords, mood, target):
         self.position = [coords[0], coords[1]]
