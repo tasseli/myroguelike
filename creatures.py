@@ -86,3 +86,18 @@ class Kobold(Creature):
             self.mood = mood
         if target != None:
             self.target = target
+
+class Urukhai(Creature):
+    sign = "o"
+    name = "Uruk-hai"
+    damage = 4
+
+    def __init__(self, coords, mood, target):
+        self.position = [coords[0], coords[1]]
+        health = random.randint(6, 9)
+        health_max = health
+        if mood != None:
+            self.mood = mood
+        if target != None:
+            self.target = target
+
