@@ -1,6 +1,6 @@
 # map.py
 
-from creatures import Player, Orc, Kobold, Urukhai
+from creatures import Player, Orc, Kobold, Urukhai, Gnoll
 
 # Define the dimensions of the map
 MAP_WIDTH = 80
@@ -66,6 +66,12 @@ class Map:
             creatures.append(kobold)
             return kobold
 
+        def init_gnoll(coords, mood, target, creatures):
+            gnoll = Gnoll(coords, mood, target)
+            self.set_sign_with_creature(gnoll)
+            creatures.append(gnoll)
+            return gnoll
+
         self.player = init_player([3,6])
 
         self.creatures = [self.player]
@@ -76,6 +82,8 @@ class Map:
         orc5 = init_orc([6,38], "toward", orc4, self.creatures)
         kobold = init_kobold([49,29], "toward", self.player, self.creatures)
         urukhai = init_urukhai([40,10], "toward", self.player, self.creatures) 
+        gnoll1 = init_gnoll([45,2], "toward", self.player, self.creatures)
+        gnoll2 = init_gnoll([48,5], "toward", self.player, self.creatures)
 
     def position_filled_by_creature(self, x, y):
         # if position is either open or wall, false

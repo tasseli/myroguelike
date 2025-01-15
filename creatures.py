@@ -101,3 +101,16 @@ class Urukhai(Creature):
         if target != None:
             self.target = target
 
+class Gnoll(Creature):
+    sign = "g"
+    name = "Gnoll"
+    damage = 3
+
+    def __init__(self, coords, mood, target):
+        self.position = [coords[0], coords[1]]
+        health = random.randint(3, 6)
+        health_max = health
+        if mood != None:
+            self.mood = mood
+        if target != None:
+            self.target = target
