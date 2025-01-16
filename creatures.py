@@ -114,3 +114,18 @@ class Gnoll(Creature):
             self.mood = mood
         if target != None:
             self.target = target
+
+class Goblin(Creature):
+    sign = "g"
+    name = "Goblin"
+    damage = 2
+
+    def __init__(self, coords, mood, target):
+        self.position = [coords[0], coords[1]]
+        health = random.randint(3, 5)
+        health_max = health
+        if mood != None:
+            self.mood = mood
+        if target != None:
+            self.target = target
+
