@@ -129,3 +129,17 @@ class Goblin(Creature):
         if target != None:
             self.target = target
 
+class Golem(Creature):
+    sign = "G"
+    name = "Golem"
+    damage = 4
+
+    def __init__(self, coords, mood, target):
+        self.position = [coords[0], coords[1]]
+        health = random.randint(13, 18)
+        health_max = health
+        if mood != None:
+            self.mood = mood
+        if target != None:
+            self.target = target
+
