@@ -44,7 +44,6 @@ class Map:
 
         def init_player(coords):
             player = Player(coords)
-            current_pos = player.get_position()
             self.set_sign_with_creature(player)
             return player
 
