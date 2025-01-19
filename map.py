@@ -1,6 +1,6 @@
 # map.py
 
-from creatures import Player, Orc, Kobold, Urukhai, Gnoll, Goblin, Golem
+from creatures import Player, Orc, Kobold, Uruk, Gnoll, Goblin, Golem
 
 # Define the dimensions of the map
 MAP_WIDTH = 80
@@ -53,11 +53,11 @@ class Map:
             creatures.append(orc)
             return orc
 
-        def init_urukhai(coords, mood, target, creatures):
-            urukhai = Urukhai(coords, mood, target)
-            self.set_sign_with_creature(urukhai)
-            creatures.append(urukhai)
-            return urukhai
+        def init_uruk(coords, mood, target, creatures):
+            uruk = Uruk(coords, mood, target)
+            self.set_sign_with_creature(uruk)
+            creatures.append(uruk)
+            return uruk
 
         def init_kobold(coords, mood, target, creatures):
             kobold = Kobold(coords, mood, target)
@@ -92,7 +92,7 @@ class Map:
         orc4 = init_orc([37,23], "toward", orc3, self.creatures)
         orc5 = init_orc([6,38], "toward", orc4, self.creatures)
         kobold = init_kobold([49,29], "toward", self.player, self.creatures)
-        urukhai = init_urukhai([40,10], "toward", self.player, self.creatures) 
+        uruk = init_uruk([40,10], "toward", self.player, self.creatures) 
         gnoll1 = init_gnoll([45,2], "toward", self.player, self.creatures)
         gnoll2 = init_gnoll([48,5], "toward", self.player, self.creatures)
         goblin1 = init_goblin([65,38], "toward", self.player, self.creatures)

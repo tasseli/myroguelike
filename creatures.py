@@ -87,9 +87,9 @@ class Kobold(Creature):
         if target != None:
             self.target = target
 
-class Urukhai(Creature):
+class Uruk(Creature):
     sign = "o"
-    name = "Uruk-hai"
+    name = "uruk"
     damage = 4
 
     def __init__(self, coords, mood, target):
@@ -103,7 +103,7 @@ class Urukhai(Creature):
 
 class Gnoll(Creature):
     sign = "g"
-    name = "Gnoll"
+    name = "gnoll"
     damage = 3
 
     def __init__(self, coords, mood, target):
@@ -117,7 +117,7 @@ class Gnoll(Creature):
 
 class Goblin(Creature):
     sign = "g"
-    name = "Goblin"
+    name = "goblin"
     damage = 2
 
     def __init__(self, coords, mood, target):
@@ -131,7 +131,7 @@ class Goblin(Creature):
 
 class Golem(Creature):
     sign = "G"
-    name = "Golem"
+    name = "golem"
     damage = 4
 
     def __init__(self, coords, mood, target):
