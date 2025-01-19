@@ -66,8 +66,8 @@ class Orc(Creature):
 
     def __init__(self, coords, mood, target):
         self.position = [coords[0], coords[1]]
-        health = random.randint(3, 7)
-        health_max = health
+        self.health = random.randint(3, 7)
+        self.health_max = self.health
         if mood != None:
             self.mood = mood
         if target != None:
@@ -80,8 +80,8 @@ class Kobold(Creature):
 
     def __init__(self, coords, mood, target):
         self.position = [coords[0], coords[1]]
-        health = random.randint(2, 6)
-        health_max = health
+        self.health = random.randint(2, 6)
+        self.health_max = self.health
         if mood != None:
             self.mood = mood
         if target != None:
@@ -94,8 +94,8 @@ class Uruk(Creature):
 
     def __init__(self, coords, mood, target):
         self.position = [coords[0], coords[1]]
-        health = random.randint(6, 9)
-        health_max = health
+        self.health = random.randint(6, 9)
+        self.health_max = self.health
         if mood != None:
             self.mood = mood
         if target != None:
@@ -108,8 +108,8 @@ class Gnoll(Creature):
 
     def __init__(self, coords, mood, target):
         self.position = [coords[0], coords[1]]
-        health = random.randint(3, 6)
-        health_max = health
+        self.health = random.randint(3, 6)
+        self.health_max = self.health
         if mood != None:
             self.mood = mood
         if target != None:
@@ -122,8 +122,8 @@ class Goblin(Creature):
 
     def __init__(self, coords, mood, target):
         self.position = [coords[0], coords[1]]
-        health = random.randint(3, 5)
-        health_max = health
+        self.health = random.randint(3, 5)
+        self.health_max = self.health
         if mood != None:
             self.mood = mood
         if target != None:
@@ -136,8 +136,8 @@ class Golem(Creature):
 
     def __init__(self, coords, mood, target):
         self.position = [coords[0], coords[1]]
-        health = random.randint(13, 18)
-        health_max = health
+        self.health = random.randint(13, 18)
+        self.health_max = self.health
         if mood != None:
             self.mood = mood
         if target != None:
