@@ -30,9 +30,7 @@ def coords_within_distance_z(x, y, z, creature):
     position = creature.get_position()
     c_x = position[0]
     c_y = position[1]
-    if z < sqrt((c_x-x)*(c_x-x) + (c_y-y)*(c_y-y)):
-        return True
-    return False
+    return z > sqrt((c_x-x)**2 + (c_y-y)**2) # True or False
 
 def render_floors_different_color(game_map, pygame, screen, font, x, y):
     if game_map.get_sign(x,y) == OPEN_SPACE:
