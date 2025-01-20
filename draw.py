@@ -19,10 +19,17 @@ def render_message_log(messages, pygame, screen, font):
                 draw_and_blit_char(pygame, screen, font, " ", j, MAP_HEIGHT + string_index, GRAY)
             string_index += 1
 
+def coords_on_border_of_map(x, y):
+    if x == 0 or x == MAP_WIDTH-1 or y == 0 or y == MAP_HEIGHT-1:
+        return true
+    return false
+
 def render_map(game_map, pygame, screen, font):    
     y = 0
     for x in range(0, MAP_WIDTH):
         for y in range(0, MAP_HEIGHT):
+            if coords_on_border_of_map():
+                pass
             if game_map.get_sign(x,y) == OPEN_SPACE:
                 draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y, GRAY)
             else:
