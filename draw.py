@@ -3,6 +3,8 @@
 from map import (WHITE, GRAY, DARK_GRAY, BLACK)
 from map import (MAP_WIDTH, MAP_HEIGHT, TILE_SIZE)
 from map import (OPEN_SPACE, WALL)
+from creature import Creature
+from math import sqrt
 
 def render_message_log(messages, pygame, screen, font):
     if len(messages) > 0:
@@ -21,14 +23,24 @@ def render_message_log(messages, pygame, screen, font):
 
 def coords_on_border_of_map(x, y):
     if x == 0 or x == MAP_WIDTH-1 or y == 0 or y == MAP_HEIGHT-1:
-        return true
-    return false
+        return True
+    return False
+
+def coords_within_distance_z(x, y, z, creature):
+    position = creature.get_position()
+    c_x = position[0]
+    c_y = position[1]
+    if z < math.sqrt((c_x-x)*(c_x-x) + (c_y-y)*(c_y-y)):
+        return True
+    return False
 
 def render_map(game_map, pygame, screen, font):    
     y = 0
     for x in range(0, MAP_WIDTH):
         for y in range(0, MAP_HEIGHT):
-            if coords_on_border_of_map():
+            if coords_on_border_of_map(x, y):
+                pass
+            if coords_within_distance_z(x, y, z, creature):
                 pass
             if game_map.get_sign(x,y) == OPEN_SPACE:
                 draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y, GRAY)
