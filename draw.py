@@ -28,8 +28,7 @@ def coords_on_border_of_map(x, y):
 
 def coords_within_distance_z(x, y, z, creature):
     position = creature.get_position()
-    c_x = position[0]
-    c_y = position[1]
+    c_x, c_y = position[0], position[1]
     return z > sqrt((c_x-x)**2 + (c_y-y)**2) # True or False
 
 def render_floors_different_color(game_map, pygame, screen, font, x, y):
