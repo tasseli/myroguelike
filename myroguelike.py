@@ -37,7 +37,7 @@ while game_state["GAME_ON"]:
     messages = handle_events(pygame, game_map, messages, game_state)
 
     # Render the map
-    render_map(game_map, pygame, screen, font)
+    render_map(game_map, pygame, screen, font, game_map.creatures[0])
     
     # Update the display
     pygame.display.flip()
@@ -55,7 +55,7 @@ while True:
     messages = handle_quit_key(pygame, game_map, messages, game_state)
 
     # Render the map
-    render_map(game_map, pygame, screen, font)
+    render_map(game_map, pygame, screen, font, game_map.creatures[0])
     
     # Update the display
     pygame.display.flip()
