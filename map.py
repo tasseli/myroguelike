@@ -33,6 +33,10 @@ class Map:
         self.my_map[3][5] = WALL
         for i in range(6, 14):
             self.my_map[55][i] = WALL
+        for i in range(13, 30):
+            self.my_map[75][i] = WALL
+        for i in range(15, 25):
+            self.my_map[i][33] = WALL
         # wall for left side
         self.my_map[0] = [WALL for x in range(MAP_HEIGHT)]
         # wall for right side
