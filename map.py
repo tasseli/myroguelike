@@ -1,6 +1,7 @@
 # map.py
 
 from creatures import Player, Orc, Kobold, Uruk, Gnoll, Goblin, Golem
+import random
 
 # Define the dimensions of the map
 MAP_WIDTH = 80
@@ -27,6 +28,20 @@ def find_creature_at(creatures, x, y):
 
 class Map:
 
+    def generate(self):
+        for y in range (MAP_HEIGHT):
+            for x in range (MAP_WIDTH):
+                self.my_map[x][y] = WALL
+        #let's create a room of dimensions at least 7 by 7
+        first_room_top = random.randint(1, MAP_HEIGHT/2-1)
+        first_room_bottom = random.randint(MAP_HEIGHT/2, MAP_HEIGHT -2)
+        first_room_left = random.randint(1, MAP_WIDTH/2-1)
+        first_room_right = random.randint(MAP_WIDTH/2, MAP_WIDTH -2)
+        for y in range (first_room_top, first_room_bottom):
+            for x in range (first_room_left, first_room_right):
+                self.my_map[x][y] = OPEN_SPACE
+        return [random.randint(first_room_left, first_room_right), random.randint(first_room_top, first_room_bottom)]
+        
     def __init__(self):
         self.my_map = [[OPEN_SPACE for y in range(MAP_HEIGHT)] for x in range(MAP_WIDTH)]
         # Set a wall at position (3, 5)
@@ -87,8 +102,9 @@ class Map:
             creatures.append(golem)
             return golem
 
-        self.player = init_player([3,6])
+#        self.player = init_player([3,6])
 
+        self.player = init_player(self.generate())
         self.creatures = [self.player]
         orc = init_orc([5,12], "run right", None, self.creatures)
         orc2 = init_orc([1,3], None, None, self.creatures)
