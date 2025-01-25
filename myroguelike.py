@@ -26,6 +26,8 @@ game_map = Map()
 
 messages = ["Welcome to Myr!", "Move around with arrows or numpad.", "Moving towards an 'o'rc or other creatures attacks.", "Good luck!"]
 game_state = {"GAME_ON": True}
+next_msg_row = 0
+chars_remaining_on_row = MAP_WIDTH
 while game_state["GAME_ON"]:
     # Clear the screen
     screen.fill(GRAY)
@@ -34,7 +36,7 @@ while game_state["GAME_ON"]:
     render_message_log(messages, pygame, screen, font)
     
     # handle events
-    messages = handle_events(pygame, game_map, messages, game_state)
+    messages = handle_events(pygame, game_map, messages, game_state, next_msg_row, chars_remaining_on_row)
 
     # Render the map
     render_map(game_map, pygame, screen, font, game_map.creatures[0])

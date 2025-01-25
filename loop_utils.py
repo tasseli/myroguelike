@@ -74,7 +74,7 @@ def check_deaths(game_map, other_creatures_move_bool):
         game_map.creatures.pop(dying[deaths-i-1])
     return death_notes
 
-def handle_events(pygame, game_map, messages, game_state):
+def handle_events(pygame, game_map, messages, game_state, next_msg_row, chars_remaining_on_row):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("event.type == quit", pygame)
@@ -95,7 +95,6 @@ def handle_events(pygame, game_map, messages, game_state):
                     death_notes1 = check_deaths(game_map, False)   # check if player killed anyone
                 death_notes2 = check_deaths(game_map, True)    # have all creatures move and check if they killed anyone
                 if "You die!" in death_notes2 or "player dies!" in death_notes2 or "You die!" in death_notes1 or "player dies!" in death_notes1:
-                    print("We mean to kill the player.")
                     game_state["GAME_ON"] = False
                 if len(death_notes1) > 0:
                     messages += death_notes1
