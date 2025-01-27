@@ -33,10 +33,10 @@ class Map:
             for x in range (MAP_WIDTH):
                 self.my_map[x][y] = WALL
         #let's create a room of dimensions at least 7 by 7
-        first_room_top = random.randint(1, MAP_HEIGHT/2-1)
-        first_room_bottom = random.randint(MAP_HEIGHT/2, MAP_HEIGHT -2)
-        first_room_left = random.randint(1, MAP_WIDTH/2-1)
-        first_room_right = random.randint(MAP_WIDTH/2, MAP_WIDTH -2)
+        first_room_top = random.randint(1, int(MAP_HEIGHT/2)-1)
+        first_room_bottom = random.randint(int(MAP_HEIGHT/2), MAP_HEIGHT -2)
+        first_room_left = random.randint(1, int(MAP_WIDTH/2)-1)
+        first_room_right = random.randint(int(MAP_WIDTH/2), MAP_WIDTH -2)
         for y in range (first_room_top, first_room_bottom):
             for x in range (first_room_left, first_room_right):
                 self.my_map[x][y] = OPEN_SPACE
