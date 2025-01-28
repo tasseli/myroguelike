@@ -6,7 +6,6 @@ Fix / rewrite:
 - adding messages to bottom UI
     - simplify
     - pick a good function setup
-- do I need to have both class parameters and initiated parameters?
 - do I need to pass coordinates as a list instead of tuple, everywhere?
 - modularize rendering logic
     - draw smarter than one char at a time
