@@ -18,11 +18,10 @@ class Creature:
         return self.position
 
     def hit(self, target_creature):
+	#pass messages about hitting to be displayed
         target_creature.health -= self.damage
         message1 = target_creature.name + " hit for " + str(self.damage) + " damage by " + self.name
-        print(message1)
         message2 = target_creature.name + " has " + str(target_creature.health) + " health. "
-        print(message2)
 
     def check_death(self):
         if self.health < 1:
