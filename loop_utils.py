@@ -47,13 +47,11 @@ def check_deaths(game_map, other_creatures_move_bool):
                     return "You die!"
                 dying.append(neighbor_creature_index)
                 death_notes.append(neighbor_death_note)                
-                print(str(neighbor_creature_index) + " is dying")
                 game_map.creatures[neighbor_creature_index].alive = False
             if death_note != "":
                 if i not in dying:
                     dying.append(i)
                     death_notes.append(death_note)
-                    print(str(i) + " is dying")
                     game_map.creatures[i].alive = False
         deaths = len(dying)
     else: 
@@ -65,7 +63,6 @@ def check_deaths(game_map, other_creatures_move_bool):
                 if i not in dying:
                     dying.append(i)
                     death_notes.append(death_note)
-                    print(str(i) + " is dying")
                     game_map.creatures[i].alive = False
         deaths = len(dying)
     for i in range(0, deaths):
@@ -77,12 +74,12 @@ def check_deaths(game_map, other_creatures_move_bool):
 def handle_events(pygame, game_map, messages, game_state, next_msg_row, chars_remaining_on_row):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            quit_app("event.type == quit", pygame)
+            quit_app("", pygame)
         if event.type == pygame.KEYDOWN:
             new_position = game_map.player.get_position().copy()
             outcome = read_moves(new_position, event.key, pygame) # changes the passed new_position?!
             if outcome == "q":
-                quit_app("q or x pressed", pygame)
+                quit_app("", pygame)
             elif outcome == "o":
 #               An unhandled key was pressed
                 pass
