@@ -143,7 +143,8 @@ class Map:
         elif self.position_filled_by_creature(new_position[0], new_position[1]) or self.my_map[new_position[0]][new_position[1]] == "@":
             target = find_creature_at(creatures, new_position[0], new_position[1])
             if target != -1:
-                creature.hit(self.creatures[target])
+                msg1, msg2 = creature.hit(self.creatures[target])
+                # hitting messages got this far
             return True
         return False
 

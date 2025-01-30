@@ -22,6 +22,7 @@ class Creature:
         target_creature.health -= self.damage
         message1 = target_creature.name + " hit for " + str(self.damage) + " damage by " + self.name
         message2 = target_creature.name + " has " + str(target_creature.health) + " health. "
+        return message1, message2 
 
     def check_death(self):
         if self.health < 1:
