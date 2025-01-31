@@ -1,7 +1,6 @@
 planning
 
 Fix / rewrite:
-- remove prints
 - work best prints into messages
 - adding messages to bottom UI
     - simplify
