@@ -4,19 +4,19 @@ from creatures import Player, Orc, Kobold, Uruk, Gnoll, Goblin, Golem
 import random
 
 # Define the dimensions of the map
-MAP_WIDTH = 80
-MAP_HEIGHT = 40
-TILE_SIZE = 16
+MAP_WIDTH   = 80
+MAP_HEIGHT  = 40
+TILE_SIZE   = 16
 
 # Define constants for tile types
-OPEN_SPACE = '.'
-WALL = '#'
+OPEN_SPACE  = '.'
+WALL        = '#'
 
 # Define colors for tiles
-WHITE = (255, 255, 255)  # 
-GRAY = (128, 128, 128)   # Open space
-DARK_GRAY = (64, 64, 64) # Wall
-BLACK = (0, 0, 0)        # Text color
+WHITE       = (255, 255, 255)  # 
+GRAY        = (128, 128, 128)   # Open space
+DARK_GRAY   = (64, 64, 64) # Wall
+BLACK       = (0, 0, 0)        # Text color
 
 def find_creature_at(creatures, x, y):
     i = 0
