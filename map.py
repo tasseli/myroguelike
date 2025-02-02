@@ -144,13 +144,12 @@ class Map:
             target = find_creature_at(creatures, new_position[0], new_position[1])
             if target != -1:
                 msg1, msg2 = creature.hit(self.creatures[target])
-                # hitting messages got this far
             return True
         return False
 
     def get_sign(self, x, y):
         return self.my_map[x][y]
-        
+
     def set_sign_with_creature(self, creature):
         coords = creature.get_position()
         self.my_map[coords[0]][coords[1]] = creature.sign
