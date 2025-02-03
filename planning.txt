@@ -2,6 +2,7 @@ planning
 
 Fix / rewrite:
 - work best prints into messages
+    - would it solve the design if messages were a property of a map? It's being passed in the correct places it seems.
 - adding messages to bottom UI
     - simplify
     - pick a good function setup
