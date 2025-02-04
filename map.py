@@ -13,10 +13,10 @@ OPEN_SPACE  = '.'
 WALL        = '#'
 
 # Define colors for tiles
-WHITE       = (255, 255, 255)  # 
+WHITE       = (255, 255, 255)   # 
 GRAY        = (128, 128, 128)   # Open space
-DARK_GRAY   = (64, 64, 64) # Wall
-BLACK       = (0, 0, 0)        # Text color
+DARK_GRAY   = (64, 64, 64)      # Wall
+BLACK       = (0, 0, 0)         # Text color
 
 def find_creature_at(creatures, x, y):
     i = 0
@@ -43,6 +43,7 @@ class Map:
         return [random.randint(first_room_left, first_room_right), random.randint(first_room_top, first_room_bottom)]
         
     def __init__(self):
+        self.messages = ["","","",""]
         self.my_map = [[OPEN_SPACE for y in range(MAP_HEIGHT)] for x in range(MAP_WIDTH)]
         # Set a wall at position (3, 5)
         self.my_map[3][5] = WALL
