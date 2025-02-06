@@ -72,7 +72,7 @@ def check_deaths(game_map, other_creatures_move_bool):
     return death_notes
 
 def handle_events(pygame, game_map, game_state, next_msg_row, chars_remaining_on_row):
-    messages = []
+    messages = game_map.messages
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("", pygame)
@@ -86,6 +86,7 @@ def handle_events(pygame, game_map, game_state, next_msg_row, chars_remaining_on
                 pass
             elif outcome == "m" or outcome == "s": # if moving happened
 #               Move key or stand still key
+                messages = []
                 death_notes1 = []
                 # move creature_0, the player
                 if game_map.move_to(0, new_position, game_map.creatures): # 0 refers to the player ## so if player moved, pass the changed new position and work with it
