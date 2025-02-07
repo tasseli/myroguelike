@@ -145,6 +145,8 @@ class Map:
             target = find_creature_at(creatures, new_position[0], new_position[1])
             if target != -1:
                 msg1, msg2 = creature.hit(self.creatures[target])
+                self.messages[2] = msg1
+                self.messages[3] = msg2
             return True
         return False
 
