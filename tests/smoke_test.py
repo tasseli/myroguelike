@@ -114,9 +114,49 @@ def check_step_around():
     assert gnoll.health == gnoll_health, "kobold hit the gnoll"
     print("OK rule checks: a chaser steps around a creature in its way")
 
-def press(game_map, key):
-    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=key))
-    loop_utils.handle_events(pygame, game_map, {"GAME_ON": True})
+# Press keys one after another; game_state is kept between them (e.g. an open wait prompt)
+def press(game_map, *keys, game_state=None):
+    if game_state is None:
+        game_state = {"GAME_ON": True}
+    for key in keys:
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=key))
+        loop_utils.handle_events(pygame, game_map, game_state)
+
+def check_wait():
+    from creatures import Kobold
+    # nobody around: wait the full 20 turns and heal 1
+    game_map = empty_room_map()
+    state = {"GAME_ON": True}
+    game_map.player.health = 5
+    press(game_map, pygame.K_w, pygame.K_2, pygame.K_KP0, pygame.K_RETURN, game_state=state)
+    assert state["wait_input"] is None, "the prompt stayed open"
+    assert game_map.messages[0] == "You wait 20 turns.", game_map.messages
+    assert game_map.player.health == 6, "didn't heal while waiting 20 turns"
+
+    # typing: backspace removes a digit, Esc cancels without using a turn
+    press(game_map, pygame.K_w, pygame.K_1, pygame.K_2, pygame.K_BACKSPACE, game_state=state)
+    assert state["wait_input"] == "1", state
+    turns_until_heal = game_map.player.turns_until_heal
+    press(game_map, pygame.K_ESCAPE, game_state=state)
+    assert state["wait_input"] is None and game_map.messages == ["You decide not to wait."]
+    assert game_map.player.turns_until_heal == turns_until_heal, "cancelling used up a turn"
+
+    # a kobold comes: stop right when it's next to the player, before it can hit
+    p_x, p_y = game_map.player.position
+    kobold = Kobold([0, 0], "toward", game_map.player)
+    place(game_map, kobold, p_x - 5, p_y)
+    health = game_map.player.health
+    press(game_map, pygame.K_w, pygame.K_5, pygame.K_0, pygame.K_RETURN, game_state=state)
+    assert game_map.messages[0] == "You stop waiting after 4 turns: the kobold is next to you.", game_map.messages
+    assert loop_utils.creature_next_to_player(game_map) is kobold
+    assert game_map.player.health == health, "the kobold got to hit while the player waited"
+
+    # someone already next to the player: don't wait at all
+    kobold_position = list(kobold.position)
+    press(game_map, pygame.K_w, pygame.K_9, pygame.K_RETURN, game_state=state)
+    assert game_map.messages == ["You can't wait with the kobold next to you."], game_map.messages
+    assert kobold.position == kobold_position, "a turn passed although waiting was refused"
+    print("OK rule checks: w waits and heals, stops when someone comes next to the player")
 
 def check_more_key():
     random.seed(0)
@@ -265,6 +305,7 @@ check_hit_message_texts()
 check_run_right_stops_at_wall()
 check_more_key()
 check_step_around()
+check_wait()
 play_random_games()
 run_real_game()     # last, because quitting the game shuts pygame down
 print("All checks passed.")

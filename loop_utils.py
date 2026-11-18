@@ -2,7 +2,7 @@
 
 import sys
 import random
-from keyboard import read_moves, read_death_screen_key
+from keyboard import read_moves, read_death_screen_key, read_digit
 from map import OPEN_SPACE, WALL, LOG_ROWS, find_creature_at
 
 # The 8 directions in order around a circle, so neighbours in the list are 45 degrees apart
@@ -107,11 +107,92 @@ def check_deaths(game_map, other_creatures_move):
         game_map.creatures.pop(i)
     return player_died
 
+# One game turn: the player moves (or stays, with direction (0, 0)), then the other creatures move,
+# then everyone still alive heals a little. Messages are added to game_map.messages.
+# Return True if the player died.
+def play_turn(game_map, direction):
+    x, y = game_map.player.get_position()
+    new_position = [x + direction[0], y + direction[1]]
+    # move creature_0, the player
+    if game_map.move_to(0, new_position):
+        check_deaths(game_map, False)       # check if player killed anyone
+    if check_deaths(game_map, True):        # have all creatures move and check if they killed anyone
+        return True
+    for creature in game_map.creatures:
+        creature.heal_slowly()
+    return False
+
+# Return a creature standing next to the player (in any of the 8 directions), or None
+def creature_next_to_player(game_map):
+    p_x, p_y = game_map.player.get_position()
+    for creature in game_map.creatures[1:]:
+        x, y = creature.get_position()
+        if max(abs(x - p_x), abs(y - p_y)) == 1:
+            return creature
+    return None
+
+def turns_text(turns):
+    return str(turns) + (" turn" if turns == 1 else " turns")
+
+# Wait up to the given number of turns, stopping early when a creature comes next to the player.
+# The log gets a summary first, then the messages of all the waited turns.
+def wait_turns(game_map, game_state, turns):
+    game_map.messages = []
+    game_map.log_offset = 0
+    nearby = creature_next_to_player(game_map)
+    if nearby is not None:
+        game_map.messages = ["You can't wait with " + nearby.called() + " next to you."]
+        return
+    waited = 0
+    while waited < turns:
+        waited += 1
+        if play_turn(game_map, (0, 0)):
+            game_state["GAME_ON"] = False
+            return
+        nearby = creature_next_to_player(game_map)
+        if nearby is not None:
+            break
+    if nearby is not None:
+        summary = "You stop waiting after " + turns_text(waited) + ": " + nearby.called() + " is next to you."
+    else:
+        summary = "You wait " + turns_text(waited) + "."
+    game_map.messages.insert(0, summary)
+
+WAIT_PROMPT = "Wait how many turns? "
+WAIT_HELP = "   (Enter: wait, Esc: cancel)"
+
+# While the wait prompt is open, keys type the number of turns instead of moving.
+# game_state["wait_input"] holds the digits typed so far; None means the prompt is closed.
+def handle_wait_input(event_key, pygame, game_map, game_state):
+    typed = game_state["wait_input"]
+    digit = read_digit(event_key, pygame)
+    if digit is not None and len(typed) < 3:
+        typed += digit
+    elif event_key == pygame.K_BACKSPACE:
+        typed = typed[:-1]
+    elif event_key == pygame.K_ESCAPE:
+        game_state["wait_input"] = None
+        game_map.messages = ["You decide not to wait."]
+        return
+    elif event_key == pygame.K_RETURN or event_key == pygame.K_KP_ENTER:
+        game_state["wait_input"] = None
+        if typed == "" or int(typed) == 0:
+            game_map.messages = ["You decide not to wait."]
+        else:
+            wait_turns(game_map, game_state, int(typed))
+        return
+    game_state["wait_input"] = typed
+    game_map.messages = [WAIT_PROMPT + typed + "_" + WAIT_HELP]
+
 def handle_events(pygame, game_map, game_state):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("", pygame)
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN and game_state.get("wait_input") is not None:
+            handle_wait_input(event.key, pygame, game_map, game_state)
+            if not game_state["GAME_ON"]:
+                return                                  # died while waiting
+        elif event.type == pygame.KEYDOWN:
             outcome, direction = read_moves(event.key, pygame)
             if outcome == "q":
                 quit_app("", pygame)
@@ -128,17 +209,14 @@ def handle_events(pygame, game_map, game_state):
 #               Move key or stand still key
                 game_map.messages = []
                 game_map.log_offset = 0
-                x, y =game_map.player.get_position()
-                new_position = [x + direction[0], y + direction[1]]
-                # move creature_0, the player
-                if game_map.move_to(0, new_position): # 0 refers to the player ## so if player moved, pass the changed new position and work with it
-                    check_deaths(game_map, False)       # check if player killed anyone
-                if check_deaths(game_map, True):        # have all creatures move and check if they killed anyone
+                if play_turn(game_map, direction):
                     game_state["GAME_ON"] = False
                     return                              # ignore any further keys pressed in the same frame
-                # a turn has passed: everyone still alive heals a little
-                for creature in game_map.creatures:
-                    creature.heal_slowly()
+            elif outcome == "wait":
+                # open the prompt for how many turns to wait; no turn passes yet
+                game_state["wait_input"] = ""
+                game_map.log_offset = 0
+                game_map.messages = [WAIT_PROMPT + "_" + WAIT_HELP]
 
 # Return "restart" if the player wants to play again; quitting exits the program.
 def handle_death_screen_keys(pygame):

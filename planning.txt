@@ -47,3 +47,4 @@ Done (Nov 2026):
 - press r on the death screen to play again; the game loop is play_game()
 - messages from the player's point of view, one line per hit ("The uruk hits you for 3. You have 9 health left.")
 - requirements.txt: pygame>=2.5
+- w waits a typed number of turns (to heal), stopping early when someone comes next to the player

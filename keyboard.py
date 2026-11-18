@@ -5,12 +5,15 @@
 #   stay still, middle direction:           return "s", (0, 0)
 #   quit command, to be handled in caller:  return "q", None
 #   show more of the message log:           return "more", None
+#   wait a number of turns:                 return "wait", None
 #   other, currently unhandled:             return "o", None
 def read_moves(eventkey, pygame):
     if eventkey == pygame.K_q or eventkey == pygame.K_x:
         return "q", None
     elif eventkey == pygame.K_m:
         return "more", None
+    elif eventkey == pygame.K_w:
+        return "wait", None
     elif eventkey == pygame.K_LEFT or eventkey == pygame.K_KP4:
         return "m", (-1, 0)
     elif eventkey == pygame.K_RIGHT or eventkey == pygame.K_KP6:
@@ -31,6 +34,18 @@ def read_moves(eventkey, pygame):
         return "s", (0, 0)
     else:
         return "o", None
+
+# Return the digit typed as a string ("0"-"9"), from the number row or the numpad, or None for other keys
+def read_digit(eventkey, pygame):
+    number_row = [pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4,
+                  pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9]
+    numpad = [pygame.K_KP0, pygame.K_KP1, pygame.K_KP2, pygame.K_KP3, pygame.K_KP4,
+              pygame.K_KP5, pygame.K_KP6, pygame.K_KP7, pygame.K_KP8, pygame.K_KP9]
+    if eventkey in number_row:
+        return str(number_row.index(eventkey))
+    if eventkey in numpad:
+        return str(numpad.index(eventkey))
+    return None
 
 # Keys on the death screen: "q" to quit, "r" to play again, None for any other key
 def read_death_screen_key(eventkey, pygame):
