@@ -2,7 +2,7 @@
 
 import sys
 import random
-from keyboard import read_moves, read_q_only
+from keyboard import read_moves, read_death_screen_key
 from map import OPEN_SPACE, WALL, LOG_ROWS, find_creature_at
 
 # The 8 directions in order around a circle, so neighbours in the list are 45 degrees apart
@@ -140,11 +140,15 @@ def handle_events(pygame, game_map, game_state):
                 for creature in game_map.creatures:
                     creature.heal_slowly()
 
-def handle_quit_key(pygame):
+# Return "restart" if the player wants to play again; quitting exits the program.
+def handle_death_screen_keys(pygame):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("event.type == quit", pygame)
         if event.type == pygame.KEYDOWN:
-            outcome = read_q_only(event.key, pygame)
+            outcome = read_death_screen_key(event.key, pygame)
             if outcome == "q":
                 quit_app("q or x pressed", pygame)
+            elif outcome == "r":
+                return "restart"
+    return None

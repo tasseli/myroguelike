@@ -32,6 +32,10 @@ def read_moves(eventkey, pygame):
     else:
         return "o", None
 
-def read_q_only(eventkey, pygame):
+# Keys on the death screen: "q" to quit, "r" to play again, None for any other key
+def read_death_screen_key(eventkey, pygame):
     if eventkey == pygame.K_q or eventkey == pygame.K_x:
         return "q"
+    elif eventkey == pygame.K_r:
+        return "r"
+    return None

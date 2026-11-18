@@ -213,16 +213,40 @@ def play_random_games(games=200, max_turns=300):
 
 # 3. real game
 
-def run_real_game(seconds=1.5):
-    # press 5 (wait) every 50 ms, then close the window
-    pygame.time.set_timer(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_KP5), 50)
-    pygame.time.set_timer(pygame.event.Event(pygame.QUIT), int(seconds * 1000), 1)
+def run_real_game(seconds=3):
+    # count the games started: myroguelike.py creates a new Map for each game
+    games_started = [0]
+    original_map = m.Map
+    def counting_map():
+        games_started[0] += 1
+        return original_map()
+    m.Map = counting_map
+
+    # after each drawn frame, press 5 (wait); every 10th frame press r (play again) instead;
+    # close the window after the given time (the game runs at 30 frames per second)
+    frames = [0]
+    original_flip = pygame.display.flip
+    def flip_and_press_keys():
+        original_flip()
+        frames[0] += 1
+        if frames[0] >= seconds * 30:
+            pygame.event.post(pygame.event.Event(pygame.QUIT))
+        elif frames[0] % 10 == 0:
+            pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_r))
+        else:
+            pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_KP5))
+    pygame.display.flip = flip_and_press_keys
+
+    random.seed(1)
     os.chdir(REPO)
     try:
         runpy.run_path(os.path.join(REPO, "myroguelike.py"), run_name="__main__")
     except SystemExit:
         pass    # quit_app() exits the program, which is what should happen
-    print("OK real game: started, played and quit")
+    m.Map = original_map
+    pygame.display.flip = original_flip
+    assert games_started[0] >= 2, f"only {games_started[0]} game started; pressing r on the death screen didn't restart"
+    print(f"OK real game: played {games_started[0]} games in a row (r restarts) and quit")
 
 
 check_healing()
