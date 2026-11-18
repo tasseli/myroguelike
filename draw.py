@@ -54,10 +54,11 @@ def render_map(game_map, pygame, screen, font, creature):
     for y in range(1, MAP_HEIGHT-1):
         render_floors_different_color(game_map, pygame, screen, font, 0, y)
         render_floors_different_color(game_map, pygame, screen, font, MAP_WIDTH-1, y)
-    # only tiles in a box around the creature can be close enough to see
+    # only tiles in a box around the creature can be close enough to see;
+    # the box stays inside the border, which was already drawn above
     c_x, c_y = creature.get_position()
-    for x in range(max(c_x - VIEW_RADIUS, 0), min(c_x + VIEW_RADIUS + 1, MAP_WIDTH)):
-        for y in range(max(c_y - VIEW_RADIUS, 0), min(c_y + VIEW_RADIUS + 1, MAP_HEIGHT)):
+    for x in range(max(c_x - VIEW_RADIUS, 1), min(c_x + VIEW_RADIUS + 1, MAP_WIDTH-1)):
+        for y in range(max(c_y - VIEW_RADIUS, 1), min(c_y + VIEW_RADIUS + 1, MAP_HEIGHT-1)):
             if coords_within_distance_z(x, y, VIEW_RADIUS, creature):
                 render_floors_different_color(game_map, pygame, screen, font, x, y)
 
