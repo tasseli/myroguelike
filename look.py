@@ -3,6 +3,7 @@
 
 import math
 from draw import VIEW_RADIUS
+from creatures import CHASE, FLEE, FRIEND, RUN_RIGHT, with_article
 
 # Moves between two tiles; diagonal steps are allowed, so it's the larger of the two distances
 def steps_between(a, b):
@@ -72,17 +73,17 @@ def target_text(creature):
 
 # What a creature is doing, for the look description
 def doing(creature, game_map):
-    if creature.mood == "friend" and creature.target is not None:
+    if creature.mood == FRIEND and creature.target is not None:
         if game_map.threats_to(creature.target):
             return "It is defending " + target_text(creature) + "."
         if creature.target.is_player:
             return "It is your friend."
         return "It is a friend of " + target_text(creature) + "."
-    if creature.mood == "toward" and creature.target is not None:
+    if creature.mood == CHASE and creature.target is not None:
         return "It is chasing " + target_text(creature) + "."
-    if creature.mood == "flee" and creature.target is not None:
+    if creature.mood == FLEE and creature.target is not None:
         return "It is fleeing from " + target_text(creature) + "."
-    if creature.mood == "run right":
+    if creature.mood == RUN_RIGHT:
         return "It is running to the right."
     return "It is wandering around."
 
@@ -92,7 +93,6 @@ def describe(creature, game_map):
     if creature.is_player:
         return ["Looking at: you (@).", health]
     steps = steps_between(creature.get_position(), game_map.player.get_position())
-    article = "an" if creature.name[0] in "aeiou" else "a"
     where = steps_text(steps) + " away"
-    return ["Looking at: " + article + " " + creature.name + " (" + creature.sign + "), " + where + ".",
+    return ["Looking at: " + with_article(creature.name) + " (" + creature.sign + "), " + where + ".",
             health + " " + doing(creature, game_map)]

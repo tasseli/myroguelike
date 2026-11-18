@@ -3,13 +3,14 @@
 # Keep each line at most 52 characters, so that it fits beside the "[m] More" indicator
 # when the log has more rows than fit.
 
+from creatures import with_article
+
 def says(creature, text):
     return "The " + creature.name + ": " + text
 
 # Every creature answers this when talked to: "I'm a kobold", "I'm an uruk"
 def greeting(creature):
-    article = "an" if creature.name[0] in "aeiou" else "a"
-    return says(creature, "Beep beep, I'm " + article + " " + creature.name + ".")
+    return says(creature, "Beep beep, I'm " + with_article(creature.name) + ".")
 
 # Golems can talk about these topics, chosen with the keys 1-5.
 # Each topic is (name, answer); the loyalty answer also makes the golem the player's friend.

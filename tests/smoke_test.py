@@ -28,7 +28,7 @@ pygame.display.set_mode((100, 100))
 
 import map as m
 import loop_utils
-from creatures import Player, Orc
+from creatures import Player, Orc, CHASE, WANDER, FLEE, FRIEND, RUN_RIGHT
 
 KEYS = [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN, pygame.K_KP1,
         pygame.K_KP3, pygame.K_KP7, pygame.K_KP9, pygame.K_KP5, pygame.K_a]
@@ -72,13 +72,13 @@ def check_hit_message_texts():
 def check_run_right_stops_at_wall():
     random.seed(0)
     game_map = m.Map()
-    runner = next(c for c in game_map.creatures if c.mood == "run right")
+    runner = next(c for c in game_map.creatures if c.mood == RUN_RIGHT)
     right_wall_x = game_map.room[2]     # the room's right edge is exclusive: that column is wall
     for turn in range(m.MAP_WIDTH):
         loop_utils.move_moodily(game_map, game_map.creatures.index(runner))
-        if runner.mood != "run right":
+        if runner.mood != RUN_RIGHT:
             break
-    assert runner.mood == "ambulate", "the runner never stopped running right"
+    assert runner.mood == WANDER, "the runner never stopped running right"
     assert runner.position[0] == right_wall_x - 1, f"runner stopped at x={runner.position[0]}, not by the wall"
     print("OK rule checks: the 'run right' orc starts wandering at a wall")
 
@@ -103,7 +103,7 @@ def check_step_around():
     game_map = empty_room_map()
     p_x, p_y = game_map.player.position
     # kobold three tiles left of the player, gnoll right in its way
-    kobold = Kobold([0, 0], "toward", game_map.player)
+    kobold = Kobold([0, 0], CHASE, game_map.player)
     gnoll = Gnoll([0, 0])
     place(game_map, kobold, p_x - 3, p_y)
     place(game_map, gnoll, p_x - 2, p_y)
@@ -157,7 +157,7 @@ def check_look():
     from creatures import Kobold, Gnoll, Golem
     game_map = empty_room_map()
     p_x, p_y = game_map.player.position
-    kobold = Kobold([0, 0], "toward", game_map.player)
+    kobold = Kobold([0, 0], CHASE, game_map.player)
     gnoll = Gnoll([0, 0])
     golem = Golem([0, 0])
     place(game_map, kobold, p_x + 3, p_y)       # nearest
@@ -187,8 +187,8 @@ def check_look():
 
     # a target other than the player is told with its distance and direction
     from look import describe
-    leader = Orc([0, 0], "toward", game_map.player)
-    follower = Orc([0, 0], "toward", leader)
+    leader = Orc([0, 0], CHASE, game_map.player)
+    follower = Orc([0, 0], CHASE, leader)
     place(game_map, follower, p_x + 2, p_y + 2)
     place(game_map, leader, p_x - 1, p_y - 1)     # 3 steps up-left of the follower
     line = describe(follower, game_map)[1]
@@ -227,9 +227,9 @@ def check_mood_colors():
     from creatures import Kobold, Gnoll
     game_map = empty_room_map()
     p_x, p_y = game_map.player.position
-    chaser = Kobold([0, 0], "toward", game_map.player)
+    chaser = Kobold([0, 0], CHASE, game_map.player)
     wanderer = Gnoll([0, 0])
-    orc_chasing_orc = Orc([0, 0], "toward", wanderer)
+    orc_chasing_orc = Orc([0, 0], CHASE, wanderer)
     place(game_map, chaser, p_x + 2, p_y)
     place(game_map, wanderer, p_x - 2, p_y)
     place(game_map, orc_chasing_orc, p_x, p_y + 2)
@@ -253,13 +253,13 @@ def check_provoke():
     game_map = empty_room_map()
     p_x, p_y = game_map.player.position
     golem = Golem([0, 0])                                   # wandering, tough enough to survive a hit
-    chaser = Kobold([0, 0], "toward", game_map.player)
+    chaser = Kobold([0, 0], CHASE, game_map.player)
     place(game_map, golem, p_x + 1, p_y)
     place(game_map, chaser, p_x - 1, p_y)
 
     game_map.messages = []
     game_map.move_to(0, [p_x + 1, p_y])                     # the player hits the golem
-    assert golem.mood == "toward" and golem.target is game_map.player, "hit golem didn't start chasing"
+    assert golem.mood == CHASE and golem.target is game_map.player, "hit golem didn't start chasing"
     assert draw.creature_color(golem, game_map.player) == m.RED
     assert game_map.messages[-1] == "The golem turns to chase you!", game_map.messages
 
@@ -275,7 +275,7 @@ def check_provoke():
     game_map.messages = []
     game_map.move_to(game_map.creatures.index(wanderer), [p_x, p_y])
     assert game_map.player.health == health, "a grey monster hit the player"
-    assert wanderer.mood == "toward" and wanderer.target is game_map.player
+    assert wanderer.mood == CHASE and wanderer.target is game_map.player
     assert game_map.messages == ["The gnoll turns to chase you!"], game_map.messages
     # now it chases the player, so the next bump is a hit
     game_map.move_to(game_map.creatures.index(wanderer), [p_x, p_y])
@@ -296,13 +296,13 @@ def check_flee():
     from creatures import Kobold
     game_map = empty_room_map()
     p_x, p_y = game_map.player.position
-    kobold = Kobold([0, 0], "toward", game_map.player)
+    kobold = Kobold([0, 0], CHASE, game_map.player)
     place(game_map, kobold, p_x + 1, p_y)
     kobold.health = kobold.health_max = 5
 
     game_map.messages = []
     game_map.move_to(0, [p_x + 1, p_y])         # the player hits it for 4: 1 health left
-    assert kobold.health == 1 and kobold.mood == "flee" and kobold.target is game_map.player, \
+    assert kobold.health == 1 and kobold.mood == FLEE and kobold.target is game_map.player, \
         f"kobold at {kobold.health} health has mood {kobold.mood}"
     assert game_map.messages[-1] == "The kobold flees from you!", game_map.messages
     assert draw.creature_color(kobold, game_map.player) == m.YELLOW
@@ -316,33 +316,33 @@ def check_flee():
         before = squared_distance()
         loop_utils.move_moodily(game_map, i)
         assert squared_distance() > before, f"fleeing kobold didn't get farther: {before} -> {squared_distance()}"
-    assert kobold.mood == "flee", "stopped fleeing before full health"
+    assert kobold.mood == FLEE, "stopped fleeing before full health"
 
     # back at full health it starts wandering
     kobold.health = kobold.health_max
     loop_utils.move_moodily(game_map, i)
-    assert kobold.mood == "ambulate" and kobold.target is None, kobold.mood
+    assert kobold.mood == WANDER and kobold.target is None, kobold.mood
 
     # a kobold left at 2 health flees too
-    kobold2 = Kobold([0, 0], "toward", game_map.player)
+    kobold2 = Kobold([0, 0], CHASE, game_map.player)
     place(game_map, kobold2, p_x, p_y + 1)
     kobold2.health = kobold2.health_max = 6
     game_map.move_to(0, [p_x, p_y + 1])
-    assert kobold2.health == 2 and kobold2.mood == "flee", f"kobold at 2 health has mood {kobold2.mood}"
+    assert kobold2.health == 2 and kobold2.mood == FLEE, f"kobold at 2 health has mood {kobold2.mood}"
 
     # other monsters don't flee: an orc left at 1 health turns to chase the player instead
     orc = Orc([0, 0])
     place(game_map, orc, p_x - 1, p_y)
     orc.health = 5
     game_map.move_to(0, [p_x - 1, p_y])
-    assert orc.health == 1 and orc.mood == "toward" and orc.target is game_map.player, orc.mood
+    assert orc.health == 1 and orc.mood == CHASE and orc.target is game_map.player, orc.mood
     print("OK rule checks: kobolds at 2 health or less flee (yellow) until healed, then wander")
 
 def check_look_while_dead():
     from creatures import Uruk
     game_map = empty_room_map()
     p_x, p_y = game_map.player.position
-    uruk = Uruk([0, 0], "toward", game_map.player)
+    uruk = Uruk([0, 0], CHASE, game_map.player)
     place(game_map, uruk, p_x + 1, p_y)
     game_map.player.health = -2                 # dead
     state = {"GAME_ON": False}
@@ -369,7 +369,7 @@ def check_friend():
     from creatures import Golem, Gnoll
     game_map = empty_room_map()
     p_x, p_y = game_map.player.position
-    friend = Golem([0, 0], "friend", game_map.player)
+    friend = Golem([0, 0], FRIEND, game_map.player)
     place(game_map, friend, p_x + 4, p_y)
     i = game_map.creatures.index(friend)
     assert draw.creature_color(friend, game_map.player) == m.GREEN
@@ -382,7 +382,7 @@ def check_friend():
         if turn >= 2:
             assert loop_utils.steps_apart(friend, game_map.player) <= m.CLOSE_STEPS, \
                 f"turn {turn}: friend {loop_utils.steps_apart(friend, game_map.player)} steps away"
-    assert game_map.player.health == health and friend.mood == "friend", "the friend hurt or turned on the player"
+    assert game_map.player.health == health and friend.mood == FRIEND, "the friend hurt or turned on the player"
 
     # next to the player, the friend doesn't stop waiting
     place_next = [p_x + 1, p_y + 1]
@@ -392,7 +392,7 @@ def check_friend():
     assert loop_utils.creature_next_to_player(game_map) is None, "the friend counts as someone next to the player"
 
     # a monster chasing the player comes close: the friend goes for it and attacks it
-    orc = Orc([0, 0], "toward", game_map.player)
+    orc = Orc([0, 0], CHASE, game_map.player)
     place(game_map, orc, p_x - 2, p_y)
     orc.health = orc.health_max = 20
     assert describe(friend, game_map)[1].endswith("It is defending you."), describe(friend, game_map)
@@ -444,7 +444,7 @@ def check_chat():
     assert game_map.messages[0] == "The golem: " + chat.GOLEM_TOPICS[3][1] and state["dialogue"] is golem
     assert turns_passed(before) == 1, "choosing topics took turns"
     press(game_map, pygame.K_5, game_state=state)                   # loyalty
-    assert golem.mood == "friend" and golem.target is player and state["dialogue"] is None
+    assert golem.mood == FRIEND and golem.target is player and state["dialogue"] is None
     assert game_map.messages[-1] == "The golem is now your friend!", game_map.messages
 
     # Esc cancels choosing without a turn; with nobody in sight there's nobody to talk to
@@ -525,7 +525,7 @@ def check_wait():
 
     # a kobold comes: stop right when it's next to the player, before it can hit
     p_x, p_y = game_map.player.position
-    kobold = Kobold([0, 0], "toward", game_map.player)
+    kobold = Kobold([0, 0], CHASE, game_map.player)
     place(game_map, kobold, p_x - 5, p_y)
     health = game_map.player.health
     press(game_map, pygame.K_w, pygame.K_5, pygame.K_0, pygame.K_RETURN, game_state=state)
@@ -605,13 +605,13 @@ def check_consistency(game_map):
 
 def check_starting_creatures(game_map):
     kobolds = [c for c in game_map.creatures if c.name == "kobold"]
-    hostile = [k for k in kobolds if k.mood == "toward" and k.target is game_map.player]
-    wandering = [k for k in kobolds if k.mood == "ambulate"]
+    hostile = [k for k in kobolds if k.mood == CHASE and k.target is game_map.player]
+    wandering = [k for k in kobolds if k.mood == WANDER]
     assert len(kobolds) == 4 and len(hostile) == 2 and len(wandering) == 2, \
         f"{len(kobolds)} kobolds: {len(hostile)} hostile, {len(wandering)} wandering"
-    assert not [c for c in game_map.creatures if c.mood == "friend"], "nobody should start as a friend"
+    assert not [c for c in game_map.creatures if c.mood == FRIEND], "nobody should start as a friend"
     golems = [c for c in game_map.creatures if c.name == "golem"]
-    assert len(golems) == 2 and all(g.mood == "ambulate" for g in golems), "there should be two wandering golems"
+    assert len(golems) == 2 and all(g.mood == WANDER for g in golems), "there should be two wandering golems"
 
 def check_spawns(game_map):
     left, top, right, bottom = game_map.room
@@ -691,7 +691,7 @@ def run_real_game(seconds=3):
         games_started[0] += 1
         game_map = original_map()
         game_map.player.health = 1
-        for friend in [c for c in game_map.creatures if c.mood == "friend"]:
+        for friend in [c for c in game_map.creatures if c.mood == FRIEND]:
             game_map.my_map[friend.position[0]][friend.position[1]] = m.OPEN_SPACE
             game_map.creatures.remove(friend)
         return game_map

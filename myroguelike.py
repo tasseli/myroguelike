@@ -4,6 +4,7 @@
 import pygame
 from loop_utils import handle_events, handle_death_screen_keys
 from draw import render_map, render_message_log, render_player_status, render_key_hints, render_look_cursor
+from creatures import with_article
 from map import Map, MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, GRAY, LOG_ROWS
 from help_texts import KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS, DEATH_KEY_HINTS
 
@@ -59,8 +60,7 @@ def play_game():
 
     # game_state is GAME_ON==False, player has died
     killer = game_map.killed_by
-    article = "an" if killer[0] in "aeiou" else "a"     # an orc, a gnoll
-    death_messages = ["You died gloriously on the battlefield!", "Killed by " + article + " " + killer + ".", "Thank you for playing. Better luck next time.", "Press 'r' to play again, 'l' to look around or 'q' to quit."]
+    death_messages = ["You died gloriously on the battlefield!", "Killed by " + with_article(killer) + ".", "Thank you for playing. Better luck next time.", "Press 'r' to play again, 'l' to look around or 'q' to quit."]
     while True:
         if handle_death_screen_keys(pygame, game_map, game_state) == "restart":
             return

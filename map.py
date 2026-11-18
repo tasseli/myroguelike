@@ -1,6 +1,7 @@
 # map.py
 
 from creatures import Player, Orc, Kobold, Uruk, Gnoll, Goblin, Golem
+from creatures import CHASE, FLEE, FRIEND, RUN_RIGHT
 import random
 
 # Define the dimensions of the map
@@ -100,19 +101,19 @@ class Map:
         near_golem = Golem(self.free_floor_at_distance(self.player, NEAR_GOLEM_SPAWN_DISTANCE))
         self.set_sign_with_creature(near_golem)
         self.creatures.append(near_golem)
-        self.add_creature(Orc, "run right")
+        self.add_creature(Orc, RUN_RIGHT)
         self.add_creature(Orc)
-        orc3 = self.add_creature(Orc, "toward", self.player)
-        orc4 = self.add_creature(Orc, "toward", orc3)
-        self.add_creature(Orc, "toward", orc4)
-        self.add_creature(Kobold, "toward", self.player)
-        self.add_creature(Kobold, "toward", self.player)
+        orc3 = self.add_creature(Orc, CHASE, self.player)
+        orc4 = self.add_creature(Orc, CHASE, orc3)
+        self.add_creature(Orc, CHASE, orc4)
+        self.add_creature(Kobold, CHASE, self.player)
+        self.add_creature(Kobold, CHASE, self.player)
         self.add_creature(Kobold)
         self.add_creature(Kobold)
-        self.add_creature(Uruk, "toward", self.player)
-        self.add_creature(Gnoll, "toward", self.player)
-        self.add_creature(Gnoll, "toward", self.player)
-        self.add_creature(Goblin, "toward", self.player)
+        self.add_creature(Uruk, CHASE, self.player)
+        self.add_creature(Gnoll, CHASE, self.player)
+        self.add_creature(Gnoll, CHASE, self.player)
+        self.add_creature(Goblin, CHASE, self.player)
         self.add_creature(Golem)
 
     # Create a creature of the given class on a random free floor tile and add it to the map.
@@ -171,24 +172,24 @@ class Map:
     # - one already fleeing keeps fleeing from whoever it fled from first
     # - otherwise, one the player hits starts chasing the player
     def react_to_hit(self, attacker, victim):
-        if victim.health <= 0 or victim.mood == "flee":
+        if victim.health <= 0 or victim.mood == FLEE:
             return
         if victim.flee_at_health is not None and victim.health <= victim.flee_at_health:
-            victim.mood = "flee"
+            victim.mood = FLEE
             victim.target = attacker
             self.messages.append("The " + victim.name + " flees from " + attacker.called() + "!")
         elif attacker is self.player:
             self.provoke(victim)
 
     def chases_player(self, creature):
-        return creature.mood == "toward" and creature.target is self.player
+        return creature.mood == CHASE and creature.target is self.player
 
     # A monster the player hits, or one that bumps into the player, starts chasing the player
     # if it wasn't already
     def provoke(self, victim):
         if self.chases_player(victim):
             return
-        victim.mood = "toward"
+        victim.mood = CHASE
         victim.target = self.player
         if victim.health > 0:       # a killed one gets a death message instead
             self.messages.append("The " + victim.name + " turns to chase you!")
@@ -199,14 +200,14 @@ class Map:
     def can_attack(self, creature, victim):
         if creature is self.player:
             return True
-        if creature.mood == "friend":
-            return victim is not creature.target and victim.mood == "toward" and victim.target is creature.target
+        if creature.mood == FRIEND:
+            return victim is not creature.target and victim.mood == CHASE and victim.target is creature.target
         return victim is self.player or victim is creature.target
 
     # The creatures chasing the given one that are close to it (within CLOSE_STEPS)
     def threats_to(self, friend):
         f_x, f_y = friend.get_position()
-        return [c for c in self.creatures if c.mood == "toward" and c.target is friend
+        return [c for c in self.creatures if c.mood == CHASE and c.target is friend
                 and max(abs(c.position[0] - f_x), abs(c.position[1] - f_y)) <= CLOSE_STEPS]
 
     def get_sign(self, x, y):

@@ -3,6 +3,7 @@
 from map import (WHITE, GRAY, DARK_GRAY, BLACK, RED, YELLOW, GREEN)
 from map import (MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, LOG_ROWS)
 from map import OPEN_SPACE
+from creatures import CHASE, FLEE, FRIEND
 
 # how far around the player the map is visible
 VIEW_RADIUS = 12
@@ -96,11 +97,11 @@ def render_map(game_map, pygame, screen, font, creature):
 #   green:  a friendly creature
 #   grey:   everyone else (wandering, running, chasing another creature, and the player)
 def creature_color(creature, player):
-    if creature.mood == "toward" and creature.target is player:
+    if creature.mood == CHASE and creature.target is player:
         return RED
-    if creature.mood == "flee":
+    if creature.mood == FLEE:
         return YELLOW
-    if creature.mood == "friend":
+    if creature.mood == FRIEND:
         return GREEN
     return DARK_GRAY
 

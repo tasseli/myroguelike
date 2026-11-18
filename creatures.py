@@ -1,9 +1,21 @@
 # creatures.py
 import random
 
+# Moods: what a creature does on its turn. Most moods are about creature.target.
+CHASE = "chase"             # moves toward its target and attacks it
+WANDER = "wander"           # moves around randomly
+RUN_RIGHT = "run right"     # runs right until it hits a wall, then wanders
+FLEE = "flee"               # moves away from its target until healed to full
+FRIEND = "friend"           # stays close to its target and defends it
+PLAYER_MOOD = "player"      # the player: moved by the keyboard
+
+# "an orc", "a gnoll"
+def with_article(name):
+    return ("an " if name[0] in "aeiou" else "a ") + name
+
 class Creature:
     sign = "c"
-    mood = "ambulate"
+    mood = WANDER
     name = "generic creature"
     health_range = (2, 2)   # starting health is rolled from this range, inclusive
     damage = 1
@@ -83,7 +95,7 @@ class Creature:
 
 class Player(Creature):
     sign = "@"
-    mood = "player"
+    mood = PLAYER_MOOD
     name = "player"
     is_player = True
     health_range = (12, 12)

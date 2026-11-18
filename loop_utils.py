@@ -4,6 +4,7 @@ import sys
 import random
 from keyboard import read_moves, read_death_screen_key, read_digit
 from map import OPEN_SPACE, WALL, LOG_ROWS, CLOSE_STEPS, find_creature_at
+from creatures import CHASE, WANDER, FLEE, FRIEND, RUN_RIGHT
 from help_texts import COMMAND_LINES, HELP_LINES
 from look import visible_creatures, first_look_target, next_in_direction, describe
 from chat import says, greeting, has_topics, topic_lines, GOLEM_TOPICS, LOYALTY
@@ -94,30 +95,30 @@ def move_moodily(map, creature_i):
     creature_index = -1
     neighbor_death_note = ""
     if death_note == "":
-        if creature.mood == "flee" and (creature.health >= creature.health_max or not creature.target.alive):
+        if creature.mood == FLEE and (creature.health >= creature.health_max or not creature.target.alive):
             # back at full health, or the one it fled from is dead: stop fleeing and wander
-            creature.mood = "ambulate"
+            creature.mood = WANDER
             creature.target = None
-        if creature.mood == "friend" and not creature.target.alive:
+        if creature.mood == FRIEND and not creature.target.alive:
             # its friend is dead: wander
-            creature.mood = "ambulate"
+            creature.mood = WANDER
             creature.target = None
-        if creature.mood == "toward":
+        if creature.mood == CHASE:
             if creature.target.alive == False:
-                creature.mood = "ambulate"
+                creature.mood = WANDER
             else:
                 new_position = creature.move_toward(creature.target)
                 new_position = step_around_blocker(map, creature, new_position)
-        if creature.mood == "ambulate":
+        if creature.mood == WANDER:
             new_position = creature.move_random()
-        elif creature.mood == "run right":
+        elif creature.mood == RUN_RIGHT:
             new_position = creature.move_right()
             # a wall ahead: running right can't go on, so start wandering from the next turn
             if map.get_sign(new_position[0], new_position[1]) == WALL:
-                creature.mood = "ambulate"
-        elif creature.mood == "flee":
+                creature.mood = WANDER
+        elif creature.mood == FLEE:
             new_position = flee_step(map, creature)
-        elif creature.mood == "friend":
+        elif creature.mood == FRIEND:
             new_position = friend_step(map, creature)
         map.move_to(creature_i, new_position)
         #I need to check here if the hit creature died, and return the data if they did
@@ -184,7 +185,7 @@ def play_turn(game_map, direction):
 def creature_next_to_player(game_map):
     p_x, p_y = game_map.player.get_position()
     for creature in game_map.creatures[1:]:
-        if creature.mood == "friend" and creature.target is game_map.player:
+        if creature.mood == FRIEND and creature.target is game_map.player:
             continue
         x, y = creature.get_position()
         if max(abs(x - p_x), abs(y - p_y)) == 1:
@@ -304,7 +305,7 @@ def stop_looking(game_map, game_state):
 def jump_to_target(game_map, game_state):
     current = game_state["look_target"]
     target = current.target
-    if current.is_player or current.mood not in ("toward", "flee", "friend") or target is None:
+    if current.is_player or current.mood not in (CHASE, FLEE, FRIEND) or target is None:
         game_map.messages = describe(current, game_map) + ["It isn't chasing or fleeing anyone."]
     elif not target.alive or target not in visible_creatures(game_map):
         game_map.messages = describe(current, game_map) + ["What it's after is out of sight."]
@@ -395,7 +396,7 @@ def handle_dialogue(event_key, pygame, game_map, game_state):
         answer = says(creature, GOLEM_TOPICS[topic][1])
         game_map.log_offset = 0
         if topic == LOYALTY:
-            creature.mood = "friend"
+            creature.mood = FRIEND
             creature.target = game_map.player
             game_state["dialogue"] = None
             game_map.messages = [answer, "The " + creature.name + " is now your friend!"]
