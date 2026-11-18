@@ -65,12 +65,13 @@ def steps_apart(a, b):
     return max(abs(a.position[0] - b.position[0]), abs(a.position[1] - b.position[1]))
 
 # A friendly creature's move:
-# 1. if creatures chasing its friend are close to the friend, go for the nearest of them (and attack it when next to it)
+# 1. if creatures chasing its friend are close to the friend, or creatures chasing itself are close to
+#    itself, go for the nearest of them (and attack it when next to it)
 # 2. otherwise, if it's farther than CLOSE_STEPS from its friend, walk back toward the friend
 # 3. otherwise move around randomly, or stay, without leaving the friend's close area
 def friend_step(map, creature):
     friend = creature.target
-    threats = map.threats_to(friend)
+    threats = map.threats_to(friend) + map.threats_to(creature)
     if threats:
         threat = min(threats, key=lambda t: steps_apart(creature, t))
         return step_around_blocker(map, creature, creature.move_toward(threat), threat)

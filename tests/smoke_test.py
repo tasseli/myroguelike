@@ -404,7 +404,18 @@ def check_friend():
         loop_utils.move_moodily(game_map, i)
     assert orc.health < 20, "the friend didn't attack the orc chasing the player"
 
-    # it doesn't attack a monster that isn't chasing the player
+    # the orc it hit fights back: it turns on the friend, and the friend keeps fighting it
+    assert orc.mood == CHASE and orc.target is friend, f"the hit orc has mood {orc.mood}"
+    assert "The orc turns on the golem!" in game_map.messages, game_map.messages
+    assert game_map.can_attack(orc, friend) and game_map.can_attack(friend, orc)
+    orc_health, friend_health = orc.health, friend.health
+    for turn in range(4):
+        loop_utils.move_moodily(game_map, game_map.creatures.index(orc))
+        loop_utils.move_moodily(game_map, i)
+    assert friend.health < friend_health and orc.health < orc_health, "the orc and the friend didn't fight"
+    assert friend.mood == FRIEND, "the friend stopped being a friend"
+
+    # it doesn't attack a monster that isn't chasing the player or itself
     wanderer = Gnoll([0, 0])
     assert not game_map.can_attack(friend, wanderer) and not game_map.can_attack(friend, game_map.player)
     print("OK rule checks: the friendly golem (green) stays close, defends the player, never hurts the player")

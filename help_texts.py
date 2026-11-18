@@ -38,6 +38,7 @@ HELP_LINES = [
     "   until they have healed back to full.",
     "   Green: friendly. A friend stays near you and",
     "   attacks monsters that come after you.",
+    "   Monsters it hits turn on it and fight back.",
     "Looking (l): a blinking cursor shows a creature",
     "   you can see; arrows/numpad jump to the next",
     "   one that way; t jumps to the one it chases or",

@@ -171,6 +171,7 @@ class Map:
     # - one that flees at low health (kobolds) and is now that low starts fleeing from the attacker
     # - one already fleeing keeps fleeing from whoever it fled from first
     # - otherwise, one the player hits starts chasing the player
+    # - and one a friendly creature hits turns on that friendly creature
     def react_to_hit(self, attacker, victim):
         if victim.health <= 0 or victim.mood == FLEE:
             return
@@ -180,6 +181,10 @@ class Map:
             self.messages.append("The " + victim.name + " flees from " + attacker.called() + "!")
         elif attacker is self.player:
             self.provoke(victim)
+        elif attacker.mood == FRIEND and not (victim.mood == CHASE and victim.target is attacker):
+            victim.mood = CHASE
+            victim.target = attacker
+            self.messages.append("The " + victim.name + " turns on " + attacker.called() + "!")
 
     def chases_player(self, creature):
         return creature.mood == CHASE and creature.target is self.player
@@ -195,13 +200,14 @@ class Map:
             self.messages.append("The " + victim.name + " turns to chase you!")
 
     # The player attacks anyone. A friendly creature never attacks its friend, but attacks anyone
-    # chasing its friend. Other creatures attack only the player or their own target.
+    # chasing its friend or itself. Other creatures attack only the player or their own target.
     # (move_to turns a grey monster's attack on the player into turning to chase instead.)
     def can_attack(self, creature, victim):
         if creature is self.player:
             return True
         if creature.mood == FRIEND:
-            return victim is not creature.target and victim.mood == CHASE and victim.target is creature.target
+            return victim is not creature.target and victim.mood == CHASE \
+                and (victim.target is creature.target or victim.target is creature)
         return victim is self.player or victim is creature.target
 
     # The creatures chasing the given one that are close to it (within CLOSE_STEPS)
