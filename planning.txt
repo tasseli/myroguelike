@@ -57,4 +57,5 @@ Done (Nov 2026):
 - a grey monster bumping into the player turns red and chases instead of hitting
 - l works on the death screen too, e.g. to look at what killed the player
 - look: the target is told with distance and direction; t jumps the cursor to it
-- green friend mood: a friendly golem starts 6 steps from the player, stays within 2 steps, and attacks monsters chasing the player that come within 2 steps of the player
+- green friend mood: a friend stays within 2 steps of its friend, and attacks monsters chasing its friend that come within 2 steps of the friend
+- the golem 6 steps from the player starts neutral (wandering) instead of friendly

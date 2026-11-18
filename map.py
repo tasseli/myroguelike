@@ -11,8 +11,8 @@ LOG_ROWS    = 4     # message rows shown under the map
 
 # How many moves away from the player other creatures start, when the room is big enough
 MIN_SPAWN_DISTANCE = 8
-# How many moves away from the player a friend of the player starts, when possible
-FRIEND_SPAWN_DISTANCE = 6
+# How many moves away from the player the near golem starts, when possible
+NEAR_GOLEM_SPAWN_DISTANCE = 6
 # "Close" for a friendly creature: next to its friend, or next to one of those tiles
 CLOSE_STEPS = 2
 
@@ -96,10 +96,10 @@ class Map:
 
         # the player must be added first: index 0 in self.creatures is always the player
         self.player = self.add_creature(Player)
-        # the player's friend: a golem starting FRIEND_SPAWN_DISTANCE moves away if possible
-        friend = Golem(self.free_floor_at_distance(self.player, FRIEND_SPAWN_DISTANCE), "friend", self.player)
-        self.set_sign_with_creature(friend)
-        self.creatures.append(friend)
+        # a neutral golem starting NEAR_GOLEM_SPAWN_DISTANCE moves away if possible, close enough to go and talk to
+        near_golem = Golem(self.free_floor_at_distance(self.player, NEAR_GOLEM_SPAWN_DISTANCE))
+        self.set_sign_with_creature(near_golem)
+        self.creatures.append(near_golem)
         self.add_creature(Orc, "run right")
         self.add_creature(Orc)
         orc3 = self.add_creature(Orc, "toward", self.player)

@@ -545,11 +545,9 @@ def check_starting_creatures(game_map):
     wandering = [k for k in kobolds if k.mood == "ambulate"]
     assert len(kobolds) == 4 and len(hostile) == 2 and len(wandering) == 2, \
         f"{len(kobolds)} kobolds: {len(hostile)} hostile, {len(wandering)} wandering"
-    friends = [c for c in game_map.creatures if c.mood == "friend"]
-    assert len(friends) == 1 and friends[0].name == "golem" and friends[0].target is game_map.player, \
-        f"friends: {[(c.name, c.target) for c in friends]}"
+    assert not [c for c in game_map.creatures if c.mood == "friend"], "nobody should start as a friend"
     golems = [c for c in game_map.creatures if c.name == "golem"]
-    assert len(golems) == 2, "the wandering golem should still be there too"
+    assert len(golems) == 2 and all(g.mood == "ambulate" for g in golems), "there should be two wandering golems"
 
 def check_spawns(game_map):
     left, top, right, bottom = game_map.room
@@ -560,13 +558,15 @@ def check_spawns(game_map):
     px, py = game_map.player.position
     def moves_from_player(x, y):
         return max(abs(x - px), abs(y - py))
-    # the friend starts FRIEND_SPAWN_DISTANCE moves away, if the room has a tile that far
-    friend = next(c for c in game_map.creatures if c.mood == "friend")
-    if any(moves_from_player(x, y) == m.FRIEND_SPAWN_DISTANCE for x in range(left, right) for y in range(top, bottom)):
-        assert moves_from_player(*friend.position) == m.FRIEND_SPAWN_DISTANCE, \
-            f"friend spawned {moves_from_player(*friend.position)} moves from the player"
+    # the near golem (added right after the player) starts NEAR_GOLEM_SPAWN_DISTANCE moves away,
+    # if the room has a tile that far
+    near_golem = game_map.creatures[1]
+    assert near_golem.name == "golem"
+    if any(moves_from_player(x, y) == m.NEAR_GOLEM_SPAWN_DISTANCE for x in range(left, right) for y in range(top, bottom)):
+        assert moves_from_player(*near_golem.position) == m.NEAR_GOLEM_SPAWN_DISTANCE, \
+            f"near golem spawned {moves_from_player(*near_golem.position)} moves from the player"
     # monsters start at least MIN_SPAWN_DISTANCE moves away, if the room has enough such tiles
-    monsters = [c for c in game_map.creatures[1:] if c is not friend]
+    monsters = [c for c in game_map.creatures[1:] if c is not near_golem]
     far_tiles = sum(1 for x in range(left, right) for y in range(top, bottom)
                     if moves_from_player(x, y) >= m.MIN_SPAWN_DISTANCE)
     if far_tiles >= len(monsters):
@@ -580,11 +580,9 @@ def is_hit_message(message):
 def check_hit_messages(messages):
     for message in messages:
         if is_hit_message(message):
-            # the player is in every hit, except orcs hitting their target orc,
-            # and the friendly golem hitting monsters that chase the player
+            # the player is in every hit, except orcs hitting their target orc
             assert message.startswith("You hit ") or " hits you " in message \
-                or message.startswith("The orc hits another orc ") or message.startswith("The golem hits the "), \
-                "attack against the rules: " + message
+                or message.startswith("The orc hits another orc "), "attack against the rules: " + message
 
 def play_random_games(games=200, max_turns=300):
     totals = {"turns": 0, "hits": 0, "deaths": 0, "heals": 0, "player deaths": 0}
