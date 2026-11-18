@@ -67,6 +67,8 @@ class Map:
     def __init__(self):
         # messages produced during a turn, shown in the bottom UI
         self.messages = []
+        # name of the creature that killed the player, set when that happens
+        self.killed_by = None
         self.room = self.generate()
         self.creatures = []
 

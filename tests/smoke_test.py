@@ -119,6 +119,8 @@ def play_random_games(games=200, max_turns=300):
             check_hit_messages(game_map.messages)
             if not game_state["GAME_ON"]:
                 assert game_map.player.health < 1, "game ended but the player is alive"
+                killers = {"orc", "uruk", "kobold", "gnoll", "goblin", "golem"}
+                assert game_map.killed_by in killers, f"killed_by is {game_map.killed_by!r}"
                 totals["player deaths"] += 1
                 break
             assert game_map.player.health >= 1, "player at 0 health but the game goes on"

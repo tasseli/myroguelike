@@ -53,6 +53,8 @@ def check_deaths(game_map, other_creatures_move):
         for i in range(1, len(game_map.creatures)):                     # don't move the player in a loop
             death_note, neighbor_death_note, neighbor_creature_index = move_moodily(game_map, i)
             if neighbor_death_note != "":
+                if neighbor_creature_index == 0:
+                    game_map.killed_by = game_map.creatures[i].name
                 mark_dead(neighbor_creature_index, neighbor_death_note)
             if death_note != "":
                 mark_dead(i, death_note)

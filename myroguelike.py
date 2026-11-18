@@ -39,7 +39,9 @@ while game_state["GAME_ON"]:
     draw_frame(game_map.messages)
 
 # game_state is GAME_ON==False, player has died
-death_messages = ["You died gloriously on the battlefield!", "Thank you for playing. Better luck next time.", "Press 'q' to quit."]
+killer = game_map.killed_by
+article = "an" if killer[0] in "aeiou" else "a"     # an orc, a gnoll
+death_messages = ["You died gloriously on the battlefield!", "Killed by " + article + " " + killer + ".", "Thank you for playing. Better luck next time.", "Press 'q' to quit."]
 while True:
     handle_quit_key(pygame)
     draw_frame(death_messages)
