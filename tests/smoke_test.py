@@ -411,6 +411,13 @@ def check_consistency(game_map):
     assert creature_tiles == len(game_map.creatures), \
         f"{creature_tiles} creature tiles on the map, but {len(game_map.creatures)} creatures"
 
+def check_starting_creatures(game_map):
+    kobolds = [c for c in game_map.creatures if c.name == "kobold"]
+    hostile = [k for k in kobolds if k.mood == "toward" and k.target is game_map.player]
+    wandering = [k for k in kobolds if k.mood == "ambulate"]
+    assert len(kobolds) == 4 and len(hostile) == 2 and len(wandering) == 2, \
+        f"{len(kobolds)} kobolds: {len(hostile)} hostile, {len(wandering)} wandering"
+
 def check_spawns(game_map):
     left, top, right, bottom = game_map.room
     assert right - left >= 8 and bottom - top >= 8, "room smaller than 8x8"
@@ -441,6 +448,7 @@ def play_random_games(games=200, max_turns=300):
     for game in range(games):
         random.seed(game)       # same games every run, so results can be compared and repeated
         game_map = m.Map()
+        check_starting_creatures(game_map)
         check_spawns(game_map)
         check_consistency(game_map)
         game_state = {"GAME_ON": True}
