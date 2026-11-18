@@ -1,13 +1,43 @@
 # loop_utils.py
 
 import sys
+import random
 from keyboard import read_moves, read_q_only
-from map import OPEN_SPACE, WALL, LOG_ROWS
+from map import OPEN_SPACE, WALL, LOG_ROWS, find_creature_at
+
+# The 8 directions in order around a circle, so neighbours in the list are 45 degrees apart
+DIRECTIONS = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
 
 def quit_app(reason, pygame):
     print(reason)
     pygame.quit()
     sys.exit()
+
+# A chaser's straight step toward its target may be blocked by a wall, or by a creature it won't attack.
+# Then try the two directions next to the straight one, the one closer to the target first,
+# and return the first open one. If both are blocked too, return the straight step (which then does nothing).
+def step_around_blocker(map, creature, new_position):
+    x, y = new_position
+    sign = map.get_sign(x, y)
+    if sign == OPEN_SPACE:
+        return new_position
+    if sign != WALL:
+        blocker = map.creatures[find_creature_at(map.creatures, x, y)]
+        if map.can_attack(creature, blocker):
+            return new_position
+    c_x, c_y = creature.get_position()
+    t_x, t_y = creature.target.get_position()
+    straight = DIRECTIONS.index((x - c_x, y - c_y))
+    options = []
+    for turn in (-1, 1):
+        dx, dy = DIRECTIONS[(straight + turn) % len(DIRECTIONS)]
+        options.append([c_x + dx, c_y + dy])
+    random.shuffle(options)     # if both are equally close, pick either
+    options.sort(key=lambda p: max(abs(p[0] - t_x), abs(p[1] - t_y)))
+    for option in options:
+        if map.get_sign(option[0], option[1]) == OPEN_SPACE:
+            return option
+    return new_position
 
 #   An idea for solving moving a whole array of creatures: implement calling each creature's type of movement by their mood.
 def move_moodily(map, creature_i):
@@ -24,6 +54,7 @@ def move_moodily(map, creature_i):
                 creature.mood = "ambulate"
             else:
                 new_position = creature.move_toward(creature.target)
+                new_position = step_around_blocker(map, creature, new_position)
         if creature.mood == "ambulate":
             new_position = creature.move_random()
         elif creature.mood == "run right":

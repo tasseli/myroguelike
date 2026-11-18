@@ -109,8 +109,7 @@ class Map:
     # return True if something happened and time passed, False if no clause managed to do something worthwhile
     # move_to may hurt the target creature. Dying needs to be checked outside of it.
     # Hitting adds its messages to self.messages.
-    # The player (i == 0) hits anyone. Other creatures only hit the player or their own target,
-    # anyone else just blocks their way.
+    # Creatures only hit those they can_attack; anyone else just blocks their way.
     def move_to(self, i, new_position):
         creatures = self.creatures
         creature = creatures[i]
@@ -130,11 +129,15 @@ class Map:
             target = find_creature_at(creatures, new_position[0], new_position[1])
             if target != -1:
                 victim = creatures[target]
-                if i != 0 and victim is not self.player and victim is not creature.target:
+                if not self.can_attack(creature, victim):
                     return False
                 self.messages.extend(creature.hit(victim))
             return True
         return False
+
+    # The player attacks anyone. Other creatures attack only the player or their own target.
+    def can_attack(self, creature, victim):
+        return creature is self.player or victim is self.player or victim is creature.target
 
     def get_sign(self, x, y):
         return self.my_map[x][y]

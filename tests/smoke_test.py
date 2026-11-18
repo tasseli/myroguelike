@@ -72,6 +72,38 @@ def check_run_right_stops_at_wall():
     assert runner.position[0] == right_wall_x - 1, f"runner stopped at x={runner.position[0]}, not by the wall"
     print("OK rule checks: the 'run right' orc starts wandering at a wall")
 
+# A map with only the player on it, standing in the middle of the room
+def empty_room_map():
+    random.seed(0)
+    game_map = m.Map()
+    for c in game_map.creatures:
+        game_map.my_map[c.position[0]][c.position[1]] = m.OPEN_SPACE
+    game_map.creatures = []
+    left, top, right, bottom = game_map.room
+    place(game_map, game_map.player, (left + right) // 2, (top + bottom) // 2)
+    return game_map
+
+def place(game_map, creature, x, y):
+    creature.position = [x, y]
+    game_map.my_map[x][y] = creature.sign
+    game_map.creatures.append(creature)
+
+def check_step_around():
+    from creatures import Kobold, Gnoll
+    game_map = empty_room_map()
+    p_x, p_y = game_map.player.position
+    # kobold three tiles left of the player, gnoll right in its way
+    kobold = Kobold([0, 0], "toward", game_map.player)
+    gnoll = Gnoll([0, 0])
+    place(game_map, kobold, p_x - 3, p_y)
+    place(game_map, gnoll, p_x - 2, p_y)
+    gnoll_health = gnoll.health
+    loop_utils.move_moodily(game_map, game_map.creatures.index(kobold))
+    k_x, k_y = kobold.position
+    assert k_x == p_x - 2 and abs(k_y - p_y) == 1, f"kobold went to {kobold.position}, not around the gnoll"
+    assert gnoll.health == gnoll_health, "kobold hit the gnoll"
+    print("OK rule checks: a chaser steps around a creature in its way")
+
 def press(game_map, key):
     pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=key))
     loop_utils.handle_events(pygame, game_map, {"GAME_ON": True})
@@ -196,6 +228,7 @@ def run_real_game(seconds=1.5):
 check_healing()
 check_run_right_stops_at_wall()
 check_more_key()
+check_step_around()
 play_random_games()
 run_real_game()     # last, because quitting the game shuts pygame down
 print("All checks passed.")
