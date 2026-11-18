@@ -420,6 +420,44 @@ def check_friend():
     assert not game_map.can_attack(friend, wanderer) and not game_map.can_attack(friend, game_map.player)
     print("OK rule checks: the friendly golem (green) stays close, defends the player, never hurts the player")
 
+def check_golem_flee():
+    from creatures import Golem
+    game_map = empty_room_map()
+    p_x, p_y = game_map.player.position
+    player = game_map.player
+    golem = Golem([0, 0], FRIEND, player)
+    orc = Orc([0, 0], CHASE, golem)
+    place(game_map, golem, p_x + 1, p_y)
+    place(game_map, orc, p_x + 2, p_y)
+    golem.health_max = 16
+    golem.health = 5
+
+    # the orc hits it down to 2 health: it flees from the orc, even though it's the player's friend
+    game_map.messages = []
+    game_map.move_to(game_map.creatures.index(orc), [p_x + 1, p_y])
+    assert golem.health == 2 and golem.mood == FLEE and golem.target is orc, golem.mood
+    assert game_map.messages[-1] == "The golem flees from the orc!", game_map.messages
+    # while fleeing it's still the player's friend: walking into it asks first, and it doesn't stop waiting
+    assert loop_utils.friend_in_direction(game_map, (1, 0)) is golem
+    assert loop_utils.creature_next_to_player(game_map) is None
+
+    # below half health it keeps fleeing; at half health it's the player's friend again
+    i = game_map.creatures.index(golem)
+    golem.health = 7
+    loop_utils.move_moodily(game_map, i)
+    assert golem.mood == FLEE, "stopped fleeing below half health"
+    golem.health = 8
+    loop_utils.move_moodily(game_map, i)
+    assert golem.mood == FRIEND and golem.target is player, f"after fleeing: {golem.mood}"
+
+    # if what it did before was about a creature that has died since, it wanders instead
+    hunter = Golem([0, 0], CHASE, orc)
+    hunter.start_fleeing(player)
+    orc.alive = False
+    hunter.stop_fleeing()
+    assert hunter.mood == WANDER and hunter.target is None, hunter.mood
+    print("OK rule checks: golems at 2 health or less flee until half health, then go back to their mood")
+
 def check_attack_friend():
     from creatures import Golem
     game_map = empty_room_map()
@@ -786,6 +824,7 @@ check_mood_colors()
 check_provoke()
 check_flee()
 check_friend()
+check_golem_flee()
 check_attack_friend()
 check_chat()
 play_random_games()

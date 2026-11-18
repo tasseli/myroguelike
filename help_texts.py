@@ -36,6 +36,8 @@ HELP_LINES = [
     "   Hit a grey one and it starts chasing you.",
     "   Yellow: fleeing. Kobolds flee at 2 health or less",
     "   until they have healed back to full.",
+    "   Golems flee at 2 health or less too, until at",
+    "   half health; then they go back to what they did.",
     "   Green: friendly. A friend stays near you and",
     "   attacks monsters that come after you.",
     "   Monsters it hits turn on it and fight back.",

@@ -96,10 +96,10 @@ def move_moodily(map, creature_i):
     creature_index = -1
     neighbor_death_note = ""
     if death_note == "":
-        if creature.mood == FLEE and (creature.health >= creature.health_max or not creature.target.alive):
-            # back at full health, or the one it fled from is dead: stop fleeing and wander
-            creature.mood = WANDER
-            creature.target = None
+        if creature.mood == FLEE and (creature.healed_enough_to_stop_fleeing() or not creature.target.alive):
+            # healed enough (kobolds: full health, golems: half), or the one it fled from is dead:
+            # stop fleeing, and wander or go back to the earlier mood
+            creature.stop_fleeing()
         if creature.mood == FRIEND and not creature.target.alive:
             # its friend is dead: wander
             creature.mood = WANDER
@@ -186,7 +186,7 @@ def play_turn(game_map, direction):
 def creature_next_to_player(game_map):
     p_x, p_y = game_map.player.get_position()
     for creature in game_map.creatures[1:]:
-        if creature.mood == FRIEND and creature.target is game_map.player:
+        if creature.is_friend_of(game_map.player):
             continue
         x, y = creature.get_position()
         if max(abs(x - p_x), abs(y - p_y)) == 1:
@@ -266,7 +266,7 @@ def friend_in_direction(game_map, direction):
     if i <= 0:                  # -1: nobody there, 0: the player itself (direction (0, 0))
         return None
     creature = game_map.creatures[i]
-    if creature.mood == FRIEND and creature.target is game_map.player:
+    if creature.is_friend_of(game_map.player):
         return creature
     return None
 

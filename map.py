@@ -168,7 +168,7 @@ class Map:
         return False
 
     # How a creature that survives a hit reacts:
-    # - one that flees at low health (kobolds) and is now that low starts fleeing from the attacker
+    # - one that flees at low health (kobolds, golems) and is now that low starts fleeing from the attacker
     # - one already fleeing keeps fleeing from whoever it fled from first
     # - otherwise, one the player hits starts chasing the player
     # - and one a friendly creature hits turns on that friendly creature
@@ -176,8 +176,7 @@ class Map:
         if victim.health <= 0 or victim.mood == FLEE:
             return
         if victim.flee_at_health is not None and victim.health <= victim.flee_at_health:
-            victim.mood = FLEE
-            victim.target = attacker
+            victim.start_fleeing(attacker)
             self.messages.append("The " + victim.name + " flees from " + attacker.called() + "!")
         elif attacker is self.player:
             self.provoke(victim)

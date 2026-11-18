@@ -21,6 +21,8 @@ class Creature:
     damage = 1
     heal_interval = 20      # heal 1 health every this many turns
     flee_at_health = None   # a hit that leaves this much health or less makes it flee; None: never flees
+    stop_fleeing_at = 1.0   # fleeing ends when health is at least this part of health_max (1.0: full health)
+    back_to_mood_after_fleeing = False  # after fleeing: True: the mood it had before; False: wander
     is_player = False
 
     def __init__(self, coords, mood=None, target=None):
@@ -32,9 +34,37 @@ class Creature:
         self.target = target
         if mood is not None:
             self.mood = mood
+        # while fleeing: the mood and target it had before
+        self.mood_before_flee = None
+        self.target_before_flee = None
 
     def get_position(self):
         return self.position
+
+    # Start fleeing from the attacker, remembering what it was doing
+    def start_fleeing(self, attacker):
+        self.mood_before_flee = self.mood
+        self.target_before_flee = self.target
+        self.mood = FLEE
+        self.target = attacker
+
+    def healed_enough_to_stop_fleeing(self):
+        return self.health >= self.health_max * self.stop_fleeing_at
+
+    # Stop fleeing: go back to the earlier mood, or wander (also if the earlier target is dead)
+    def stop_fleeing(self):
+        mood, target = self.mood_before_flee, self.target_before_flee
+        if not self.back_to_mood_after_fleeing or (target is not None and not target.alive):
+            mood, target = WANDER, None
+        self.mood, self.target = mood, target
+        self.mood_before_flee = None
+        self.target_before_flee = None
+
+    # A friend of the other creature: friendly toward it, or fleeing for now but friendly before that
+    def is_friend_of(self, other):
+        if self.mood == FRIEND:
+            return self.target is other
+        return self.mood == FLEE and self.mood_before_flee == FRIEND and self.target_before_flee is other
 
     # How the creature is called in messages: "you" for the player, "the orc" for others
     def called(self):
@@ -137,3 +167,6 @@ class Golem(Creature):
     name = "golem"
     health_range = (13, 18)
     damage = 4
+    flee_at_health = 2
+    stop_fleeing_at = 0.5
+    back_to_mood_after_fleeing = True
