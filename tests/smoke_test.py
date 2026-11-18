@@ -122,6 +122,30 @@ def press(game_map, *keys, game_state=None):
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=key))
         loop_utils.handle_events(pygame, game_map, game_state)
 
+def check_help():
+    from help_texts import HELP_LINES, KEY_HINTS, DEATH_KEY_HINTS
+    game_map = empty_room_map()
+    turns_until_heal = game_map.player.turns_until_heal
+
+    # '?' is recognised by the character typed (here Shift + slash, as on a US keyboard)
+    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SLASH, unicode="?"))
+    loop_utils.handle_events(pygame, game_map, {"GAME_ON": True})
+    assert game_map.messages == HELP_LINES, "? didn't show the help"
+    press(game_map, pygame.K_m)
+    assert game_map.log_offset == 4, "m didn't page the help"
+
+    game_map.messages = []
+    press(game_map, pygame.K_h)
+    assert game_map.messages == HELP_LINES and game_map.log_offset == 0, "h didn't show the help from the start"
+    assert game_map.player.turns_until_heal == turns_until_heal, "showing the help used up a turn"
+
+    # the texts fit: a help line plus its row number must end before the More indicator
+    for line in HELP_LINES:
+        assert len(line) <= 52, f"help line too long ({len(line)} characters): {line}"
+    for hints in (KEY_HINTS, DEATH_KEY_HINTS):
+        assert len(hints) <= m.MAP_WIDTH - 2, "key hints don't fit on one row"
+    print("OK rule checks: ? and h show the help, m pages it, no turn used")
+
 def check_wait():
     from creatures import Kobold
     # nobody around: wait the full 20 turns and heal 1
@@ -306,6 +330,7 @@ check_run_right_stops_at_wall()
 check_more_key()
 check_step_around()
 check_wait()
+check_help()
 play_random_games()
 run_real_game()     # last, because quitting the game shuts pygame down
 print("All checks passed.")

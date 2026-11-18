@@ -6,10 +6,15 @@
 #   quit command, to be handled in caller:  return "q", None
 #   show more of the message log:           return "more", None
 #   wait a number of turns:                 return "wait", None
+#   show the help:                          return "help", None
 #   other, currently unhandled:             return "o", None
-def read_moves(eventkey, pygame):
+# typed_char is the character the key produced; '?' is checked by it, because
+# which key gives '?' depends on the keyboard layout.
+def read_moves(eventkey, pygame, typed_char=""):
     if eventkey == pygame.K_q or eventkey == pygame.K_x:
         return "q", None
+    elif typed_char == "?" or eventkey == pygame.K_h:
+        return "help", None
     elif eventkey == pygame.K_m:
         return "more", None
     elif eventkey == pygame.K_w:

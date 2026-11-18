@@ -36,6 +36,10 @@ def render_message_log(messages, offset, pygame, screen, font):
         more = "[m] More: " + rows + " of " + str(len(messages))
         draw_text_right(more, MAP_HEIGHT + LOG_ROWS - 1, pygame, screen, font)
 
+# Show the most needed keys on the row under the message log
+def render_key_hints(hints, pygame, screen, font):
+    draw_text(hints, 1, MAP_HEIGHT + LOG_ROWS, pygame, screen, font)
+
 # Show the player's health at the right end of the first message row. Call after render_message_log.
 def render_player_status(player, pygame, screen, font):
     status = "HP " + str(max(player.health, 0)) + "/" + str(player.health_max)

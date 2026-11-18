@@ -3,10 +3,11 @@
 
 import pygame
 from loop_utils import handle_events, handle_death_screen_keys
-from draw import render_map, render_message_log, render_player_status
+from draw import render_map, render_message_log, render_player_status, render_key_hints
 from map import Map, MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, GRAY, LOG_ROWS
+from help_texts import KEY_HINTS, DEATH_KEY_HINTS
 
-BOTTOM_UI_HEIGHT = LOG_ROWS
+BOTTOM_UI_HEIGHT = LOG_ROWS + 1     # the message log, and a row of key hints under it
 FPS = 30
 
 # pygame setup
@@ -19,11 +20,12 @@ clock = pygame.time.Clock()
 # Initialize a font
 font = pygame.font.SysFont(None, 22)
 
-# Draw the message log (from row log_offset on) and the map, then wait for the next frame
-def draw_frame(game_map, messages, log_offset):
+# Draw the message log (from row log_offset on), the key hints and the map, then wait for the next frame
+def draw_frame(game_map, messages, log_offset, key_hints):
     screen.fill(GRAY)
     render_message_log(messages, log_offset, pygame, screen, font)
     render_player_status(game_map.player, pygame, screen, font)
+    render_key_hints(key_hints, pygame, screen, font)
     render_map(game_map, pygame, screen, font, game_map.player)
     pygame.display.flip()
     clock.tick(FPS)
@@ -38,7 +40,7 @@ def play_game():
     game_state = {"GAME_ON": True}
     while game_state["GAME_ON"]:
         handle_events(pygame, game_map, game_state)
-        draw_frame(game_map, game_map.messages, game_map.log_offset)
+        draw_frame(game_map, game_map.messages, game_map.log_offset, KEY_HINTS)
 
     # game_state is GAME_ON==False, player has died
     killer = game_map.killed_by
@@ -47,7 +49,7 @@ def play_game():
     while True:
         if handle_death_screen_keys(pygame) == "restart":
             return
-        draw_frame(game_map, death_messages, 0)
+        draw_frame(game_map, death_messages, 0, DEATH_KEY_HINTS)
 
 # Play games until the player quits; quitting exits the program from inside the loops
 while True:
