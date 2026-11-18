@@ -3,7 +3,9 @@
 from map import (GRAY, DARK_GRAY, BLACK)
 from map import (MAP_WIDTH, MAP_HEIGHT, TILE_SIZE)
 from map import OPEN_SPACE
-from math import sqrt
+
+# how far around the player the map is visible
+VIEW_RADIUS = 12
 
 def render_message_log(messages, pygame, screen, font):
     if len(messages) > 0:
@@ -32,10 +34,11 @@ def coords_on_border_of_map(x, y):
         return True
     return False
 
+# Compare squared distances: same result as z > sqrt(...), without the slow square root.
 def coords_within_distance_z(x, y, z, creature):
     position = creature.get_position()
     c_x, c_y = position[0], position[1]
-    return z > sqrt((c_x-x)**2 + (c_y-y)**2) # True or False
+    return (c_x-x)**2 + (c_y-y)**2 < z*z # True or False
 
 def render_floors_different_color(game_map, pygame, screen, font, x, y):
     if game_map.get_sign(x,y) == OPEN_SPACE:
@@ -44,11 +47,18 @@ def render_floors_different_color(game_map, pygame, screen, font, x, y):
         draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y, DARK_GRAY)
 
 def render_map(game_map, pygame, screen, font, creature):
+    # the map's outer border is always visible
     for x in range(0, MAP_WIDTH):
-        for y in range(0, MAP_HEIGHT):
-            if coords_on_border_of_map(x, y):
-                render_floors_different_color(game_map, pygame, screen, font, x, y)
-            if coords_within_distance_z(x, y, 12, creature):
+        render_floors_different_color(game_map, pygame, screen, font, x, 0)
+        render_floors_different_color(game_map, pygame, screen, font, x, MAP_HEIGHT-1)
+    for y in range(1, MAP_HEIGHT-1):
+        render_floors_different_color(game_map, pygame, screen, font, 0, y)
+        render_floors_different_color(game_map, pygame, screen, font, MAP_WIDTH-1, y)
+    # only tiles in a box around the creature can be close enough to see
+    c_x, c_y = creature.get_position()
+    for x in range(max(c_x - VIEW_RADIUS, 0), min(c_x + VIEW_RADIUS + 1, MAP_WIDTH)):
+        for y in range(max(c_y - VIEW_RADIUS, 0), min(c_y + VIEW_RADIUS + 1, MAP_HEIGHT)):
+            if coords_within_distance_z(x, y, VIEW_RADIUS, creature):
                 render_floors_different_color(game_map, pygame, screen, font, x, y)
 
 def draw_and_blit_char(pygame, screen, font, my_char, x, y, color):
