@@ -456,6 +456,11 @@ def check_chat():
     press(lonely, pygame.K_c, game_state=state)
     assert state["chat_target"] is None and lonely.messages == ["There's nobody to talk to."]
 
+    # 'an' before a vowel, 'a' before a consonant
+    from creatures import Uruk
+    assert chat.greeting(Uruk([0, 0])) == "The uruk: Beep beep, I'm an uruk."
+    assert chat.greeting(Orc([0, 0])) == "The orc: Beep beep, I'm an orc."
+
     # every chat line fits beside the More indicator
     lines = [chat.greeting(c) for c in (golem, kobold)] + chat.topic_lines(golem) \
         + [chat.says(golem, answer) for name, answer in chat.GOLEM_TOPICS]

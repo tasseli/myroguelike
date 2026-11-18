@@ -6,9 +6,10 @@
 def says(creature, text):
     return "The " + creature.name + ": " + text
 
-# Every creature answers this when talked to
+# Every creature answers this when talked to: "I'm a kobold", "I'm an uruk"
 def greeting(creature):
-    return says(creature, "Beep beep, I'm a " + creature.name + ".")
+    article = "an" if creature.name[0] in "aeiou" else "a"
+    return says(creature, "Beep beep, I'm " + article + " " + creature.name + ".")
 
 # Golems can talk about these topics, chosen with the keys 1-5.
 # Each topic is (name, answer); the loyalty answer also makes the golem the player's friend.
