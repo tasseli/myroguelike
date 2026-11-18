@@ -41,6 +41,21 @@ def step_around_blocker(map, creature, new_position):
             return option
     return new_position
 
+# A fleeing creature steps to the free neighbouring tile farthest from the one it flees from.
+# If no free tile is farther away than where it stands, it stays put.
+def flee_step(map, creature):
+    c_x, c_y = creature.get_position()
+    t_x, t_y = creature.target.get_position()
+    def distance(tile):
+        return (tile[0] - t_x)**2 + (tile[1] - t_y)**2
+    best = [c_x, c_y]
+    options = [[c_x + dx, c_y + dy] for dx, dy in DIRECTIONS]
+    random.shuffle(options)     # equally far tiles: pick any
+    for option in options:
+        if map.get_sign(option[0], option[1]) == OPEN_SPACE and distance(option) > distance(best):
+            best = option
+    return best
+
 #   An idea for solving moving a whole array of creatures: implement calling each creature's type of movement by their mood.
 def move_moodily(map, creature_i):
     creatures = map.creatures
@@ -51,6 +66,10 @@ def move_moodily(map, creature_i):
     creature_index = -1
     neighbor_death_note = ""
     if death_note == "":
+        if creature.mood == "flee" and (creature.health >= creature.health_max or not creature.target.alive):
+            # back at full health, or the one it fled from is dead: stop fleeing and wander
+            creature.mood = "ambulate"
+            creature.target = None
         if creature.mood == "toward":
             if creature.target.alive == False:
                 creature.mood = "ambulate"
@@ -64,6 +83,8 @@ def move_moodily(map, creature_i):
             # a wall ahead: running right can't go on, so start wandering from the next turn
             if map.get_sign(new_position[0], new_position[1]) == WALL:
                 creature.mood = "ambulate"
+        elif creature.mood == "flee":
+            new_position = flee_step(map, creature)
         map.move_to(creature_i, new_position)
         #I need to check here if the hit creature died, and return the data if they did
         neighbor_death_note, creature_index = map.check_death_for_coords(new_position[0], new_position[1])

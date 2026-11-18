@@ -247,6 +247,47 @@ def run_frames_while_waiting(game_map, game_state):
         frames += 1
     return frames
 
+def check_flee():
+    import draw
+    from look import describe
+    from creatures import Kobold
+    game_map = empty_room_map()
+    p_x, p_y = game_map.player.position
+    kobold = Kobold([0, 0], "toward", game_map.player)
+    place(game_map, kobold, p_x + 1, p_y)
+    kobold.health = kobold.health_max = 5
+
+    game_map.messages = []
+    game_map.move_to(0, [p_x + 1, p_y])         # the player hits it for 4: 1 health left
+    assert kobold.health == 1 and kobold.mood == "flee" and kobold.target is game_map.player, \
+        f"kobold at {kobold.health} health has mood {kobold.mood}"
+    assert game_map.messages[-1] == "The kobold flees from you!", game_map.messages
+    assert draw.creature_color(kobold, game_map.player) == m.YELLOW
+    assert describe(kobold, game_map)[1].endswith("It is fleeing from you."), describe(kobold, game_map)
+
+    # it moves away from the player every turn
+    i = game_map.creatures.index(kobold)
+    def squared_distance():
+        return (kobold.position[0] - p_x)**2 + (kobold.position[1] - p_y)**2
+    for turn in range(3):
+        before = squared_distance()
+        loop_utils.move_moodily(game_map, i)
+        assert squared_distance() > before, f"fleeing kobold didn't get farther: {before} -> {squared_distance()}"
+    assert kobold.mood == "flee", "stopped fleeing before full health"
+
+    # back at full health it starts wandering
+    kobold.health = kobold.health_max
+    loop_utils.move_moodily(game_map, i)
+    assert kobold.mood == "ambulate" and kobold.target is None, kobold.mood
+
+    # other monsters don't flee: an orc left at 1 health turns to chase the player instead
+    orc = Orc([0, 0])
+    place(game_map, orc, p_x - 1, p_y)
+    orc.health = 5
+    game_map.move_to(0, [p_x - 1, p_y])
+    assert orc.health == 1 and orc.mood == "toward" and orc.target is game_map.player, orc.mood
+    print("OK rule checks: kobolds at 1 health flee (yellow) until healed, then wander")
+
 def check_wait():
     from creatures import Kobold
     per_turn = loop_utils.WAIT_FRAMES_PER_TURN
@@ -467,6 +508,7 @@ check_help()
 check_look()
 check_mood_colors()
 check_provoke()
+check_flee()
 play_random_games()
 run_real_game()     # last, because quitting the game shuts pygame down
 print("All checks passed.")

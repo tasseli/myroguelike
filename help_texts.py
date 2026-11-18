@@ -31,6 +31,8 @@ HELP_LINES = [
     "Colors: monsters on red are chasing you; those on",
     "   grey wander or go their own way.",
     "   Hit a grey one and it starts chasing you.",
+    "   Yellow: fleeing. Kobolds flee at 1 health",
+    "   until they have healed back to full.",
     "Looking (l): a blinking cursor shows a creature",
     "   you can see; arrows/numpad jump to the next",
     "   one that way. l or Esc stops looking.",

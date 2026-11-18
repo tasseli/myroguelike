@@ -8,6 +8,7 @@ class Creature:
     health_range = (2, 2)   # starting health is rolled from this range, inclusive
     damage = 1
     heal_interval = 20      # heal 1 health every this many turns
+    flee_at_health = None   # a hit that leaves this much health or less makes it flee; None: never flees
     is_player = False
 
     def __init__(self, coords, mood=None, target=None):
@@ -99,6 +100,7 @@ class Kobold(Creature):
     name = "kobold"
     health_range = (2, 6)
     damage = 2
+    flee_at_health = 1
 
 class Uruk(Creature):
     sign = "u"

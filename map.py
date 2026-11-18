@@ -22,6 +22,7 @@ GRAY        = (128, 128, 128)   # Open space
 DARK_GRAY   = (64, 64, 64)      # Wall
 BLACK       = (0, 0, 0)         # Text color
 RED         = (190, 50, 50)     # Monster chasing the player
+YELLOW      = (210, 180, 50)    # Monster fleeing
 
 def find_creature_at(creatures, x, y):
     i = 0
@@ -133,10 +134,23 @@ class Map:
                 if not self.can_attack(creature, victim):
                     return False
                 self.messages.extend(creature.hit(victim))
-                if creature is self.player:
-                    self.provoke(victim)
+                self.react_to_hit(creature, victim)
             return True
         return False
+
+    # How a creature that survives a hit reacts:
+    # - one that flees at low health (kobolds) and is now that low starts fleeing from the attacker
+    # - one already fleeing keeps fleeing from whoever it fled from first
+    # - otherwise, one the player hits starts chasing the player
+    def react_to_hit(self, attacker, victim):
+        if victim.health <= 0 or victim.mood == "flee":
+            return
+        if victim.flee_at_health is not None and victim.health <= victim.flee_at_health:
+            victim.mood = "flee"
+            victim.target = attacker
+            self.messages.append("The " + victim.name + " flees from " + attacker.called() + "!")
+        elif attacker is self.player:
+            self.provoke(victim)
 
     # A monster the player hits starts chasing the player, if it wasn't already
     def provoke(self, victim):

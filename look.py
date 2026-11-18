@@ -54,6 +54,8 @@ def next_in_direction(current, candidates, direction):
 def doing(creature):
     if creature.mood == "toward" and creature.target is not None:
         return "It is chasing " + creature.target.called() + "."
+    if creature.mood == "flee" and creature.target is not None:
+        return "It is fleeing from " + creature.target.called() + "."
     if creature.mood == "run right":
         return "It is running to the right."
     return "It is wandering around."
