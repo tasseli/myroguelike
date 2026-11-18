@@ -1,6 +1,6 @@
 # draw.py
 
-from map import (GRAY, DARK_GRAY, BLACK)
+from map import (WHITE, GRAY, DARK_GRAY, BLACK)
 from map import (MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, LOG_ROWS)
 from map import OPEN_SPACE
 
@@ -35,6 +35,12 @@ def render_message_log(messages, offset, pygame, screen, font):
             rows = str(offset + 1) + "-" + str(offset + len(shown))    # "1-4 of 9"
         more = "[m] More: " + rows + " of " + str(len(messages))
         draw_text_right(more, MAP_HEIGHT + LOG_ROWS - 1, pygame, screen, font)
+
+# In look mode, make the selected creature's tile blink: a white background every other 0.4 seconds
+def render_look_cursor(creature, pygame, screen, font):
+    if (pygame.time.get_ticks() // 400) % 2 == 0:
+        x, y = creature.get_position()
+        draw_and_blit_char(pygame, screen, font, creature.sign, x, y, WHITE)
 
 # Show the most needed keys on the row under the message log
 def render_key_hints(hints, pygame, screen, font):

@@ -5,6 +5,7 @@ import random
 from keyboard import read_moves, read_death_screen_key, read_digit
 from map import OPEN_SPACE, WALL, LOG_ROWS, find_creature_at
 from help_texts import COMMAND_LINES, HELP_LINES
+from look import visible_creatures, first_look_target, next_in_direction, describe
 
 # The 8 directions in order around a circle, so neighbours in the list are 45 degrees apart
 DIRECTIONS = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
@@ -185,11 +186,40 @@ def handle_wait_input(event_key, pygame, game_map, game_state):
     game_state["wait_input"] = typed
     game_map.messages = [WAIT_PROMPT + typed + "_" + WAIT_HELP]
 
+# Look mode: game_state["look_target"] is the selected creature; None means not looking.
+# The log shows the description while looking, and what it showed before afterwards.
+def start_looking(game_map, game_state):
+    game_state["look_saved_log"] = (game_map.messages, game_map.log_offset)
+    target = first_look_target(game_map)
+    game_state["look_target"] = target
+    game_map.messages = describe(target, game_map)
+    game_map.log_offset = 0
+
+def stop_looking(game_map, game_state):
+    game_map.messages, game_map.log_offset = game_state["look_saved_log"]
+    game_state["look_target"] = None
+
+# While looking, direction keys jump to the next visible creature in that direction; no turns pass
+def handle_look_input(event_key, typed_char, pygame, game_map, game_state):
+    if event_key == pygame.K_l or event_key == pygame.K_ESCAPE:
+        stop_looking(game_map, game_state)
+        return
+    outcome, direction = read_moves(event_key, pygame, typed_char)
+    if outcome == "q":
+        quit_app("", pygame)
+    elif outcome == "m":
+        next_target = next_in_direction(game_state["look_target"], visible_creatures(game_map), direction)
+        if next_target is not None:
+            game_state["look_target"] = next_target
+            game_map.messages = describe(next_target, game_map)
+
 def handle_events(pygame, game_map, game_state):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("", pygame)
-        if event.type == pygame.KEYDOWN and game_state.get("wait_input") is not None:
+        if event.type == pygame.KEYDOWN and game_state.get("look_target") is not None:
+            handle_look_input(event.key, getattr(event, "unicode", ""), pygame, game_map, game_state)
+        elif event.type == pygame.KEYDOWN and game_state.get("wait_input") is not None:
             handle_wait_input(event.key, pygame, game_map, game_state)
             if not game_state["GAME_ON"]:
                 return                                  # died while waiting
@@ -217,6 +247,8 @@ def handle_events(pygame, game_map, game_state):
                 # show the commands (?) or the help (h) in the log, m pages through it; no turn passes
                 game_map.messages = list(COMMAND_LINES if outcome == "commands" else HELP_LINES)
                 game_map.log_offset = 0
+            elif outcome == "look":
+                start_looking(game_map, game_state)
             elif outcome == "wait":
                 # open the prompt for how many turns to wait; no turn passes yet
                 game_state["wait_input"] = ""

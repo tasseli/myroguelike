@@ -123,7 +123,7 @@ def press(game_map, *keys, game_state=None):
         loop_utils.handle_events(pygame, game_map, game_state)
 
 def check_help():
-    from help_texts import COMMAND_LINES, HELP_LINES, KEY_HINTS, DEATH_KEY_HINTS
+    from help_texts import COMMAND_LINES, HELP_LINES, KEY_HINTS, LOOK_KEY_HINTS, DEATH_KEY_HINTS
     game_map = empty_room_map()
     turns_until_heal = game_map.player.turns_until_heal
 
@@ -148,9 +148,49 @@ def check_help():
     # the texts fit: a line plus its row number must end before the More indicator
     for line in COMMAND_LINES + HELP_LINES:
         assert len(line) <= 52, f"help line too long ({len(line)} characters): {line}"
-    for hints in (KEY_HINTS, DEATH_KEY_HINTS):
+    for hints in (KEY_HINTS, LOOK_KEY_HINTS, DEATH_KEY_HINTS):
         assert len(hints) <= m.MAP_WIDTH - 2, f"key hints don't fit on one row ({len(hints)} characters)"
     print("OK rule checks: ? shows the commands, h the help, m pages them, no turn used")
+
+def check_look():
+    from creatures import Kobold, Gnoll, Golem
+    game_map = empty_room_map()
+    p_x, p_y = game_map.player.position
+    kobold = Kobold([0, 0], "toward", game_map.player)
+    gnoll = Gnoll([0, 0])
+    golem = Golem([0, 0])
+    place(game_map, kobold, p_x + 3, p_y)       # nearest
+    place(game_map, gnoll, p_x, p_y - 4)
+    place(game_map, golem, min(p_x + 16, m.MAP_WIDTH - 2), p_y)    # too far away to see
+    game_map.messages = ["before looking"]
+    state = {"GAME_ON": True}
+    turns_until_heal = game_map.player.turns_until_heal
+
+    press(game_map, pygame.K_l, game_state=state)
+    assert state["look_target"] is kobold, "look didn't start on the nearest monster"
+    assert game_map.messages == ["Looking at: a kobold (k), 3 steps away.",
+                                 "Health " + str(kobold.health) + "/" + str(kobold.health_max) + ". It is chasing you."], game_map.messages
+    press(game_map, pygame.K_RIGHT, game_state=state)
+    assert state["look_target"] is kobold, "jumped to a creature the player can't see"
+    press(game_map, pygame.K_LEFT, game_state=state)
+    assert state["look_target"] is game_map.player and game_map.messages[0] == "Looking at: you (@)."
+    press(game_map, pygame.K_KP8, game_state=state)
+    assert state["look_target"] is gnoll and "wandering" in game_map.messages[1], game_map.messages
+    press(game_map, pygame.K_KP3, game_state=state)     # down-right from the gnoll: the kobold
+    assert state["look_target"] is kobold
+
+    press(game_map, pygame.K_ESCAPE, game_state=state)
+    assert state["look_target"] is None and game_map.messages == ["before looking"], "log not put back"
+    assert game_map.player.turns_until_heal == turns_until_heal, "looking used up a turn"
+    assert kobold.position == [p_x + 3, p_y], "creatures moved while looking"
+
+    # with no monster in sight, looking starts on the player; l also stops looking
+    lonely = empty_room_map()
+    press(lonely, pygame.K_l, game_state=state)
+    assert state["look_target"] is lonely.player
+    press(lonely, pygame.K_l, game_state=state)
+    assert state["look_target"] is None
+    print("OK rule checks: l looks at visible creatures, direction keys jump between them")
 
 def check_wait():
     from creatures import Kobold
@@ -337,6 +377,7 @@ check_more_key()
 check_step_around()
 check_wait()
 check_help()
+check_look()
 play_random_games()
 run_real_game()     # last, because quitting the game shuts pygame down
 print("All checks passed.")

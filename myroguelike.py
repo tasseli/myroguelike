@@ -3,9 +3,9 @@
 
 import pygame
 from loop_utils import handle_events, handle_death_screen_keys
-from draw import render_map, render_message_log, render_player_status, render_key_hints
+from draw import render_map, render_message_log, render_player_status, render_key_hints, render_look_cursor
 from map import Map, MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, GRAY, LOG_ROWS
-from help_texts import KEY_HINTS, DEATH_KEY_HINTS
+from help_texts import KEY_HINTS, LOOK_KEY_HINTS, DEATH_KEY_HINTS
 
 BOTTOM_UI_HEIGHT = LOG_ROWS + 1     # the message log, and a row of key hints under it
 FPS = 30
@@ -20,13 +20,16 @@ clock = pygame.time.Clock()
 # Initialize a font
 font = pygame.font.SysFont(None, 22)
 
-# Draw the message log (from row log_offset on), the key hints and the map, then wait for the next frame
-def draw_frame(game_map, messages, log_offset, key_hints):
+# Draw the message log (from row log_offset on), the key hints and the map, then wait for the next frame.
+# look_target is the creature selected in look mode, or None.
+def draw_frame(game_map, messages, log_offset, key_hints, look_target=None):
     screen.fill(GRAY)
     render_message_log(messages, log_offset, pygame, screen, font)
     render_player_status(game_map.player, pygame, screen, font)
     render_key_hints(key_hints, pygame, screen, font)
     render_map(game_map, pygame, screen, font, game_map.player)
+    if look_target is not None:
+        render_look_cursor(look_target, pygame, screen, font)
     pygame.display.flip()
     clock.tick(FPS)
 
@@ -40,7 +43,9 @@ def play_game():
     game_state = {"GAME_ON": True}
     while game_state["GAME_ON"]:
         handle_events(pygame, game_map, game_state)
-        draw_frame(game_map, game_map.messages, game_map.log_offset, KEY_HINTS)
+        looking_at = game_state.get("look_target")
+        key_hints = LOOK_KEY_HINTS if looking_at is not None else KEY_HINTS
+        draw_frame(game_map, game_map.messages, game_map.log_offset, key_hints, looking_at)
 
     # game_state is GAME_ON==False, player has died
     killer = game_map.killed_by

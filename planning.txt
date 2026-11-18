@@ -49,3 +49,4 @@ Done (Nov 2026):
 - requirements.txt: pygame>=2.5
 - w waits a typed number of turns (to heal), stopping early when someone comes next to the player
 - ? lists the commands for any turn, h explains how things work (both paged with m); a key hint row under the log
+- l looks at visible creatures: a blinking cursor, direction keys jump to the next creature that way

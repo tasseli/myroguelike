@@ -8,6 +8,7 @@ COMMAND_LINES = [
     "Move: arrow keys or numpad 1-9 (diagonals too).",
     "5: stay in place for one turn.",
     "w: wait many turns (type a number, then Enter).",
+    "l: look at creatures you can see.",
     "m: show more rows of the log.",
     "?: this list of commands.   h: help.",
     "q or x: quit the game.",
@@ -24,11 +25,15 @@ HELP_LINES = [
     "   Backspace deletes a digit, Esc cancels.",
     "   Waiting stops when someone comes next to you,",
     "   and doesn't start if someone already is.",
+    "Looking (l): a blinking cursor shows a creature",
+    "   you can see; arrows/numpad jump to the next",
+    "   one that way. l or Esc stops looking.",
     "Log: when a turn has more than 4 messages, the",
     "   rows are numbered and m shows the next ones.",
     "After dying: r plays again, q quits.",
 ]
 
 # Shown on the row under the message log
-KEY_HINTS = "arrows/numpad: move  5: stay  w: wait  m: more  ?: commands  h: help  q: quit"
+KEY_HINTS = "arrows/numpad: move  5: stay  w: wait  l: look  m: more  ?: commands  h: help"
+LOOK_KEY_HINTS = "arrows/numpad: next creature that way   l or Esc: stop looking"
 DEATH_KEY_HINTS = "r: play again   q: quit"
