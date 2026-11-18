@@ -62,9 +62,18 @@ def render_map(game_map, pygame, screen, font, creature):
             if coords_within_distance_z(x, y, VIEW_RADIUS, creature):
                 render_floors_different_color(game_map, pygame, screen, font, x, y)
 
+# Rendered characters, built once per font and character and then reused
+glyph_cache = {}
+
+def get_glyph(font, my_char):
+    key = (font, my_char)
+    if key not in glyph_cache:
+        glyph_cache[key] = font.render(my_char, True, BLACK)
+    return glyph_cache[key]
+
 def draw_and_blit_char(pygame, screen, font, my_char, x, y, color):
     pygame.draw.rect(screen, color, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
-    # Render the my_char (e.g. '#' / '@') character on top of the background color
-    text_surface = font.render(my_char, True, BLACK)
+    # Draw the my_char (e.g. '#' / '@') character on top of the background color
+    text_surface = get_glyph(font, my_char)
     text_rect = text_surface.get_rect(center=(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2))
     screen.blit(text_surface, text_rect)
