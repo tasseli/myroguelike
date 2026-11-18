@@ -55,3 +55,4 @@ Done (Nov 2026):
 - a grey monster the player hits starts chasing the player ("The golem turns to chase you!")
 - yellow flee mood: kobolds left at 2 health or less flee from whoever hurt them until back at full health, then wander
 - three more kobolds on the starting map: one hostile, two wandering (4 kobolds in all)
+- a grey monster bumping into the player turns red and chases instead of hitting

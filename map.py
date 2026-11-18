@@ -136,6 +136,10 @@ class Map:
                 victim = creatures[target]
                 if not self.can_attack(creature, victim):
                     return False
+                if victim is self.player and not self.chases_player(creature):
+                    # a grey monster bumping into the player doesn't hit, but turns to chase the player
+                    self.provoke(creature)
+                    return True
                 self.messages.extend(creature.hit(victim))
                 self.react_to_hit(creature, victim)
             return True
@@ -155,9 +159,13 @@ class Map:
         elif attacker is self.player:
             self.provoke(victim)
 
-    # A monster the player hits starts chasing the player, if it wasn't already
+    def chases_player(self, creature):
+        return creature.mood == "toward" and creature.target is self.player
+
+    # A monster the player hits, or one that bumps into the player, starts chasing the player
+    # if it wasn't already
     def provoke(self, victim):
-        if victim.mood == "toward" and victim.target is self.player:
+        if self.chases_player(victim):
             return
         victim.mood = "toward"
         victim.target = self.player
@@ -165,6 +173,7 @@ class Map:
             self.messages.append("The " + victim.name + " turns to chase you!")
 
     # The player attacks anyone. Other creatures attack only the player or their own target.
+    # (move_to turns a grey monster's attack on the player into turning to chase instead.)
     def can_attack(self, creature, victim):
         return creature is self.player or victim is self.player or victim is creature.target
 

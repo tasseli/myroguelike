@@ -17,7 +17,9 @@ COMMAND_LINES = [
 # h : how things work, in more detail
 HELP_LINES = [
     "Attacking: walk into a creature to attack it.",
-    "Monsters attack you, or the creature they chase;",
+    "Red monsters attack you. A grey one bumping into",
+    "   you turns red instead of hitting. Monsters",
+    "   attack only you or the creature they chase;",
     "   others in their way just block them.",
     "Health: HP at the right. At 0 health you die.",
     "Healing: everyone heals 1 health every 20 turns.",

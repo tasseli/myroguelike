@@ -237,7 +237,20 @@ def check_provoke():
     game_map.move_to(0, [p_x - 1, p_y])                     # hitting a chaser changes nothing
     assert chaser.target is game_map.player
     assert not any("turns to chase" in s for s in game_map.messages), game_map.messages
-    print("OK rule checks: a grey monster the player hits starts chasing the player")
+    # a grey monster bumping into the player doesn't hit, but turns to chase the player
+    from creatures import Gnoll
+    wanderer = Gnoll([0, 0])
+    place(game_map, wanderer, p_x, p_y + 1)
+    health = game_map.player.health
+    game_map.messages = []
+    game_map.move_to(game_map.creatures.index(wanderer), [p_x, p_y])
+    assert game_map.player.health == health, "a grey monster hit the player"
+    assert wanderer.mood == "toward" and wanderer.target is game_map.player
+    assert game_map.messages == ["The gnoll turns to chase you!"], game_map.messages
+    # now it chases the player, so the next bump is a hit
+    game_map.move_to(game_map.creatures.index(wanderer), [p_x, p_y])
+    assert game_map.player.health == health - wanderer.damage, "the now red gnoll didn't hit"
+    print("OK rule checks: a grey monster hit by or bumping into the player starts chasing instead of hitting")
 
 # Run game frames with no keys pressed, like the game loop does, until waiting ends. Return the frame count.
 def run_frames_while_waiting(game_map, game_state):
