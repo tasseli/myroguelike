@@ -53,4 +53,4 @@ Done (Nov 2026):
 - l looks at visible creatures: a blinking cursor, direction keys jump to the next creature that way
 - creature tiles colored by mood: red = chasing the player, grey = others
 - a grey monster the player hits starts chasing the player ("The golem turns to chase you!")
-- yellow flee mood: kobolds left at 1 health flee from whoever hurt them until back at full health, then wander
+- yellow flee mood: kobolds left at 2 health or less flee from whoever hurt them until back at full health, then wander

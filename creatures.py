@@ -100,7 +100,7 @@ class Kobold(Creature):
     name = "kobold"
     health_range = (2, 6)
     damage = 2
-    flee_at_health = 1
+    flee_at_health = 2
 
 class Uruk(Creature):
     sign = "u"

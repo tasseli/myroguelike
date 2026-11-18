@@ -280,13 +280,20 @@ def check_flee():
     loop_utils.move_moodily(game_map, i)
     assert kobold.mood == "ambulate" and kobold.target is None, kobold.mood
 
+    # a kobold left at 2 health flees too
+    kobold2 = Kobold([0, 0], "toward", game_map.player)
+    place(game_map, kobold2, p_x, p_y + 1)
+    kobold2.health = kobold2.health_max = 6
+    game_map.move_to(0, [p_x, p_y + 1])
+    assert kobold2.health == 2 and kobold2.mood == "flee", f"kobold at 2 health has mood {kobold2.mood}"
+
     # other monsters don't flee: an orc left at 1 health turns to chase the player instead
     orc = Orc([0, 0])
     place(game_map, orc, p_x - 1, p_y)
     orc.health = 5
     game_map.move_to(0, [p_x - 1, p_y])
     assert orc.health == 1 and orc.mood == "toward" and orc.target is game_map.player, orc.mood
-    print("OK rule checks: kobolds at 1 health flee (yellow) until healed, then wander")
+    print("OK rule checks: kobolds at 2 health or less flee (yellow) until healed, then wander")
 
 def check_wait():
     from creatures import Kobold
