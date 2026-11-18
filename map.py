@@ -55,62 +55,28 @@ class Map:
         # messages produced during a turn, shown in the bottom UI
         self.messages = []
         self.room = self.generate()
+        self.creatures = []
 
-        def init_player(coords):
-            player = Player(coords)
-            self.set_sign_with_creature(player)
-            return player
+        # the player must be added first: index 0 in self.creatures is always the player
+        self.player = self.add_creature(Player)
+        self.add_creature(Orc, "run right")
+        self.add_creature(Orc)
+        orc3 = self.add_creature(Orc, "toward", self.player)
+        orc4 = self.add_creature(Orc, "toward", orc3)
+        self.add_creature(Orc, "toward", orc4)
+        self.add_creature(Kobold, "toward", self.player)
+        self.add_creature(Uruk, "toward", self.player)
+        self.add_creature(Gnoll, "toward", self.player)
+        self.add_creature(Gnoll, "toward", self.player)
+        self.add_creature(Goblin, "toward", self.player)
+        self.add_creature(Golem)
 
-        def init_orc(coords, mood, target, creatures):
-            orc = Orc(coords, mood, target)
-            self.set_sign_with_creature(orc)
-            creatures.append(orc)
-            return orc
-
-        def init_uruk(coords, mood, target, creatures):
-            uruk = Uruk(coords, mood, target)
-            self.set_sign_with_creature(uruk)
-            creatures.append(uruk)
-            return uruk
-
-        def init_kobold(coords, mood, target, creatures):
-            kobold = Kobold(coords, mood, target)
-            self.set_sign_with_creature(kobold)
-            creatures.append(kobold)
-            return kobold
-
-        def init_gnoll(coords, mood, target, creatures):
-            gnoll = Gnoll(coords, mood, target)
-            self.set_sign_with_creature(gnoll)
-            creatures.append(gnoll)
-            return gnoll
-
-        def init_goblin(coords, mood, target, creatures):
-            goblin = Goblin(coords, mood, target)
-            self.set_sign_with_creature(goblin)
-            creatures.append(goblin)
-            return goblin
-
-        def init_golem(coords, mood, target, creatures):
-            golem = Golem(coords, mood, target)
-            self.set_sign_with_creature(golem)
-            creatures.append(golem)
-            return golem
-
-        free = self.random_free_floor
-        self.player = init_player(free())
-        self.creatures = [self.player]
-        orc = init_orc(free(), "run right", None, self.creatures)
-        orc2 = init_orc(free(), None, None, self.creatures)
-        orc3 = init_orc(free(), "toward", self.player, self.creatures)
-        orc4 = init_orc(free(), "toward", orc3, self.creatures)
-        orc5 = init_orc(free(), "toward", orc4, self.creatures)
-        kobold = init_kobold(free(), "toward", self.player, self.creatures)
-        uruk = init_uruk(free(), "toward", self.player, self.creatures)
-        gnoll1 = init_gnoll(free(), "toward", self.player, self.creatures)
-        gnoll2 = init_gnoll(free(), "toward", self.player, self.creatures)
-        goblin1 = init_goblin(free(), "toward", self.player, self.creatures)
-        golem1 = init_golem(free(), None, None, self.creatures)
+    # Create a creature of the given class on a random free floor tile and add it to the map.
+    def add_creature(self, creature_class, mood=None, target=None):
+        creature = creature_class(self.random_free_floor(), mood, target)
+        self.set_sign_with_creature(creature)
+        self.creatures.append(creature)
+        return creature
 
     def position_filled_by_creature(self, x, y):
         # if position is either open or wall, false
@@ -120,7 +86,8 @@ class Map:
     # return True if something happened and time passed, False if no clause managed to do something worthwhile
     # move_to may hurt the target creature. Dying needs to be checked outside of it.
     # Hitting adds its messages to self.messages.
-    def move_to(self, i, new_position, creatures):
+    def move_to(self, i, new_position):
+        creatures = self.creatures
         creature = creatures[i]
 
         if new_position == creature.get_position():

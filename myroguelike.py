@@ -4,12 +4,10 @@
 import pygame
 from loop_utils import handle_events, handle_quit_key
 from draw import render_map, render_message_log
-from map import (Map,
-MAP_WIDTH, MAP_HEIGHT, TILE_SIZE)
-from map import (WHITE, GRAY, DARK_GRAY, BLACK)
+from map import Map, MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, GRAY
+
 BOTTOM_UI_HEIGHT = 4
 FPS = 30
-from loop_utils import quit_app
 
 # pygame setup
 pygame.init()
@@ -21,47 +19,26 @@ clock = pygame.time.Clock()
 # Initialize a font
 font = pygame.font.SysFont(None, 22)
 
-# Initialize an empty map
+# Generate the map with its creatures
 game_map = Map()
 
-# Main loop
+# Draw the message log (the latest lines that fit) and the map, then wait for the next frame
+def draw_frame(messages):
+    screen.fill(GRAY)
+    render_message_log(messages[-BOTTOM_UI_HEIGHT:], pygame, screen, font)
+    render_map(game_map, pygame, screen, font, game_map.player)
+    pygame.display.flip()
+    clock.tick(FPS)
 
+# Main loop
 game_map.messages = ["Welcome to Myr!", "Move around with arrows or numpad.", "Moving towards an 'o'rc or other creatures attacks.", "Good luck!"]
 game_state = {"GAME_ON": True}
-next_msg_row = 0
-chars_remaining_on_row = MAP_WIDTH
 while game_state["GAME_ON"]:
-    # Clear the screen
-    screen.fill(GRAY)
-
-    # print message log, the latest lines that fit
-    render_message_log(game_map.messages[-BOTTOM_UI_HEIGHT:], pygame, screen, font)
-
-    # handle events
-    handle_events(pygame, game_map, game_state, next_msg_row, chars_remaining_on_row)
-
-    # Render the map
-    render_map(game_map, pygame, screen, font, game_map.creatures[0])
-
-    # Update the display
-    pygame.display.flip()
-    clock.tick(FPS)
+    handle_events(pygame, game_map, game_state)
+    draw_frame(game_map.messages)
 
 # game_state is GAME_ON==False, player has died
-messages = ["You died gloriously on the battlefield!", "Thank you for playing. Better luck next time.", "Press 'q' to quit."]
+death_messages = ["You died gloriously on the battlefield!", "Thank you for playing. Better luck next time.", "Press 'q' to quit."]
 while True:
-    # Clear the screen
-    screen.fill(GRAY)
-
-    # print message log
-    render_message_log(messages, pygame, screen, font)
-
-    # handle events
-    messages = handle_quit_key(pygame, game_map, messages, game_state)
-
-    # Render the map
-    render_map(game_map, pygame, screen, font, game_map.creatures[0])
-
-    # Update the display
-    pygame.display.flip()
-    clock.tick(FPS)
+    handle_quit_key(pygame)
+    draw_frame(death_messages)

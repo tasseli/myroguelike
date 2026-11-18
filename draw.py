@@ -1,9 +1,8 @@
 # draw.py
 
-from map import (WHITE, GRAY, DARK_GRAY, BLACK)
+from map import (GRAY, DARK_GRAY, BLACK)
 from map import (MAP_WIDTH, MAP_HEIGHT, TILE_SIZE)
-from map import (OPEN_SPACE, WALL)
-from creatures import Creature
+from map import OPEN_SPACE
 from math import sqrt
 
 def render_message_log(messages, pygame, screen, font):
@@ -37,8 +36,7 @@ def render_floors_different_color(game_map, pygame, screen, font, x, y):
     else:
         draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y, DARK_GRAY)
 
-def render_map(game_map, pygame, screen, font, creature):    
-    y = 0
+def render_map(game_map, pygame, screen, font, creature):
     for x in range(0, MAP_WIDTH):
         for y in range(0, MAP_HEIGHT):
             if coords_on_border_of_map(x, y):

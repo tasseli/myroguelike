@@ -5,14 +5,17 @@ class Creature:
     sign = "c"
     mood = "ambulate"
     name = "generic creature"
-    alive = True
-    target = None
-    health = 2
-    health_max = health
+    health_range = (2, 2)   # starting health is rolled from this range, inclusive
     damage = 1
 
-    def __init__(self, coords):
-        self.position = coords
+    def __init__(self, coords, mood=None, target=None):
+        self.position = [int(coords[0]), int(coords[1])]
+        self.health = random.randint(*self.health_range)
+        self.health_max = self.health
+        self.alive = True
+        self.target = target
+        if mood is not None:
+            self.mood = mood
 
     def get_position(self):
         return self.position
@@ -22,7 +25,7 @@ class Creature:
         target_creature.health -= self.damage
         message1 = target_creature.name + " hit for " + str(self.damage) + " damage by " + self.name
         message2 = target_creature.name + " has " + str(target_creature.health) + " health. "
-        return message1, message2 
+        return message1, message2
 
     def check_death(self):
         if self.health < 1:
@@ -36,7 +39,7 @@ class Creature:
         x = random.randint(0,2)-1
         y = random.randint(0,2)-1
         return [self.position[0] + x, self.position[1] + y]
-        
+
     def move_toward(self, destination):
         destination = destination.get_position()
         x = 0
@@ -55,91 +58,41 @@ class Player(Creature):
     sign = "@"
     mood = "player"
     name = "player"
-    health = 12
-    health_max = health
+    health_range = (12, 12)
     damage = 4
 
 class Orc(Creature):
     sign = "o"
     name = "orc"
+    health_range = (3, 7)
     damage = 3
-
-    def __init__(self, coords, mood, target):
-        self.position = [coords[0], coords[1]]
-        self.health = random.randint(3, 7)
-        self.health_max = self.health
-        if mood != None:
-            self.mood = mood
-        if target != None:
-            self.target = target
 
 class Kobold(Creature):
     sign = "k"
     name = "kobold"
+    health_range = (2, 6)
     damage = 2
-
-    def __init__(self, coords, mood, target):
-        self.position = [coords[0], coords[1]]
-        self.health = random.randint(2, 6)
-        self.health_max = self.health
-        if mood != None:
-            self.mood = mood
-        if target != None:
-            self.target = target
 
 class Uruk(Creature):
     sign = "o"
     name = "uruk"
+    health_range = (6, 9)
     damage = 4
-
-    def __init__(self, coords, mood, target):
-        self.position = [coords[0], coords[1]]
-        self.health = random.randint(6, 9)
-        self.health_max = self.health
-        if mood != None:
-            self.mood = mood
-        if target != None:
-            self.target = target
 
 class Gnoll(Creature):
     sign = "g"
     name = "gnoll"
+    health_range = (3, 6)
     damage = 3
-
-    def __init__(self, coords, mood, target):
-        self.position = [coords[0], coords[1]]
-        self.health = random.randint(3, 6)
-        self.health_max = self.health
-        if mood != None:
-            self.mood = mood
-        if target != None:
-            self.target = target
 
 class Goblin(Creature):
     sign = "g"
     name = "goblin"
+    health_range = (3, 5)
     damage = 2
-
-    def __init__(self, coords, mood, target):
-        self.position = [coords[0], coords[1]]
-        self.health = random.randint(3, 5)
-        self.health_max = self.health
-        if mood != None:
-            self.mood = mood
-        if target != None:
-            self.target = target
 
 class Golem(Creature):
     sign = "G"
     name = "golem"
+    health_range = (13, 18)
     damage = 4
-
-    def __init__(self, coords, mood, target):
-        self.position = [coords[0], coords[1]]
-        self.health = random.randint(13, 18)
-        self.health_max = self.health
-        if mood != None:
-            self.mood = mood
-        if target != None:
-            self.target = target
-

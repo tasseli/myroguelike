@@ -2,8 +2,7 @@
 
 import sys
 from keyboard import read_moves, read_q_only
-from map import (OPEN_SPACE, WALL)
-from map import find_creature_at
+from map import OPEN_SPACE
 
 def quit_app(reason, pygame):
     print(reason)
@@ -29,7 +28,7 @@ def move_moodily(map, creature_i):
             new_position = creature.move_random()
         elif creature.mood == "run right":
             new_position = creature.move_right()
-        map.move_to(creature_i, new_position, creatures)
+        map.move_to(creature_i, new_position)
         #I need to check here if the hit creature died, and return the data if they did
         neighbor_death_note, creature_index = map.check_death_for_coords(new_position[0], new_position[1])
     return death_note, neighbor_death_note, creature_index
@@ -72,7 +71,7 @@ def check_deaths(game_map, other_creatures_move):
         game_map.creatures.pop(i)
     return player_died
 
-def handle_events(pygame, game_map, game_state, next_msg_row, chars_remaining_on_row):
+def handle_events(pygame, game_map, game_state):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("", pygame)
@@ -88,12 +87,12 @@ def handle_events(pygame, game_map, game_state, next_msg_row, chars_remaining_on
 #               Move key or stand still key
                 game_map.messages = []
                 # move creature_0, the player
-                if game_map.move_to(0, new_position, game_map.creatures): # 0 refers to the player ## so if player moved, pass the changed new position and work with it
+                if game_map.move_to(0, new_position): # 0 refers to the player ## so if player moved, pass the changed new position and work with it
                     check_deaths(game_map, False)       # check if player killed anyone
                 if check_deaths(game_map, True):        # have all creatures move and check if they killed anyone
                     game_state["GAME_ON"] = False
 
-def handle_quit_key(pygame, game_map, messages, game_state):
+def handle_quit_key(pygame):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("event.type == quit", pygame)
@@ -101,4 +100,3 @@ def handle_quit_key(pygame, game_map, messages, game_state):
             outcome = read_q_only(event.key, pygame)
             if outcome == "q":
                 quit_app("q or x pressed", pygame)
-    return messages
