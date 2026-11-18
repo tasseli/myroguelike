@@ -74,13 +74,13 @@ class Kobold(Creature):
     damage = 2
 
 class Uruk(Creature):
-    sign = "o"
+    sign = "u"
     name = "uruk"
     health_range = (6, 9)
     damage = 4
 
 class Gnoll(Creature):
-    sign = "g"
+    sign = "n"
     name = "gnoll"
     health_range = (3, 6)
     damage = 3
