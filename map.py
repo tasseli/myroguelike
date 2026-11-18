@@ -8,6 +8,9 @@ MAP_WIDTH   = 80
 MAP_HEIGHT  = 40
 TILE_SIZE   = 16
 
+# How many moves away from the player other creatures start, when the room is big enough
+MIN_SPAWN_DISTANCE = 8
+
 # Define constants for tile types
 OPEN_SPACE  = '.'
 WALL        = '#'
@@ -43,13 +46,23 @@ class Map:
         return (left, top, right, bottom)
 
     # Return the coords of a random floor tile in the room that has no creature on it.
-    def random_free_floor(self):
+    # With away_from, only tiles at least min_distance moves from that creature are used.
+    # If the room is too small for that, the farthest free tiles are used instead.
+    def random_free_floor(self, away_from=None, min_distance=0):
         left, top, right, bottom = self.room
-        while True:
-            x = random.randint(left, right - 1)
-            y = random.randint(top, bottom - 1)
-            if self.my_map[x][y] == OPEN_SPACE:
-                return [x, y]
+        free = [[x, y] for x in range(left, right) for y in range(top, bottom)
+                if self.my_map[x][y] == OPEN_SPACE]
+        if away_from is not None:
+            ax, ay = away_from.get_position()
+            def moves(tile):
+                # diagonal steps are allowed, so the number of moves is the larger of the two distances
+                return max(abs(tile[0] - ax), abs(tile[1] - ay))
+            far = [tile for tile in free if moves(tile) >= min_distance]
+            if not far:
+                farthest = max(moves(tile) for tile in free)
+                far = [tile for tile in free if moves(tile) == farthest]
+            free = far
+        return random.choice(free)
 
     def __init__(self):
         # messages produced during a turn, shown in the bottom UI
@@ -72,8 +85,13 @@ class Map:
         self.add_creature(Golem)
 
     # Create a creature of the given class on a random free floor tile and add it to the map.
+    # Creatures other than the player start at least MIN_SPAWN_DISTANCE moves from the player.
     def add_creature(self, creature_class, mood=None, target=None):
-        creature = creature_class(self.random_free_floor(), mood, target)
+        if self.creatures:
+            coords = self.random_free_floor(self.player, MIN_SPAWN_DISTANCE)
+        else:
+            coords = self.random_free_floor()
+        creature = creature_class(coords, mood, target)
         self.set_sign_with_creature(creature)
         self.creatures.append(creature)
         return creature
