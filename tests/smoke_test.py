@@ -217,6 +217,28 @@ def check_mood_colors():
     assert tile_color(wanderer) == m.DARK_GRAY and tile_color(orc_chasing_orc) == m.DARK_GRAY
     print("OK rule checks: monsters chasing the player are drawn on red, others on grey")
 
+def check_provoke():
+    import draw
+    from creatures import Kobold, Golem
+    game_map = empty_room_map()
+    p_x, p_y = game_map.player.position
+    golem = Golem([0, 0])                                   # wandering, tough enough to survive a hit
+    chaser = Kobold([0, 0], "toward", game_map.player)
+    place(game_map, golem, p_x + 1, p_y)
+    place(game_map, chaser, p_x - 1, p_y)
+
+    game_map.messages = []
+    game_map.move_to(0, [p_x + 1, p_y])                     # the player hits the golem
+    assert golem.mood == "toward" and golem.target is game_map.player, "hit golem didn't start chasing"
+    assert draw.creature_color(golem, game_map.player) == m.RED
+    assert game_map.messages[-1] == "The golem turns to chase you!", game_map.messages
+
+    game_map.messages = []
+    game_map.move_to(0, [p_x - 1, p_y])                     # hitting a chaser changes nothing
+    assert chaser.target is game_map.player
+    assert not any("turns to chase" in s for s in game_map.messages), game_map.messages
+    print("OK rule checks: a grey monster the player hits starts chasing the player")
+
 def check_wait():
     from creatures import Kobold
     # nobody around: wait the full 20 turns and heal 1
@@ -404,6 +426,7 @@ check_wait()
 check_help()
 check_look()
 check_mood_colors()
+check_provoke()
 play_random_games()
 run_real_game()     # last, because quitting the game shuts pygame down
 print("All checks passed.")
