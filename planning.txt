@@ -59,3 +59,4 @@ Done (Nov 2026):
 - look: the target is told with distance and direction; t jumps the cursor to it
 - green friend mood: a friend stays within 2 steps of its friend, and attacks monsters chasing its friend that come within 2 steps of the friend
 - the golem 6 steps from the player starts neutral (wandering) instead of friendly
+- c chats: choose whom (no turn), talking takes a turn ("Beep beep, I'm a kobold."); golems offer 5 topics (no turns), loyalty makes the golem a friend

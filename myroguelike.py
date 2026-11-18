@@ -5,7 +5,7 @@ import pygame
 from loop_utils import handle_events, handle_death_screen_keys
 from draw import render_map, render_message_log, render_player_status, render_key_hints, render_look_cursor
 from map import Map, MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, GRAY, LOG_ROWS
-from help_texts import KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, DEATH_KEY_HINTS
+from help_texts import KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS, DEATH_KEY_HINTS
 
 BOTTOM_UI_HEIGHT = LOG_ROWS + 1     # the message log, and a row of key hints under it
 FPS = 30
@@ -43,11 +43,16 @@ def play_game():
     game_state = {"GAME_ON": True}
     while game_state["GAME_ON"]:
         handle_events(pygame, game_map, game_state)
-        looking_at = game_state.get("look_target")
+        # the blinking cursor is on the creature looked at, chosen to talk to, or talked with
+        looking_at = game_state.get("look_target") or game_state.get("chat_target") or game_state.get("dialogue")
         if game_state.get("waiting") is not None:
             key_hints = WAIT_KEY_HINTS
-        elif looking_at is not None:
+        elif game_state.get("look_target") is not None:
             key_hints = LOOK_KEY_HINTS
+        elif game_state.get("chat_target") is not None:
+            key_hints = CHAT_KEY_HINTS
+        elif game_state.get("dialogue") is not None:
+            key_hints = DIALOGUE_KEY_HINTS
         else:
             key_hints = KEY_HINTS
         draw_frame(game_map, game_map.messages, game_map.log_offset, key_hints, looking_at)

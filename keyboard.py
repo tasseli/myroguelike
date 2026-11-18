@@ -9,6 +9,7 @@
 #   show the list of commands:              return "commands", None
 #   show the help:                          return "help", None
 #   look at creatures:                      return "look", None
+#   chat with a creature:                   return "chat", None
 #   other, currently unhandled:             return "o", None
 # typed_char is the character the key produced; '?' is checked by it, because
 # which key gives '?' depends on the keyboard layout.
@@ -21,6 +22,8 @@ def read_moves(eventkey, pygame, typed_char=""):
         return "help", None
     elif eventkey == pygame.K_l:
         return "look", None
+    elif eventkey == pygame.K_c:
+        return "chat", None
     elif eventkey == pygame.K_m:
         return "more", None
     elif eventkey == pygame.K_w:

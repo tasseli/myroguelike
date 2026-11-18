@@ -9,6 +9,7 @@ COMMAND_LINES = [
     "5: stay in place for one turn.",
     "w: wait many turns (type a number, then Enter).",
     "l: look at creatures you can see.",
+    "c: chat with a creature you can see.",
     "m: show more rows of the log.",
     "?: this list of commands.   h: help.",
     "q or x: quit the game.",
@@ -41,13 +42,19 @@ HELP_LINES = [
     "   you can see; arrows/numpad jump to the next",
     "   one that way; t jumps to the one it chases or",
     "   flees from. l or Esc stops looking.",
+    "Chatting (c): choose whom with arrows/numpad,",
+    "   then Enter or c. Talking takes a turn; with",
+    "   golems, choosing topics (1-5) doesn't.",
     "Log: when a turn has more than 4 messages, the",
     "   rows are numbered and m shows the next ones.",
     "After dying: r plays again, l looks around, q quits.",
 ]
 
 # Shown on the row under the message log
-KEY_HINTS = "arrows/numpad: move  5: stay  w: wait  l: look  m: more  ?: commands  h: help"
+# (m is left out to make room; the "[m] More" indicator shows it when it's needed)
+KEY_HINTS = "arrows/numpad: move  5: stay  w: wait  l: look  c: chat  ?: commands  h: help"
 WAIT_KEY_HINTS = "any key: stop waiting"
+CHAT_KEY_HINTS = "arrows/numpad: choose whom  Enter or c: talk  Esc: cancel"
+DIALOGUE_KEY_HINTS = "1-5: choose a topic  m: more  Esc: end the talk"
 LOOK_KEY_HINTS ="arrows/numpad: next creature that way  t: its target  l or Esc: stop looking"
 DEATH_KEY_HINTS = "r: play again   l: look around   q: quit"

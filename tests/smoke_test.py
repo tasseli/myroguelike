@@ -124,6 +124,7 @@ def press(game_map, *keys, game_state=None):
 
 def check_help():
     from help_texts import COMMAND_LINES, HELP_LINES, KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, DEATH_KEY_HINTS
+    from help_texts import CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS
     game_map = empty_room_map()
     turns_until_heal = game_map.player.turns_until_heal
 
@@ -148,7 +149,7 @@ def check_help():
     # the texts fit: a line plus its row number must end before the More indicator
     for line in COMMAND_LINES + HELP_LINES:
         assert len(line) <= 52, f"help line too long ({len(line)} characters): {line}"
-    for hints in (KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, DEATH_KEY_HINTS):
+    for hints in (KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS, DEATH_KEY_HINTS):
         assert len(hints) <= m.MAP_WIDTH - 2, f"key hints don't fit on one row ({len(hints)} characters)"
     print("OK rule checks: ? shows the commands, h the help, m pages them, no turn used")
 
@@ -403,6 +404,64 @@ def check_friend():
     wanderer = Gnoll([0, 0])
     assert not game_map.can_attack(friend, wanderer) and not game_map.can_attack(friend, game_map.player)
     print("OK rule checks: the friendly golem (green) stays close, defends the player, never hurts the player")
+
+def check_chat():
+    import chat
+    from creatures import Golem, Kobold
+    game_map = empty_room_map()
+    p_x, p_y = game_map.player.position
+    golem = Golem([0, 0])
+    kobold = Kobold([0, 0])
+    place(game_map, golem, p_x + 2, p_y)
+    place(game_map, kobold, p_x - 3, p_y)
+    state = {"GAME_ON": True}
+    player = game_map.player
+    def turns_passed(before):
+        return before - player.turns_until_heal
+
+    # c asks whom to talk to, starting from the nearest; choosing takes no turn
+    before = player.turns_until_heal
+    press(game_map, pygame.K_c, game_state=state)
+    assert state["chat_target"] is golem and game_map.messages[0] == "Who do you want to talk to?"
+    press(game_map, pygame.K_LEFT, game_state=state)
+    assert state["chat_target"] is kobold
+    assert turns_passed(before) == 0, "choosing whom to talk to took a turn"
+
+    # talking takes one turn; a kobold just answers
+    press(game_map, pygame.K_RETURN, game_state=state)
+    assert game_map.messages[0] == "The kobold: Beep beep, I'm a kobold.", game_map.messages
+    assert state["chat_target"] is None and state.get("dialogue") is None
+    assert turns_passed(before) == 1, "talking didn't take exactly one turn"
+
+    # a golem answers, then asks for a topic; topics take no turns
+    before = player.turns_until_heal
+    press(game_map, pygame.K_c, game_state=state)
+    state["chat_target"] = golem        # both have wandered a turn, so choose the golem directly
+    press(game_map, pygame.K_c, game_state=state)                   # c again also talks
+    assert state.get("dialogue") is golem, "golem didn't start a dialogue"
+    assert game_map.messages[:4] == ["The golem: Beep beep, I'm a golem."] + chat.topic_lines(golem), game_map.messages
+    press(game_map, pygame.K_1, pygame.K_KP4, game_state=state)     # weather, then changing body parts
+    assert game_map.messages[0] == "The golem: " + chat.GOLEM_TOPICS[3][1] and state["dialogue"] is golem
+    assert turns_passed(before) == 1, "choosing topics took turns"
+    press(game_map, pygame.K_5, game_state=state)                   # loyalty
+    assert golem.mood == "friend" and golem.target is player and state["dialogue"] is None
+    assert game_map.messages[-1] == "The golem is now your friend!", game_map.messages
+
+    # Esc cancels choosing without a turn; with nobody in sight there's nobody to talk to
+    before = player.turns_until_heal
+    press(game_map, pygame.K_c, pygame.K_ESCAPE, game_state=state)
+    assert state["chat_target"] is None and game_map.messages == ["You decide not to talk."]
+    assert turns_passed(before) == 0
+    lonely = empty_room_map()
+    press(lonely, pygame.K_c, game_state=state)
+    assert state["chat_target"] is None and lonely.messages == ["There's nobody to talk to."]
+
+    # every chat line fits beside the More indicator
+    lines = [chat.greeting(c) for c in (golem, kobold)] + chat.topic_lines(golem) \
+        + [chat.says(golem, answer) for name, answer in chat.GOLEM_TOPICS]
+    for line in lines:
+        assert len(line) <= 52, f"chat line too long ({len(line)}): {line}"
+    print("OK rule checks: c chats; talking takes a turn, golem topics don't, loyalty makes a friend")
 
 def check_wait():
     from creatures import Kobold
@@ -673,6 +732,7 @@ check_mood_colors()
 check_provoke()
 check_flee()
 check_friend()
+check_chat()
 play_random_games()
 run_real_game()     # last, because quitting the game shuts pygame down
 print("All checks passed.")

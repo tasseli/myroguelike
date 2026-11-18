@@ -6,6 +6,7 @@ from keyboard import read_moves, read_death_screen_key, read_digit
 from map import OPEN_SPACE, WALL, LOG_ROWS, CLOSE_STEPS, find_creature_at
 from help_texts import COMMAND_LINES, HELP_LINES
 from look import visible_creatures, first_look_target, next_in_direction, describe
+from chat import says, greeting, has_topics, topic_lines, GOLEM_TOPICS, LOYALTY
 
 # The 8 directions in order around a circle, so neighbours in the list are 45 degrees apart
 DIRECTIONS = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
@@ -328,6 +329,79 @@ def handle_look_input(event_key, typed_char, pygame, game_map, game_state):
             game_state["look_target"] = next_target
             game_map.messages = describe(next_target, game_map)
 
+# Show the next rows of the log, back to the first after the last; no turn passes
+def page_log(game_map):
+    if len(game_map.messages) > LOG_ROWS:
+        game_map.log_offset += LOG_ROWS
+        if game_map.log_offset >= len(game_map.messages):
+            game_map.log_offset = 0
+
+# Chatting (c) has three steps:
+# 1. choose whom to talk to: a cursor like in look mode (game_state["chat_target"]); no turn passes
+# 2. talk: the creature answers, and this takes one turn
+# 3. golems go on with topics to choose from (game_state["dialogue"]); choosing takes no turns
+def start_chat(game_map, game_state):
+    game_map.log_offset = 0
+    monsters = visible_creatures(game_map)[1:]
+    if not monsters:
+        game_map.messages = ["There's nobody to talk to."]
+        return
+    game_state["chat_target"] = monsters[0]
+    game_map.messages = ["Who do you want to talk to?"] + describe(monsters[0], game_map)
+
+def handle_chat_choice(event_key, typed_char, pygame, game_map, game_state):
+    if event_key == pygame.K_ESCAPE:
+        game_state["chat_target"] = None
+        game_map.messages = ["You decide not to talk."]
+        return
+    if event_key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_c):
+        talk_to(game_map, game_state, game_state["chat_target"])
+        return
+    outcome, direction = read_moves(event_key, pygame, typed_char)
+    if outcome == "q":
+        quit_app("", pygame)
+    elif outcome == "m":
+        monsters = visible_creatures(game_map)[1:]
+        next_target = next_in_direction(game_state["chat_target"], monsters, direction)
+        if next_target is not None:
+            game_state["chat_target"] = next_target
+            game_map.messages = ["Who do you want to talk to?"] + describe(next_target, game_map)
+
+def talk_to(game_map, game_state, creature):
+    game_state["chat_target"] = None
+    game_map.log_offset = 0
+    game_map.messages = [greeting(creature)]
+    # talking takes a turn: the others move, and their messages follow the talk
+    if play_turn(game_map, (0, 0)):
+        game_state["GAME_ON"] = False
+        return
+    if has_topics(creature) and creature in game_map.creatures:
+        game_state["dialogue"] = creature
+        game_map.messages = game_map.messages[:1] + topic_lines(creature) + game_map.messages[1:]
+
+def handle_dialogue(event_key, pygame, game_map, game_state):
+    creature = game_state["dialogue"]
+    digit = read_digit(event_key, pygame)
+    if event_key == pygame.K_ESCAPE:
+        game_state["dialogue"] = None
+        game_map.messages = ["You end the talk."]
+        game_map.log_offset = 0
+    elif event_key == pygame.K_m:
+        page_log(game_map)
+    elif event_key == pygame.K_q or event_key == pygame.K_x:
+        quit_app("", pygame)
+    elif digit is not None and 1 <= int(digit) <= len(GOLEM_TOPICS):
+        topic = int(digit) - 1
+        answer = says(creature, GOLEM_TOPICS[topic][1])
+        game_map.log_offset = 0
+        if topic == LOYALTY:
+            creature.mood = "friend"
+            creature.target = game_map.player
+            game_state["dialogue"] = None
+            game_map.messages = [answer, "The " + creature.name + " is now your friend!"]
+        else:
+            game_map.messages = [answer] + topic_lines(creature)
+
 # Called once a frame: handle the keys pressed, and play the next waited turn when it's time
 def handle_events(pygame, game_map, game_state):
     for event in pygame.event.get():
@@ -340,6 +414,12 @@ def handle_events(pygame, game_map, game_state):
             handle_look_input(event.key, getattr(event, "unicode", ""), pygame, game_map, game_state)
         elif event.type == pygame.KEYDOWN and game_state.get("wait_input") is not None:
             handle_wait_input(event.key, pygame, game_map, game_state)
+        elif event.type == pygame.KEYDOWN and game_state.get("chat_target") is not None:
+            handle_chat_choice(event.key, getattr(event, "unicode", ""), pygame, game_map, game_state)
+            if not game_state["GAME_ON"]:
+                return                                  # died during the turn spent talking
+        elif event.type == pygame.KEYDOWN and game_state.get("dialogue") is not None:
+            handle_dialogue(event.key, pygame, game_map, game_state)
         elif event.type == pygame.KEYDOWN:
             outcome, direction = read_moves(event.key, pygame, getattr(event, "unicode", ""))
             if outcome == "q":
@@ -348,11 +428,9 @@ def handle_events(pygame, game_map, game_state):
 #               An unhandled key was pressed
                 pass
             elif outcome == "more":
-                # show the next rows of this turn's messages, back to the first after the last; no turn passes
-                if len(game_map.messages) > LOG_ROWS:
-                    game_map.log_offset += LOG_ROWS
-                    if game_map.log_offset >= len(game_map.messages):
-                        game_map.log_offset = 0
+                page_log(game_map)
+            elif outcome == "chat":
+                start_chat(game_map, game_state)
             elif outcome == "m" or outcome == "s": # if moving happened
 #               Move key or stand still key
                 game_map.messages = []
