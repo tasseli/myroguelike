@@ -117,7 +117,7 @@ def check_step_around():
 # Press keys one after another; game_state is kept between them (e.g. an open wait prompt)
 def press(game_map, *keys, game_state=None):
     if game_state is None:
-        game_state = {"GAME_ON": True}
+        game_state = loop_utils.new_game_state()
     for key in keys:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=key))
         loop_utils.handle_events(pygame, game_map, game_state)
@@ -130,7 +130,7 @@ def check_help():
 
     # '?' is recognised by the character typed (here Shift + slash, as on a US keyboard)
     pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SLASH, unicode="?"))
-    loop_utils.handle_events(pygame, game_map, {"GAME_ON": True})
+    loop_utils.handle_events(pygame, game_map, loop_utils.new_game_state())
     assert game_map.messages == COMMAND_LINES, "? didn't show the commands"
     press(game_map, pygame.K_m)
     assert game_map.log_offset == 4, "m didn't page the commands"
@@ -164,7 +164,7 @@ def check_look():
     place(game_map, gnoll, p_x, p_y - 4)
     place(game_map, golem, min(p_x + 16, m.MAP_WIDTH - 2), p_y)    # too far away to see
     game_map.messages = ["before looking"]
-    state = {"GAME_ON": True}
+    state = loop_utils.new_game_state()
     turns_until_heal = game_map.player.turns_until_heal
 
     press(game_map, pygame.K_l, game_state=state)
@@ -196,8 +196,8 @@ def check_look():
     assert describe(leader, game_map)[1].endswith("It is chasing you."), describe(leader, game_map)
 
     # t follows the chain: follower -> leader -> player; the player has no target
-    state["look_saved_log"] = (["before looking"], 0)
-    state["look_target"] = follower
+    press(game_map, pygame.K_l, game_state=state)
+    state["look_target"] = follower     # put the look cursor on the follower
     press(game_map, pygame.K_t, game_state=state)
     assert state["look_target"] is leader, "t didn't jump to the orc it chases"
     press(game_map, pygame.K_t, game_state=state)
@@ -345,13 +345,16 @@ def check_look_while_dead():
     uruk = Uruk([0, 0], CHASE, game_map.player)
     place(game_map, uruk, p_x + 1, p_y)
     game_map.player.health = -2                 # dead
-    state = {"GAME_ON": False}
+    game_map.killed_by = "uruk"
+    state = loop_utils.new_game_state()
+    loop_utils.die(game_map, state)
+    assert state["mode"] == loop_utils.DEAD and game_map.messages[1] == "Killed by an uruk.", game_map.messages
 
     def death_screen_keys(*keys):
         result = None
         for key in keys:
             pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=key))
-            result = loop_utils.handle_death_screen_keys(pygame, game_map, state)
+            result = loop_utils.handle_events(pygame, game_map, state)
         return result
 
     assert death_screen_keys(pygame.K_l) is None and state["look_target"] is uruk, "l didn't look at the killer"
@@ -359,7 +362,8 @@ def check_look_while_dead():
     assert state["look_target"] is game_map.player
     assert game_map.messages == ["Looking at: you (@).", "Health 0/12."], game_map.messages
     death_screen_keys(pygame.K_ESCAPE)
-    assert state["look_target"] is None, "Esc didn't stop looking"
+    assert state["look_target"] is None and state["mode"] == loop_utils.DEAD, "Esc didn't go back to the death screen"
+    assert game_map.messages[1] == "Killed by an uruk.", "the death screen text didn't come back"
     assert death_screen_keys(pygame.K_r) == "restart", "r didn't restart after looking"
     print("OK rule checks: l looks around on the death screen")
 
@@ -414,7 +418,7 @@ def check_chat():
     kobold = Kobold([0, 0])
     place(game_map, golem, p_x + 2, p_y)
     place(game_map, kobold, p_x - 3, p_y)
-    state = {"GAME_ON": True}
+    state = loop_utils.new_game_state()
     player = game_map.player
     def turns_passed(before):
         return before - player.turns_until_heal
@@ -481,7 +485,7 @@ def check_wait():
 
     # nobody around: wait the full 20 turns and heal 1
     game_map = empty_room_map()
-    state = {"GAME_ON": True}
+    state = loop_utils.new_game_state()
     game_map.player.health = 5
     press(game_map, pygame.K_w, pygame.K_2, pygame.K_KP0, pygame.K_RETURN, game_state=state)
     assert state["wait_input"] is None, "the prompt stayed open"
@@ -505,7 +509,7 @@ def check_wait():
 
     # started below full health: stop when full health is reached (1 health short heals in 20 turns)
     full_map = empty_room_map()
-    full_state = {"GAME_ON": True}
+    full_state = loop_utils.new_game_state()
     full_map.player.health = full_map.player.health_max - 1
     press(full_map, pygame.K_w, pygame.K_5, pygame.K_0, pygame.K_RETURN, game_state=full_state)
     run_frames_while_waiting(full_map, full_state)
@@ -543,7 +547,7 @@ def check_wait():
 
     # any key stops waiting, and that key does nothing else
     game_map = empty_room_map()
-    state = {"GAME_ON": True}
+    state = loop_utils.new_game_state()
     press(game_map, pygame.K_w, pygame.K_9, pygame.K_9, pygame.K_RETURN, game_state=state)    # turn 1
     for frame in range(gap(2) + gap(3)):                                                      # turns 2 and 3
         loop_utils.handle_events(pygame, game_map, state)
@@ -650,22 +654,31 @@ def check_hit_messages(messages):
 
 def play_random_games(games=200, max_turns=300):
     totals = {"turns": 0, "hits": 0, "deaths": 0, "heals": 0, "player deaths": 0}
+    # remember the log of the turn the player dies on, before die() replaces it with the death screen
+    last_turn_before_death = [[]]
+    original_die = loop_utils.die
+    def remembering_die(game_map, game_state):
+        last_turn_before_death[0] = list(game_map.messages)
+        original_die(game_map, game_state)
+    loop_utils.die = remembering_die
     for game in range(games):
         random.seed(game)       # same games every run, so results can be compared and repeated
         game_map = m.Map()
         check_starting_creatures(game_map)
         check_spawns(game_map)
         check_consistency(game_map)
-        game_state = {"GAME_ON": True}
+        game_state = loop_utils.new_game_state()
         for turn in range(max_turns):
             health_before = {id(c): c.health for c in game_map.creatures}
             pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=random.choice(KEYS)))
             loop_utils.handle_events(pygame, game_map, game_state)
+            # on the turn the player dies, the log shows the death screen; count that turn's messages instead
+            turn_messages = last_turn_before_death[0] if game_state["mode"] == loop_utils.DEAD else game_map.messages
             totals["turns"] += 1
-            totals["hits"] += sum(is_hit_message(s) for s in game_map.messages)
-            totals["deaths"] += sum("dies!" in s for s in game_map.messages)
-            check_hit_messages(game_map.messages)
-            if not game_state["GAME_ON"]:
+            totals["hits"] += sum(is_hit_message(s) for s in turn_messages)
+            totals["deaths"] += sum("dies!" in s for s in turn_messages)
+            check_hit_messages(turn_messages)
+            if game_state["mode"] == loop_utils.DEAD:
                 assert game_map.player.health < 1, "game ended but the player is alive"
                 killers = {"orc", "uruk", "kobold", "gnoll", "goblin", "golem"}
                 assert game_map.killed_by in killers, f"killed_by is {game_map.killed_by!r}"
@@ -677,6 +690,7 @@ def play_random_games(games=200, max_turns=300):
                     assert c.health == health_before[id(c)] + 1, f"{c.name} healed more than 1"
                     totals["heals"] += 1
             check_consistency(game_map)
+    loop_utils.die = original_die
     print(f"OK random games: {games} games, " + ", ".join(f"{v} {k}" for k, v in totals.items()))
 
 

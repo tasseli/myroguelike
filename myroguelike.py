@@ -2,9 +2,8 @@
 # consider renaming to gameloop.py
 
 import pygame
-from loop_utils import handle_events, handle_death_screen_keys
+from loop_utils import handle_events, new_game_state, PLAY, WAIT_PROMPT, WAITING, LOOK, CHOOSE_CHAT, DIALOGUE, DEAD
 from draw import render_map, render_message_log, render_player_status, render_key_hints, render_look_cursor
-from creatures import with_article
 from map import Map, MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, GRAY, LOG_ROWS
 from help_texts import KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS, DEATH_KEY_HINTS
 
@@ -34,42 +33,42 @@ def draw_frame(game_map, messages, log_offset, key_hints, look_target=None):
     pygame.display.flip()
     clock.tick(FPS)
 
+# The key hint row shown in each mode
+KEY_HINTS_FOR_MODE = {
+    PLAY: KEY_HINTS,
+    WAIT_PROMPT: KEY_HINTS,
+    WAITING: WAIT_KEY_HINTS,
+    LOOK: LOOK_KEY_HINTS,
+    CHOOSE_CHAT: CHAT_KEY_HINTS,
+    DIALOGUE: DIALOGUE_KEY_HINTS,
+    DEAD: DEATH_KEY_HINTS,
+}
+
+# The creature the blinking cursor is on: the one looked at, chosen to talk to, or talked with
+def cursor_creature(game_state):
+    mode = game_state["mode"]
+    if mode == LOOK:
+        return game_state["look_target"]
+    if mode == CHOOSE_CHAT:
+        return game_state["chat_target"]
+    if mode == DIALOGUE:
+        return game_state["dialogue"]
+    return None
+
 # Play one game, from a new map to the death screen. Returns when the player wants to play again.
 def play_game():
     # Generate the map with its creatures
     game_map = Map()
-
-    # Main loop
     game_map.messages = ["Welcome to Myr!", "Move around with arrows or numpad.", "Moving towards an 'o'rc or other creatures attacks.", "Good luck!"]
-    game_state = {"GAME_ON": True}
-    while game_state["GAME_ON"]:
-        handle_events(pygame, game_map, game_state)
-        # the blinking cursor is on the creature looked at, chosen to talk to, or talked with
-        looking_at = game_state.get("look_target") or game_state.get("chat_target") or game_state.get("dialogue")
-        if game_state.get("waiting") is not None:
-            key_hints = WAIT_KEY_HINTS
-        elif game_state.get("look_target") is not None:
-            key_hints = LOOK_KEY_HINTS
-        elif game_state.get("chat_target") is not None:
-            key_hints = CHAT_KEY_HINTS
-        elif game_state.get("dialogue") is not None:
-            key_hints = DIALOGUE_KEY_HINTS
-        else:
-            key_hints = KEY_HINTS
-        draw_frame(game_map, game_map.messages, game_map.log_offset, key_hints, looking_at)
+    game_state = new_game_state()
 
-    # game_state is GAME_ON==False, player has died
-    killer = game_map.killed_by
-    death_messages = ["You died gloriously on the battlefield!", "Killed by " + with_article(killer) + ".", "Thank you for playing. Better luck next time.", "Press 'r' to play again, 'l' to look around or 'q' to quit."]
+    # Main loop: dying switches to the DEAD mode, where r plays again
     while True:
-        if handle_death_screen_keys(pygame, game_map, game_state) == "restart":
+        if handle_events(pygame, game_map, game_state) == "restart":
             return
-        looking_at = game_state.get("look_target")
-        if looking_at is not None:
-            draw_frame(game_map, game_map.messages, 0, LOOK_KEY_HINTS, looking_at)
-        else:
-            draw_frame(game_map, death_messages, 0, DEATH_KEY_HINTS)
+        draw_frame(game_map, game_map.messages, game_map.log_offset,
+                   KEY_HINTS_FOR_MODE[game_state["mode"]], cursor_creature(game_state))
 
-# Play games until the player quits; quitting exits the program from inside the loops
+# Play games until the player quits; quitting exits the program from inside the loop
 while True:
     play_game()
