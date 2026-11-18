@@ -40,11 +40,11 @@ HELP_LINES = [
     "   one that way. l or Esc stops looking.",
     "Log: when a turn has more than 4 messages, the",
     "   rows are numbered and m shows the next ones.",
-    "After dying: r plays again, q quits.",
+    "After dying: r plays again, l looks around, q quits.",
 ]
 
 # Shown on the row under the message log
 KEY_HINTS = "arrows/numpad: move  5: stay  w: wait  l: look  m: more  ?: commands  h: help"
 WAIT_KEY_HINTS = "any key: stop waiting"
 LOOK_KEY_HINTS ="arrows/numpad: next creature that way   l or Esc: stop looking"
-DEATH_KEY_HINTS = "r: play again   q: quit"
+DEATH_KEY_HINTS = "r: play again   l: look around   q: quit"

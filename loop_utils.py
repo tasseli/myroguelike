@@ -322,15 +322,20 @@ def handle_events(pygame, game_map, game_state):
     if game_state.get("waiting") is not None:
         continue_waiting(game_map, game_state)
 
+# Keys on the death screen. l starts look mode, which works as during the game (game_state["look_target"]).
 # Return "restart" if the player wants to play again; quitting exits the program.
-def handle_death_screen_keys(pygame):
+def handle_death_screen_keys(pygame, game_map, game_state):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("event.type == quit", pygame)
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN and game_state.get("look_target") is not None:
+            handle_look_input(event.key, getattr(event, "unicode", ""), pygame, game_map, game_state)
+        elif event.type == pygame.KEYDOWN:
             outcome = read_death_screen_key(event.key, pygame)
             if outcome == "q":
                 quit_app("q or x pressed", pygame)
             elif outcome == "r":
                 return "restart"
+            elif outcome == "l":
+                start_looking(game_map, game_state)
     return None

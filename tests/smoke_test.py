@@ -308,6 +308,31 @@ def check_flee():
     assert orc.health == 1 and orc.mood == "toward" and orc.target is game_map.player, orc.mood
     print("OK rule checks: kobolds at 2 health or less flee (yellow) until healed, then wander")
 
+def check_look_while_dead():
+    from creatures import Uruk
+    game_map = empty_room_map()
+    p_x, p_y = game_map.player.position
+    uruk = Uruk([0, 0], "toward", game_map.player)
+    place(game_map, uruk, p_x + 1, p_y)
+    game_map.player.health = -2                 # dead
+    state = {"GAME_ON": False}
+
+    def death_screen_keys(*keys):
+        result = None
+        for key in keys:
+            pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=key))
+            result = loop_utils.handle_death_screen_keys(pygame, game_map, state)
+        return result
+
+    assert death_screen_keys(pygame.K_l) is None and state["look_target"] is uruk, "l didn't look at the killer"
+    death_screen_keys(pygame.K_LEFT)
+    assert state["look_target"] is game_map.player
+    assert game_map.messages == ["Looking at: you (@).", "Health 0/12."], game_map.messages
+    death_screen_keys(pygame.K_ESCAPE)
+    assert state["look_target"] is None, "Esc didn't stop looking"
+    assert death_screen_keys(pygame.K_r) == "restart", "r didn't restart after looking"
+    print("OK rule checks: l looks around on the death screen")
+
 def check_wait():
     from creatures import Kobold
     gap = loop_utils.wait_frames_before_turn
@@ -553,6 +578,7 @@ check_step_around()
 check_wait()
 check_help()
 check_look()
+check_look_while_dead()
 check_mood_colors()
 check_provoke()
 check_flee()

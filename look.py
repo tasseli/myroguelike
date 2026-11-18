@@ -62,7 +62,7 @@ def doing(creature):
 
 # Two log lines describing the creature
 def describe(creature, game_map):
-    health = "Health " + str(creature.health) + "/" + str(creature.health_max) + "."
+    health = "Health " + str(max(creature.health, 0)) + "/" + str(creature.health_max) + "."   # a dead player: 0
     if creature.is_player:
         return ["Looking at: you (@).", health]
     steps = steps_between(creature.get_position(), game_map.player.get_position())

@@ -55,11 +55,15 @@ def play_game():
     # game_state is GAME_ON==False, player has died
     killer = game_map.killed_by
     article = "an" if killer[0] in "aeiou" else "a"     # an orc, a gnoll
-    death_messages = ["You died gloriously on the battlefield!", "Killed by " + article + " " + killer + ".", "Thank you for playing. Better luck next time.", "Press 'r' to play again or 'q' to quit."]
+    death_messages = ["You died gloriously on the battlefield!", "Killed by " + article + " " + killer + ".", "Thank you for playing. Better luck next time.", "Press 'r' to play again, 'l' to look around or 'q' to quit."]
     while True:
-        if handle_death_screen_keys(pygame) == "restart":
+        if handle_death_screen_keys(pygame, game_map, game_state) == "restart":
             return
-        draw_frame(game_map, death_messages, 0, DEATH_KEY_HINTS)
+        looking_at = game_state.get("look_target")
+        if looking_at is not None:
+            draw_frame(game_map, game_map.messages, 0, LOOK_KEY_HINTS, looking_at)
+        else:
+            draw_frame(game_map, death_messages, 0, DEATH_KEY_HINTS)
 
 # Play games until the player quits; quitting exits the program from inside the loops
 while True:
