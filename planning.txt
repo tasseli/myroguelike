@@ -1,14 +1,19 @@
 planning
 
 Fix / rewrite:
-- work best prints into messages
-    - would it solve the design if messages were a property of a map? It's being passed in the correct places it seems.
 - adding messages to bottom UI
     - simplify
     - pick a good function setup
+    - only the last 4 messages fit, so a busy turn can push out the player's own
 - do I need to pass coordinates as a list instead of tuple, everywhere?
 - modularize rendering logic
     - draw smarter than one char at a time
+    - redraw only when something changes; a turn-based game doesn't need 30 redraws a second
+- keep the smoke test in the repo (tests/), so changes can be checked with one command
+- read_moves changes the passed new_position; return the new position instead
+- death screen should show what killed the player
+- the "run right" orc gets stuck against a wall for the rest of the game
+- aitips.txt: commit or ignore it; requirements.txt says pygame 2.6.1, 2.5.2 is installed
 
 Add features:
 - create a better message system
@@ -30,6 +35,16 @@ Add features:
 - languages based on INT
 - bartering based on language / abilities
 - "Look at ..." "It doesn't make sense to you" / "you see another Dwarven healer with a spellbook of second circle on their backpack, probably"It would be very cool if there'd be stat potions lying around, and raising a stat did show, but everything else changed based on the stats.
+
+Done (Nov 2026):
+- work best prints into messages: hit and death messages go to the bottom UI through game_map.messages (messages are a property of the map)
+- creatures spawn on free floor in the generated room; monsters start at least 8 moves from the player
+- monsters only attack the player or their own target, others just block them
+- every creature has its own letter (gnoll n, uruk u)
+- player's health is shown next to the message log
+- slow healing for all creatures: 1 hp per 20 turns
+- 30 fps cap; faster drawing (only tiles near the player, no square root, cached characters)
+- less duplicate code: one Creature __init__ with health_range, Map.add_creature
 
 Recap:
  pygame.display.set_mode()  can be used to create the grid
