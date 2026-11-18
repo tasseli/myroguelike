@@ -96,6 +96,7 @@ def empty_room_map():
             game_map.my_map[x][y] = m.OPEN_SPACE
     game_map.rooms, game_map.corridor = [room], []
     game_map.distance_cache = {}        # the walls changed
+    game_map.view_cache = {}
     game_map.creatures = []
     place(game_map, game_map.player, 40, 20)
     return game_map
@@ -184,6 +185,42 @@ def check_path_through_corridor():
     after = [distances[tuple(rear.position)], distances[tuple(front.position)]]
     assert after[0] < before[0] and after[1] < before[1], f"walking distances {before} -> {after}"
     print("OK rule checks: chasers find the shortest way through the corridor, swapping past others there")
+
+def check_line_of_sight():
+    import draw
+    from look import visible_creatures
+    from creatures import Kobold
+    game_map = empty_room_map()
+    p_x, p_y = game_map.player.position                      # (40, 20)
+    # a wall 3 tiles to the right of the player, 9 tiles high, and a kobold behind it
+    for y in range(p_y - 4, p_y + 5):
+        game_map.my_map[p_x + 3][y] = m.WALL
+    game_map.view_cache = {}
+    kobold = Kobold([0, 0], CHASE, game_map.player)
+    place(game_map, kobold, p_x + 6, p_y)
+    visible = game_map.visible_tiles(game_map.player)
+    assert (p_x + 3, p_y) in visible, "the wall itself should be visible"
+    assert (p_x + 6, p_y) not in visible, "a tile behind the wall is visible"
+    assert (p_x - 6, p_y) in visible and (p_x, p_y - 6) in visible, "open tiles nearby aren't visible"
+    assert kobold not in visible_creatures(game_map), "look can pick a creature behind a wall"
+
+    # drawn: the kobold behind the wall isn't; after moving away, the seen wall is remembered, dim
+    screen = pygame.display.set_mode((m.MAP_WIDTH * m.TILE_SIZE, m.MAP_HEIGHT * m.TILE_SIZE))
+    font = pygame.font.SysFont(None, 22)
+    def background(x, y):
+        return tuple(screen.get_at((x * m.TILE_SIZE, y * m.TILE_SIZE)))[:3]
+    screen.fill(m.GRAY)
+    draw.render_map(game_map, pygame, screen, font, game_map.player)
+    assert background(p_x + 3, p_y) == m.DARK_GRAY and background(p_x + 6, p_y) == m.GRAY, "wall or kobold drawn wrong"
+    assert (p_x + 3, p_y) in game_map.seen
+    game_map.my_map[p_x][p_y] = m.OPEN_SPACE
+    game_map.player.position = [27, 10]                       # far away, the wall is out of view
+    game_map.my_map[27][10] = "@"
+    screen.fill(m.GRAY)
+    draw.render_map(game_map, pygame, screen, font, game_map.player)
+    assert (p_x + 3, p_y) not in game_map.visible_tiles(game_map.player)
+    assert background(p_x + 3, p_y) == m.REMEMBERED_WALL, f"remembered wall drawn {background(p_x + 3, p_y)}"
+    print("OK rule checks: walls block the view; seen tiles are remembered and drawn dim")
 
 def press(game_map, *keys, game_state=None):
     if game_state is None:
@@ -919,6 +956,7 @@ check_wait()
 check_help()
 check_look()
 check_look_while_dead()
+check_line_of_sight()
 check_mood_colors()
 check_provoke()
 check_flee()

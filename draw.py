@@ -1,12 +1,9 @@
 # draw.py
 
-from map import (WHITE, GRAY, DARK_GRAY, BLACK, RED, YELLOW, GREEN)
+from map import (WHITE, GRAY, DARK_GRAY, BLACK, RED, YELLOW, GREEN, REMEMBERED_WALL, DIM_TEXT)
 from map import (MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, LOG_ROWS)
-from map import OPEN_SPACE
+from map import OPEN_SPACE, WALL
 from creatures import CHASE, FLEE, FRIEND
-
-# how far around the player the map is visible
-VIEW_RADIUS = 12
 
 # Draw text on a dark background, one character per tile, starting at tile x, y.
 def draw_text(text, x, y, pygame, screen, font):
@@ -57,19 +54,25 @@ def coords_on_border_of_map(x, y):
         return True
     return False
 
-# Compare squared distances: same result as z > sqrt(...), without the slow square root.
-def coords_within_distance_z(x, y, z, creature):
-    position = creature.get_position()
-    c_x, c_y = position[0], position[1]
-    return (c_x-x)**2 + (c_y-y)**2 < z*z # True or False
-
 def render_floors_different_color(game_map, pygame, screen, font, x, y):
     if game_map.get_sign(x,y) == OPEN_SPACE:
         draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y, GRAY)
     else:
         draw_and_blit_char(pygame, screen, font, game_map.get_sign(x,y), x, y, DARK_GRAY)
 
-def render_map(game_map, pygame, screen, font, creature):
+# A tile seen before but not in view now: its wall or floor, dimmer, and no creature (who knows who's there now)
+def render_remembered(game_map, pygame, screen, font, x, y):
+    if game_map.get_sign(x, y) == WALL:
+        draw_and_blit_char(pygame, screen, font, WALL, x, y, REMEMBERED_WALL, DIM_TEXT)
+    else:
+        draw_and_blit_char(pygame, screen, font, OPEN_SPACE, x, y, GRAY, DIM_TEXT)
+
+# Draw what the viewer (the player) sees, what it remembers, and the map's outer border
+def render_map(game_map, pygame, screen, font, viewer):
+    visible = game_map.visible_tiles(viewer)
+    game_map.seen |= visible
+    for x, y in game_map.seen - visible:
+        render_remembered(game_map, pygame, screen, font, x, y)
     # the map's outer border is always visible
     for x in range(0, MAP_WIDTH):
         render_floors_different_color(game_map, pygame, screen, font, x, 0)
@@ -77,18 +80,14 @@ def render_map(game_map, pygame, screen, font, creature):
     for y in range(1, MAP_HEIGHT-1):
         render_floors_different_color(game_map, pygame, screen, font, 0, y)
         render_floors_different_color(game_map, pygame, screen, font, MAP_WIDTH-1, y)
-    # only tiles in a box around the creature can be close enough to see;
-    # the box stays inside the border, which was already drawn above
-    c_x, c_y = creature.get_position()
-    for x in range(max(c_x - VIEW_RADIUS, 1), min(c_x + VIEW_RADIUS + 1, MAP_WIDTH-1)):
-        for y in range(max(c_y - VIEW_RADIUS, 1), min(c_y + VIEW_RADIUS + 1, MAP_HEIGHT-1)):
-            if coords_within_distance_z(x, y, VIEW_RADIUS, creature):
-                render_floors_different_color(game_map, pygame, screen, font, x, y)
+    for x, y in visible:
+        if not coords_on_border_of_map(x, y):
+            render_floors_different_color(game_map, pygame, screen, font, x, y)
     # visible creatures whose mood has its own color are drawn again in that color
     for other in game_map.creatures:
         color = creature_color(other, game_map.player)
-        o_x, o_y = other.get_position()
-        if color != DARK_GRAY and coords_within_distance_z(o_x, o_y, VIEW_RADIUS, creature):
+        if color != DARK_GRAY and tuple(other.get_position()) in visible:
+            o_x, o_y = other.get_position()
             draw_and_blit_char(pygame, screen, font, other.sign, o_x, o_y, color)
 
 # The background color of a creature's tile, by its mood:
@@ -105,18 +104,18 @@ def creature_color(creature, player):
         return GREEN
     return DARK_GRAY
 
-# Rendered characters, built once per font and character and then reused
+# Rendered characters, built once per font, character and text color, and then reused
 glyph_cache = {}
 
-def get_glyph(font, my_char):
-    key = (font, my_char)
+def get_glyph(font, my_char, text_color=BLACK):
+    key = (font, my_char, text_color)
     if key not in glyph_cache:
-        glyph_cache[key] = font.render(my_char, True, BLACK)
+        glyph_cache[key] = font.render(my_char, True, text_color)
     return glyph_cache[key]
 
-def draw_and_blit_char(pygame, screen, font, my_char, x, y, color):
+def draw_and_blit_char(pygame, screen, font, my_char, x, y, color, text_color=BLACK):
     pygame.draw.rect(screen, color, (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
     # Draw the my_char (e.g. '#' / '@') character on top of the background color
-    text_surface = get_glyph(font, my_char)
+    text_surface = get_glyph(font, my_char, text_color)
     text_rect = text_surface.get_rect(center=(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2))
     screen.blit(text_surface, text_rect)

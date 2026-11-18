@@ -7,7 +7,6 @@ Fix / rewrite:
 - modularize rendering logic
     - draw smarter than one char at a time
     - redraw only when something changes; a turn-based game doesn't need 30 redraws a second
-- fog of war shows everything within 12 tiles, also through walls (into the other room)
 
 Add features:
 - create a better message system
@@ -67,3 +66,4 @@ Done (Nov 2026):
 - golems flee at 2 health or less until half health, then go back to their earlier mood (a fleeing friend still counts as a friend)
 - dungeon: two random sized rooms (left and right half) joined by a straight corridor
 - pathfinding: chasers and friends take the shortest walkable way (breadth-first search), swapping places to pass others in the corridor
+- line of sight: walls block the view; seen tiles are remembered and drawn dim (without creatures)

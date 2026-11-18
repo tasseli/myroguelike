@@ -2,7 +2,6 @@
 # The look command (l): a cursor that selects visible creatures and describes them.
 
 import math
-from draw import VIEW_RADIUS
 from creatures import CHASE, FLEE, FRIEND, RUN_RIGHT, with_article
 
 # Moves between two tiles; diagonal steps are allowed, so it's the larger of the two distances
@@ -10,13 +9,13 @@ def steps_between(a, b):
     return max(abs(a[0] - b[0]), abs(a[1] - b[1]))
 
 # The creatures the player can see: the player first, then the others from nearest to farthest.
-# Uses the same distance check as the fog of war in draw.py.
+# Uses the same line of sight as drawing the map (Map.visible_tiles).
 def visible_creatures(game_map):
     p_x, p_y = game_map.player.get_position()
+    in_view = game_map.visible_tiles(game_map.player)
     seen = []
     for creature in game_map.creatures[1:]:
-        x, y = creature.get_position()
-        if (x - p_x)**2 + (y - p_y)**2 < VIEW_RADIUS * VIEW_RADIUS:
+        if tuple(creature.get_position()) in in_view:
             seen.append(creature)
     seen.sort(key=lambda c: (c.position[0] - p_x)**2 + (c.position[1] - p_y)**2)
     return [game_map.player] + seen

@@ -14,6 +14,9 @@ MAP_HEIGHT  = 40
 TILE_SIZE   = 16
 LOG_ROWS    = 4     # message rows shown under the map
 
+# How far the player can see (if no wall is in the way)
+VIEW_RADIUS = 12
+
 # The sizes of the two rooms, picked at random between these, inclusive
 ROOM_MIN_WIDTH, ROOM_MAX_WIDTH = 8, 24
 ROOM_MIN_HEIGHT, ROOM_MAX_HEIGHT = 6, 16
@@ -37,6 +40,8 @@ BLACK       = (0, 0, 0)         # Text color
 RED         = (190, 50, 50)     # Monster chasing the player
 YELLOW      = (210, 180, 50)    # Monster fleeing
 GREEN       = (70, 170, 70)     # Friendly creature
+REMEMBERED_WALL = (96, 96, 96)  # Wall seen before but not in view now
+DIM_TEXT    = (70, 70, 70)      # Text color for tiles seen before but not in view now
 
 def find_creature_at(creatures, x, y):
     i = 0
@@ -101,6 +106,46 @@ class Map:
                     todo.append(tile)
         return distances
 
+    # The tiles the player can see from where it stands: within VIEW_RADIUS, with no wall on the straight
+    # line from the player to the tile (a wall itself can be seen, but not what's behind it). Creatures
+    # don't block the view. A set of (x, y); kept and reused per tile, as the walls never change.
+    def visible_tiles(self, viewer):
+        start = tuple(viewer.get_position())
+        if start not in self.view_cache:
+            if len(self.view_cache) > 200:
+                self.view_cache = {}
+            self.view_cache[start] = self.tiles_in_view(start)
+        return self.view_cache[start]
+
+    def tiles_in_view(self, start):
+        s_x, s_y = start
+        visible = set()
+        for x in range(max(s_x - VIEW_RADIUS, 0), min(s_x + VIEW_RADIUS + 1, MAP_WIDTH)):
+            for y in range(max(s_y - VIEW_RADIUS, 0), min(s_y + VIEW_RADIUS + 1, MAP_HEIGHT)):
+                if (x - s_x)**2 + (y - s_y)**2 < VIEW_RADIUS * VIEW_RADIUS and self.line_is_clear(s_x, s_y, x, y):
+                    visible.add((x, y))
+        return visible
+
+    # True if no wall stands on the straight line between the two tiles (the ends themselves don't count).
+    # The line goes tile by tile, like a line drawn on squared paper (Bresenham's line algorithm).
+    def line_is_clear(self, x0, y0, x1, y1):
+        d_x, d_y = abs(x1 - x0), -abs(y1 - y0)
+        step_x = 1 if x0 < x1 else -1
+        step_y = 1 if y0 < y1 else -1
+        error = d_x + d_y
+        x, y = x0, y0
+        while (x, y) != (x1, y1):
+            if (x, y) != (x0, y0) and self.my_map[x][y] == WALL:
+                return False
+            double_error = 2 * error
+            if double_error >= d_y:
+                error += d_y
+                x += step_x
+            if double_error <= d_x:
+                error += d_x
+                y += step_y
+        return True
+
     # The floor tiles in the rooms (not the corridor) that have no creature on them
     def free_room_tiles(self):
         return [[x, y] for left, top, right, bottom in self.rooms
@@ -143,6 +188,8 @@ class Map:
         self.killed_by = None
         self.rooms, self.corridor = self.generate()
         self.distance_cache = {}    # for distances_to
+        self.view_cache = {}        # for visible_tiles
+        self.seen = set()           # every tile the player has seen: remembered and drawn dim
         self.creatures = []
 
         # the player must be added first: index 0 in self.creatures is always the player
