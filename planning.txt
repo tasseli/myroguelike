@@ -12,6 +12,7 @@ Add features:
 - create a better message system
 - consider game manager class
 - add changing moods at least once destination becomes ineligible
+- a new mood, shown in green (draw.creature_color)
 - adding knowledge, first levels
 - adding discussion
 - adding key handling for fun commands like look, say, tickle, hit
@@ -50,3 +51,4 @@ Done (Nov 2026):
 - w waits a typed number of turns (to heal), stopping early when someone comes next to the player
 - ? lists the commands for any turn, h explains how things work (both paged with m); a key hint row under the log
 - l looks at visible creatures: a blinking cursor, direction keys jump to the next creature that way
+- creature tiles colored by mood: red = chasing the player, grey = others

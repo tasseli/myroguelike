@@ -25,6 +25,8 @@ HELP_LINES = [
     "   Backspace deletes a digit, Esc cancels.",
     "   Waiting stops when someone comes next to you,",
     "   and doesn't start if someone already is.",
+    "Colors: monsters on red are chasing you; those on",
+    "   grey wander or go their own way.",
     "Looking (l): a blinking cursor shows a creature",
     "   you can see; arrows/numpad jump to the next",
     "   one that way. l or Esc stops looking.",

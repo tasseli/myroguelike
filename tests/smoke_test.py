@@ -192,6 +192,31 @@ def check_look():
     assert state["look_target"] is None
     print("OK rule checks: l looks at visible creatures, direction keys jump between them")
 
+def check_mood_colors():
+    import draw
+    from creatures import Kobold, Gnoll
+    game_map = empty_room_map()
+    p_x, p_y = game_map.player.position
+    chaser = Kobold([0, 0], "toward", game_map.player)
+    wanderer = Gnoll([0, 0])
+    orc_chasing_orc = Orc([0, 0], "toward", wanderer)
+    place(game_map, chaser, p_x + 2, p_y)
+    place(game_map, wanderer, p_x - 2, p_y)
+    place(game_map, orc_chasing_orc, p_x, p_y + 2)
+    assert draw.creature_color(chaser, game_map.player) == m.RED
+    assert draw.creature_color(wanderer, game_map.player) == m.DARK_GRAY
+    assert draw.creature_color(orc_chasing_orc, game_map.player) == m.DARK_GRAY
+    assert draw.creature_color(game_map.player, game_map.player) == m.DARK_GRAY
+
+    # on screen: the corner pixel of each tile has the tile's background color
+    screen = pygame.display.set_mode((m.MAP_WIDTH * m.TILE_SIZE, m.MAP_HEIGHT * m.TILE_SIZE))
+    draw.render_map(game_map, pygame, screen, pygame.font.SysFont(None, 22), game_map.player)
+    def tile_color(c):
+        return tuple(screen.get_at((c.position[0] * m.TILE_SIZE, c.position[1] * m.TILE_SIZE)))[:3]
+    assert tile_color(chaser) == m.RED, tile_color(chaser)
+    assert tile_color(wanderer) == m.DARK_GRAY and tile_color(orc_chasing_orc) == m.DARK_GRAY
+    print("OK rule checks: monsters chasing the player are drawn on red, others on grey")
+
 def check_wait():
     from creatures import Kobold
     # nobody around: wait the full 20 turns and heal 1
@@ -378,6 +403,7 @@ check_step_around()
 check_wait()
 check_help()
 check_look()
+check_mood_colors()
 play_random_games()
 run_real_game()     # last, because quitting the game shuts pygame down
 print("All checks passed.")

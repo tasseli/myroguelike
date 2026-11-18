@@ -1,6 +1,6 @@
 # draw.py
 
-from map import (WHITE, GRAY, DARK_GRAY, BLACK)
+from map import (WHITE, GRAY, DARK_GRAY, BLACK, RED)
 from map import (MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, LOG_ROWS)
 from map import OPEN_SPACE
 
@@ -83,6 +83,21 @@ def render_map(game_map, pygame, screen, font, creature):
         for y in range(max(c_y - VIEW_RADIUS, 1), min(c_y + VIEW_RADIUS + 1, MAP_HEIGHT-1)):
             if coords_within_distance_z(x, y, VIEW_RADIUS, creature):
                 render_floors_different_color(game_map, pygame, screen, font, x, y)
+    # visible creatures whose mood has its own color are drawn again in that color
+    for other in game_map.creatures:
+        color = creature_color(other, game_map.player)
+        o_x, o_y = other.get_position()
+        if color != DARK_GRAY and coords_within_distance_z(o_x, o_y, VIEW_RADIUS, creature):
+            draw_and_blit_char(pygame, screen, font, other.sign, o_x, o_y, color)
+
+# The background color of a creature's tile, by its mood:
+#   red:  a monster chasing the player
+#   grey: everyone else (wandering, running, chasing another creature, and the player)
+# A new mood shown in green is planned: add it here, e.g. if creature.mood == "...": return GREEN
+def creature_color(creature, player):
+    if creature.mood == "toward" and creature.target is player:
+        return RED
+    return DARK_GRAY
 
 # Rendered characters, built once per font and character and then reused
 glyph_cache = {}

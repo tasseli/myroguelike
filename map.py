@@ -21,6 +21,7 @@ WHITE       = (255, 255, 255)   #
 GRAY        = (128, 128, 128)   # Open space
 DARK_GRAY   = (64, 64, 64)      # Wall
 BLACK       = (0, 0, 0)         # Text color
+RED         = (190, 50, 50)     # Monster chasing the player
 
 def find_creature_at(creatures, x, y):
     i = 0
