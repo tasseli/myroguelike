@@ -10,6 +10,7 @@
 #   show the help:                          return "help", None
 #   look at creatures:                      return "look", None
 #   chat with a creature:                   return "chat", None
+#   show the game's earlier messages:       return "history", None
 #   other, currently unhandled:             return "o", None
 # typed_char is the character the key produced; '?' is checked by it, because
 # which key gives '?' depends on the keyboard layout.
@@ -24,6 +25,8 @@ def read_moves(eventkey, pygame, typed_char=""):
         return "look", None
     elif eventkey == pygame.K_c:
         return "chat", None
+    elif eventkey == pygame.K_p:
+        return "history", None
     elif eventkey == pygame.K_m:
         return "more", None
     elif eventkey == pygame.K_w:
@@ -61,7 +64,8 @@ def read_digit(eventkey, pygame):
         return str(numpad.index(eventkey))
     return None
 
-# Keys on the death screen: "q" to quit, "r" to play again, "l" to look, None for any other key
+# Keys on the death screen: "q" to quit, "r" to play again, "l" to look, "p" for earlier messages,
+# None for any other key
 def read_death_screen_key(eventkey, pygame):
     if eventkey == pygame.K_q or eventkey == pygame.K_x:
         return "q"
@@ -69,4 +73,6 @@ def read_death_screen_key(eventkey, pygame):
         return "r"
     elif eventkey == pygame.K_l:
         return "l"
+    elif eventkey == pygame.K_p:
+        return "p"
     return None

@@ -67,3 +67,4 @@ Done (Nov 2026):
 - dungeon: two random sized rooms (left and right half) joined by a straight corridor
 - pathfinding: chasers and friends take the shortest walkable way (breadth-first search), swapping places to pass others in the corridor
 - line of sight: walls block the view; seen tiles are remembered and drawn dim (without creatures)
+- p shows the game's earlier messages (history of the last 500: hits, deaths, chat, waiting, dying), newest page first

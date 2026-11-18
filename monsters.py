@@ -169,19 +169,21 @@ def check_deaths(game_map, other_creatures_move):
     return player_died
 
 # One game turn: the player moves (or stays, with direction (0, 0)), then the other creatures move,
-# then everyone still alive heals a little. Messages are added to game_map.messages.
-# Return True if the player died.
+# then everyone still alive heals a little. Messages are added to game_map.messages, and to the
+# game's history. Return True if the player died.
 def play_turn(game_map, direction):
+    first_new_message = len(game_map.messages)
     x, y = game_map.player.get_position()
     new_position = [x + direction[0], y + direction[1]]
     # move creature_0, the player
     if game_map.move_to(0, new_position):
         check_deaths(game_map, False)       # check if player killed anyone
-    if check_deaths(game_map, True):        # have all creatures move and check if they killed anyone
-        return True
-    for creature in game_map.creatures:
-        creature.heal_slowly()
-    return False
+    player_died = check_deaths(game_map, True)  # have all creatures move and check if they killed anyone
+    if not player_died:
+        for creature in game_map.creatures:
+            creature.heal_slowly()
+    game_map.record(game_map.messages[first_new_message:])
+    return player_died
 
 # Return a creature standing next to the player (in any of the 8 directions), or None.
 # The player's friends don't count.

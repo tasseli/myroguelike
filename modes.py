@@ -41,17 +41,20 @@ LOOK = "look"                   # a cursor shows creatures
 CHOOSE_CHAT = "choose chat"     # a cursor to choose whom to talk to
 DIALOGUE = "dialogue"           # choosing a topic to talk about
 CONFIRM_ATTACK = "confirm attack"   # y/n: really attack your friend?
+HISTORY = "history"             # paging through the game's earlier messages
 DEAD = "dead"                   # the death screen
 
 # The state of one game, apart from the map. Besides the mode, it holds what the modes need:
 #   wait_input: digits typed at the wait prompt          waiting: how waiting is going
 #   look_target, look_saved_log, mode_before_look: look  chat_target, dialogue: chatting
 #   attack_direction: the step that would attack a friend, waiting for y/n
+#   history_saved_log, mode_before_history: the log and mode to go back to from the history
 # Each of these is None when its mode isn't active.
 def new_game_state():
     return {"mode": PLAY, "wait_input": None, "waiting": None,
             "look_target": None, "look_saved_log": None, "mode_before_look": None,
-            "chat_target": None, "dialogue": None, "attack_direction": None}
+            "chat_target": None, "dialogue": None, "attack_direction": None,
+            "history_saved_log": None, "mode_before_history": None}
 
 # The player has died: switch to the death screen
 def die(game_map, game_state):
@@ -60,10 +63,11 @@ def die(game_map, game_state):
     game_state["chat_target"] = None
     game_state["dialogue"] = None
     game_map.log_offset = 0
+    game_map.record(["You died gloriously on the battlefield!", "Killed by " + with_article(game_map.killed_by) + "."])
     game_map.messages = ["You died gloriously on the battlefield!",
                          "Killed by " + with_article(game_map.killed_by) + ".",
                          "Thank you for playing. Better luck next time.",
-                         "Press 'r' to play again, 'l' to look around or 'q' to quit."]
+                         "Press 'r' to play again, 'l' to look around, 'p' for messages, 'q' to quit."]
 
 # Show the next rows of the log, back to the first after the last; no turn passes
 def page_log(game_map):
@@ -115,6 +119,8 @@ def handle_play_key(event_key, typed_char, pygame, game_map, game_state):
         game_map.log_offset = 0
     elif outcome == "look":
         start_looking(game_map, game_state)
+    elif outcome == "history":
+        start_history(game_map, game_state)
     elif outcome == "chat":
         start_chat(game_map, game_state)
     elif outcome == "wait":
@@ -174,6 +180,7 @@ def start_waiting(game_map, game_state, turns):
 
 # End waiting: the log gets the summary first, then the messages of all the waited turns
 def finish_waiting(game_map, game_state, summary):
+    game_map.record([summary])
     game_map.messages = [summary] + game_state["waiting"]["log"]
     game_map.log_offset = 0
     game_state["waiting"] = None
@@ -305,6 +312,7 @@ def talk_to(game_map, game_state, creature):
     game_state["mode"] = PLAY
     game_map.log_offset = 0
     game_map.messages = [greeting(creature)]
+    game_map.record(game_map.messages)
     # talking takes a turn: the others move, and their messages follow the talk
     if play_turn(game_map, (0, 0)):
         die(game_map, game_state)
@@ -333,12 +341,14 @@ def handle_dialogue(event_key, typed_char, pygame, game_map, game_state):
     elif digit is not None and 1 <= int(digit) <= len(GOLEM_TOPICS):
         topic = int(digit) - 1
         answer = says(creature, GOLEM_TOPICS[topic][1])
+        game_map.record([answer])
         game_map.log_offset = 0
         if topic == LOYALTY:
             creature.mood = FRIEND
             creature.target = game_map.player
             end_dialogue(game_state)
             game_map.messages = [answer, "The " + creature.name + " is now your friend!"]
+            game_map.record(game_map.messages[1:])
         else:
             game_map.messages = [answer] + topic_lines(creature)
 
@@ -357,9 +367,45 @@ def handle_confirm_attack(event_key, typed_char, pygame, game_map, game_state):
         game_map.messages = ["You leave your friend be."]
 
 
+# --- HISTORY mode ---
+# The log shows the game's earlier messages (Map.history), newest page first, and afterwards what it
+# showed before. Works from PLAY and from DEAD, and goes back to the mode it came from; no turns pass.
+
+def start_history(game_map, game_state):
+    if not game_map.history:
+        game_map.messages = ["No messages yet."]
+        game_map.log_offset = 0
+        return
+    game_state["mode_before_history"] = game_state["mode"]
+    game_state["mode"] = HISTORY
+    game_state["history_saved_log"] = (game_map.messages, game_map.log_offset)
+    game_map.messages = list(game_map.history)
+    game_map.log_offset = last_page(game_map.messages)
+
+# Where the last page of the log starts
+def last_page(messages):
+    return (len(messages) - 1) // LOG_ROWS * LOG_ROWS
+
+# m, p or up: older messages (from the oldest, back to the newest); down: newer; Esc: back
+def handle_history_key(event_key, typed_char, pygame, game_map, game_state):
+    if event_key in (pygame.K_m, pygame.K_p, pygame.K_UP, pygame.K_KP8):
+        game_map.log_offset -= LOG_ROWS
+        if game_map.log_offset < 0:
+            game_map.log_offset = last_page(game_map.messages)
+    elif event_key in (pygame.K_DOWN, pygame.K_KP2):
+        game_map.log_offset = min(game_map.log_offset + LOG_ROWS, last_page(game_map.messages))
+    elif event_key == pygame.K_ESCAPE:
+        game_map.messages, game_map.log_offset = game_state["history_saved_log"]
+        game_state["mode"] = game_state["mode_before_history"]
+        game_state["history_saved_log"] = None
+        game_state["mode_before_history"] = None
+    elif event_key == pygame.K_q or event_key == pygame.K_x:
+        quit_app("", pygame)
+
+
 # --- DEAD mode ---
 
-# r plays again (returns "restart"), l looks around, q quits
+# r plays again (returns "restart"), l looks around, p shows earlier messages, q quits
 def handle_dead_key(event_key, typed_char, pygame, game_map, game_state):
     outcome = read_death_screen_key(event_key, pygame)
     if outcome == "q":
@@ -368,6 +414,8 @@ def handle_dead_key(event_key, typed_char, pygame, game_map, game_state):
         return "restart"
     elif outcome == "l":
         start_looking(game_map, game_state)
+    elif outcome == "p":
+        start_history(game_map, game_state)
     return None
 
 
@@ -382,6 +430,7 @@ KEY_HANDLERS = {
     CHOOSE_CHAT: handle_chat_choice,
     DIALOGUE: handle_dialogue,
     CONFIRM_ATTACK: handle_confirm_attack,
+    HISTORY: handle_history_key,
     DEAD: handle_dead_key,
 }
 

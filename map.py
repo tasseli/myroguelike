@@ -16,6 +16,8 @@ LOG_ROWS    = 4     # message rows shown under the map
 
 # How far the player can see (if no wall is in the way)
 VIEW_RADIUS = 12
+# How many of the game's messages the history (p) keeps
+HISTORY_LENGTH = 500
 
 # The sizes of the two rooms, picked at random between these, inclusive
 ROOM_MIN_WIDTH, ROOM_MAX_WIDTH = 8, 24
@@ -190,6 +192,7 @@ class Map:
         self.distance_cache = {}    # for distances_to
         self.view_cache = {}        # for visible_tiles
         self.seen = set()           # every tile the player has seen: remembered and drawn dim
+        self.history = []           # the game's messages so far, oldest first (the p key shows them)
         self.creatures = []
 
         # the player must be added first: index 0 in self.creatures is always the player
@@ -311,6 +314,11 @@ class Map:
         f_x, f_y = friend.get_position()
         return [c for c in self.creatures if c.mood == CHASE and c.target is friend
                 and max(abs(c.position[0] - f_x), abs(c.position[1] - f_y)) <= CLOSE_STEPS]
+
+    # Add messages to the game's history, keeping the last HISTORY_LENGTH
+    def record(self, messages):
+        self.history.extend(messages)
+        del self.history[:-HISTORY_LENGTH]
 
     # Two creatures change places (a chaser getting past one it won't attack, e.g. in the corridor)
     def swap_places(self, a, b):

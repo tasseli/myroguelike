@@ -11,6 +11,7 @@ COMMAND_LINES = [
     "l: look at creatures you can see.",
     "c: chat with a creature you can see.",
     "m: show more rows of the log.",
+    "p: the game's earlier messages.",
     "?: this list of commands.   h: help.",
     "q or x: quit the game.",
 ]
@@ -51,7 +52,10 @@ HELP_LINES = [
     "   golems, choosing topics (1-5) doesn't.",
     "Log: when a turn has more than 4 messages, the",
     "   rows are numbered and m shows the next ones.",
-    "After dying: r plays again, l looks around, q quits.",
+    "History (p): the game's earlier messages, newest",
+    "   first; m, p or up: older, down: newer, Esc: back.",
+    "After dying: r plays again, l looks around,",
+    "   p shows earlier messages, q quits.",
 ]
 
 # Shown on the row under the message log
@@ -62,4 +66,5 @@ CHAT_KEY_HINTS = "arrows/numpad: choose whom  Enter or c: talk  Esc: cancel"
 CONFIRM_KEY_HINTS = "y: attack your friend   n or any other key: don't"
 DIALOGUE_KEY_HINTS ="1-5: choose a topic  m: more  Esc: end the talk"
 LOOK_KEY_HINTS ="arrows/numpad: next creature that way  t: its target  l or Esc: stop looking"
-DEATH_KEY_HINTS = "r: play again   l: look around   q: quit"
+HISTORY_KEY_HINTS = "m, p or up: older messages  down: newer  Esc: back"
+DEATH_KEY_HINTS = "r: play again   l: look around   p: messages   q: quit"

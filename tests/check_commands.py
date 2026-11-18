@@ -122,7 +122,7 @@ def check_wait():
 
 def check_help():
     from help_texts import COMMAND_LINES, HELP_LINES, KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, DEATH_KEY_HINTS
-    from help_texts import CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS, CONFIRM_KEY_HINTS
+    from help_texts import CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS, CONFIRM_KEY_HINTS, HISTORY_KEY_HINTS
     game_map = empty_room_map()
     turns_until_heal = game_map.player.turns_until_heal
 
@@ -147,7 +147,8 @@ def check_help():
     # the texts fit: a line plus its row number must end before the More indicator
     for line in COMMAND_LINES + HELP_LINES:
         assert len(line) <= 52, f"help line too long ({len(line)} characters): {line}"
-    for hints in (KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS, CONFIRM_KEY_HINTS, DEATH_KEY_HINTS):
+    for hints in (KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS, CONFIRM_KEY_HINTS,
+                  HISTORY_KEY_HINTS, DEATH_KEY_HINTS):
         assert len(hints) <= m.MAP_WIDTH - 2, f"key hints don't fit on one row ({len(hints)} characters)"
     print("OK rule checks: ? shows the commands, h the help, m pages them, no turn used")
 
@@ -335,3 +336,57 @@ def check_chat():
     for line in lines:
         assert len(line) <= 52, f"chat line too long ({len(line)}): {line}"
     print("OK rule checks: c chats; talking takes a turn, golem topics don't, loyalty makes a friend")
+
+
+def check_history():
+    from creatures import Kobold
+    game_map = empty_room_map()
+    state = modes.new_game_state()
+    player = game_map.player
+    p_x, p_y = player.position
+
+    # nothing has happened yet
+    press(game_map, pygame.K_p, game_state=state)
+    assert state["mode"] == modes.PLAY and game_map.messages == ["No messages yet."], game_map.messages
+
+    # a few turns of fighting a tough kobold: every turn's messages go into the history, in order
+    kobold = Kobold([0, 0], CHASE, player)
+    place(game_map, kobold, p_x + 1, p_y)
+    kobold.health = kobold.health_max = 40
+    seen_on_screen = []
+    for turn in range(4):
+        press(game_map, pygame.K_RIGHT, game_state=state)
+        seen_on_screen += game_map.messages
+    assert game_map.history == seen_on_screen and len(game_map.history) >= 6, game_map.history
+
+    # p shows it, newest page first; m and up go to older pages, down to newer; no turn passes
+    game_map.messages = ["the log before"]
+    turns_until_heal = player.turns_until_heal
+    press(game_map, pygame.K_p, game_state=state)
+    last_page = (len(game_map.history) - 1) // m.LOG_ROWS * m.LOG_ROWS
+    assert state["mode"] == modes.HISTORY and game_map.messages == game_map.history
+    assert game_map.log_offset == last_page, (game_map.log_offset, last_page)
+    press(game_map, pygame.K_m, game_state=state)
+    assert game_map.log_offset == last_page - m.LOG_ROWS
+    press(game_map, pygame.K_DOWN, game_state=state)
+    assert game_map.log_offset == last_page
+    press(game_map, pygame.K_ESCAPE, game_state=state)
+    assert state["mode"] == modes.PLAY and game_map.messages == ["the log before"], "Esc didn't go back"
+    assert player.turns_until_heal == turns_until_heal, "looking at the history took a turn"
+
+    # chat lines and death go into the history too, and p works on the death screen
+    game_map.record(["filler"] * 10)
+    modes.talk_to(game_map, state, kobold)
+    assert "The kobold: Beep beep, I'm a kobold." in game_map.history
+    game_map.killed_by = "kobold"
+    modes.die(game_map, state)
+    assert game_map.history[-1] == "Killed by a kobold.", game_map.history[-2:]
+    press(game_map, pygame.K_p, game_state=state)
+    assert state["mode"] == modes.HISTORY
+    press(game_map, pygame.K_ESCAPE, game_state=state)
+    assert state["mode"] == modes.DEAD and game_map.messages[1] == "Killed by a kobold."
+
+    # only the last HISTORY_LENGTH messages are kept
+    game_map.record(["old"] * (m.HISTORY_LENGTH + 50))
+    assert len(game_map.history) == m.HISTORY_LENGTH
+    print("OK rule checks: p shows the game's earlier messages, paged, from play and from the death screen")
