@@ -123,28 +123,34 @@ def press(game_map, *keys, game_state=None):
         loop_utils.handle_events(pygame, game_map, game_state)
 
 def check_help():
-    from help_texts import HELP_LINES, KEY_HINTS, DEATH_KEY_HINTS
+    from help_texts import COMMAND_LINES, HELP_LINES, KEY_HINTS, DEATH_KEY_HINTS
     game_map = empty_room_map()
     turns_until_heal = game_map.player.turns_until_heal
 
     # '?' is recognised by the character typed (here Shift + slash, as on a US keyboard)
     pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SLASH, unicode="?"))
     loop_utils.handle_events(pygame, game_map, {"GAME_ON": True})
-    assert game_map.messages == HELP_LINES, "? didn't show the help"
+    assert game_map.messages == COMMAND_LINES, "? didn't show the commands"
     press(game_map, pygame.K_m)
-    assert game_map.log_offset == 4, "m didn't page the help"
+    assert game_map.log_offset == 4, "m didn't page the commands"
 
-    game_map.messages = []
     press(game_map, pygame.K_h)
     assert game_map.messages == HELP_LINES and game_map.log_offset == 0, "h didn't show the help from the start"
+    press(game_map, pygame.K_m)
+    assert game_map.log_offset == 4, "m didn't page the help"
     assert game_map.player.turns_until_heal == turns_until_heal, "showing the help used up a turn"
 
-    # the texts fit: a help line plus its row number must end before the More indicator
-    for line in HELP_LINES:
+    # ? lists only the commands for any turn; how things work (healing, attacking, r after dying) is in h
+    for topic in ("heal", "attack", "r plays again"):
+        assert not any(topic in line.lower() for line in COMMAND_LINES), f"'{topic}' belongs in h, not ?"
+        assert any(topic in line.lower() for line in HELP_LINES), f"h doesn't mention '{topic}'"
+
+    # the texts fit: a line plus its row number must end before the More indicator
+    for line in COMMAND_LINES + HELP_LINES:
         assert len(line) <= 52, f"help line too long ({len(line)} characters): {line}"
     for hints in (KEY_HINTS, DEATH_KEY_HINTS):
-        assert len(hints) <= m.MAP_WIDTH - 2, "key hints don't fit on one row"
-    print("OK rule checks: ? and h show the help, m pages it, no turn used")
+        assert len(hints) <= m.MAP_WIDTH - 2, f"key hints don't fit on one row ({len(hints)} characters)"
+    print("OK rule checks: ? shows the commands, h the help, m pages them, no turn used")
 
 def check_wait():
     from creatures import Kobold

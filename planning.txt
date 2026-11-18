@@ -48,4 +48,4 @@ Done (Nov 2026):
 - messages from the player's point of view, one line per hit ("The uruk hits you for 3. You have 9 health left.")
 - requirements.txt: pygame>=2.5
 - w waits a typed number of turns (to heal), stopping early when someone comes next to the player
-- ? and h show help in the log (m pages it); a key hint row under the log
+- ? lists the commands for any turn, h explains how things work (both paged with m); a key hint row under the log

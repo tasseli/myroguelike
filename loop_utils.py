@@ -4,7 +4,7 @@ import sys
 import random
 from keyboard import read_moves, read_death_screen_key, read_digit
 from map import OPEN_SPACE, WALL, LOG_ROWS, find_creature_at
-from help_texts import HELP_LINES
+from help_texts import COMMAND_LINES, HELP_LINES
 
 # The 8 directions in order around a circle, so neighbours in the list are 45 degrees apart
 DIRECTIONS = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
@@ -213,9 +213,9 @@ def handle_events(pygame, game_map, game_state):
                 if play_turn(game_map, direction):
                     game_state["GAME_ON"] = False
                     return                              # ignore any further keys pressed in the same frame
-            elif outcome == "help":
-                # show the help in the log, m pages through it; no turn passes
-                game_map.messages = list(HELP_LINES)
+            elif outcome == "commands" or outcome == "help":
+                # show the commands (?) or the help (h) in the log, m pages through it; no turn passes
+                game_map.messages = list(COMMAND_LINES if outcome == "commands" else HELP_LINES)
                 game_map.log_offset = 0
             elif outcome == "wait":
                 # open the prompt for how many turns to wait; no turn passes yet
