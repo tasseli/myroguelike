@@ -124,7 +124,7 @@ def press(game_map, *keys, game_state=None):
 
 def check_help():
     from help_texts import COMMAND_LINES, HELP_LINES, KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, DEATH_KEY_HINTS
-    from help_texts import CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS
+    from help_texts import CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS, CONFIRM_KEY_HINTS
     game_map = empty_room_map()
     turns_until_heal = game_map.player.turns_until_heal
 
@@ -149,7 +149,7 @@ def check_help():
     # the texts fit: a line plus its row number must end before the More indicator
     for line in COMMAND_LINES + HELP_LINES:
         assert len(line) <= 52, f"help line too long ({len(line)} characters): {line}"
-    for hints in (KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS, DEATH_KEY_HINTS):
+    for hints in (KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS, CONFIRM_KEY_HINTS, DEATH_KEY_HINTS):
         assert len(hints) <= m.MAP_WIDTH - 2, f"key hints don't fit on one row ({len(hints)} characters)"
     print("OK rule checks: ? shows the commands, h the help, m pages them, no turn used")
 
@@ -419,6 +419,30 @@ def check_friend():
     wanderer = Gnoll([0, 0])
     assert not game_map.can_attack(friend, wanderer) and not game_map.can_attack(friend, game_map.player)
     print("OK rule checks: the friendly golem (green) stays close, defends the player, never hurts the player")
+
+def check_attack_friend():
+    from creatures import Golem
+    game_map = empty_room_map()
+    p_x, p_y = game_map.player.position
+    friend = Golem([0, 0], FRIEND, game_map.player)
+    place(game_map, friend, p_x + 1, p_y)
+    state = loop_utils.new_game_state()
+    player = game_map.player
+    health, turns = friend.health, player.turns_until_heal
+
+    # walking into the friend asks first, and takes no turn
+    press(game_map, pygame.K_RIGHT, game_state=state)
+    assert state["mode"] == loop_utils.CONFIRM_ATTACK, state["mode"]
+    assert game_map.messages == ["Really attack your friend, the golem? (y/n)"], game_map.messages
+    # n: nothing happens
+    press(game_map, pygame.K_n, game_state=state)
+    assert state["mode"] == loop_utils.PLAY and game_map.messages == ["You leave your friend be."]
+    assert friend.health == health and player.turns_until_heal == turns, "saying no hurt the friend or took a turn"
+    # y: the player attacks, a turn passes, and the friend turns on the player
+    press(game_map, pygame.K_RIGHT, pygame.K_y, game_state=state)
+    assert friend.health == health - player.damage, "saying yes didn't attack the friend"
+    assert friend.mood == CHASE and friend.target is player and player.turns_until_heal == turns - 1
+    print("OK rule checks: walking into your friend asks y/n before attacking")
 
 def check_chat():
     import chat
@@ -762,6 +786,7 @@ check_mood_colors()
 check_provoke()
 check_flee()
 check_friend()
+check_attack_friend()
 check_chat()
 play_random_games()
 run_real_game()     # last, because quitting the game shuts pygame down

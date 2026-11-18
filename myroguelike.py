@@ -2,10 +2,10 @@
 # consider renaming to gameloop.py
 
 import pygame
-from loop_utils import handle_events, new_game_state, PLAY, WAIT_PROMPT, WAITING, LOOK, CHOOSE_CHAT, DIALOGUE, DEAD
+from loop_utils import handle_events, new_game_state, PLAY, WAIT_PROMPT, WAITING, LOOK, CHOOSE_CHAT, DIALOGUE, CONFIRM_ATTACK, DEAD
 from draw import render_map, render_message_log, render_player_status, render_key_hints, render_look_cursor
 from map import Map, MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, GRAY, LOG_ROWS
-from help_texts import KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS, DEATH_KEY_HINTS
+from help_texts import KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, CHAT_KEY_HINTS, DIALOGUE_KEY_HINTS, CONFIRM_KEY_HINTS, DEATH_KEY_HINTS
 
 BOTTOM_UI_HEIGHT = LOG_ROWS + 1     # the message log, and a row of key hints under it
 FPS = 30
@@ -41,6 +41,7 @@ KEY_HINTS_FOR_MODE = {
     LOOK: LOOK_KEY_HINTS,
     CHOOSE_CHAT: CHAT_KEY_HINTS,
     DIALOGUE: DIALOGUE_KEY_HINTS,
+    CONFIRM_ATTACK: CONFIRM_KEY_HINTS,
     DEAD: DEATH_KEY_HINTS,
 }
 

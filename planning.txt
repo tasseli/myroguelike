@@ -62,3 +62,4 @@ Done (Nov 2026):
 - c chats: choose whom (no turn), talking takes a turn ("Beep beep, I'm a kobold."); golems offer 5 topics (no turns), loyalty makes the golem a friend
 - one mode at a time (game_state["mode"]: PLAY, WAIT_PROMPT, WAITING, LOOK, CHOOSE_CHAT, DIALOGUE, DEAD), each with its own key handler and hint row; a first step toward a game manager
 - monsters a friend hits turn on the friend and fight back; a friend defends itself too
+- walking into your friend asks "Really attack your friend? (y/n)" (CONFIRM_ATTACK mode)

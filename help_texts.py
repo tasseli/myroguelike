@@ -39,6 +39,7 @@ HELP_LINES = [
     "   Green: friendly. A friend stays near you and",
     "   attacks monsters that come after you.",
     "   Monsters it hits turn on it and fight back.",
+    "   Walking into your friend asks before attacking.",
     "Looking (l): a blinking cursor shows a creature",
     "   you can see; arrows/numpad jump to the next",
     "   one that way; t jumps to the one it chases or",
@@ -56,6 +57,7 @@ HELP_LINES = [
 KEY_HINTS = "arrows/numpad: move  5: stay  w: wait  l: look  c: chat  ?: commands  h: help"
 WAIT_KEY_HINTS = "any key: stop waiting"
 CHAT_KEY_HINTS = "arrows/numpad: choose whom  Enter or c: talk  Esc: cancel"
-DIALOGUE_KEY_HINTS = "1-5: choose a topic  m: more  Esc: end the talk"
+CONFIRM_KEY_HINTS = "y: attack your friend   n or any other key: don't"
+DIALOGUE_KEY_HINTS ="1-5: choose a topic  m: more  Esc: end the talk"
 LOOK_KEY_HINTS ="arrows/numpad: next creature that way  t: its target  l or Esc: stop looking"
 DEATH_KEY_HINTS = "r: play again   l: look around   q: quit"

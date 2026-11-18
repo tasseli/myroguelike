@@ -217,16 +217,18 @@ WAITING = "waiting"             # turns pass by themselves; any key stops
 LOOK = "look"                   # a cursor shows creatures
 CHOOSE_CHAT = "choose chat"     # a cursor to choose whom to talk to
 DIALOGUE = "dialogue"           # choosing a topic to talk about
+CONFIRM_ATTACK = "confirm attack"   # y/n: really attack your friend?
 DEAD = "dead"                   # the death screen
 
 # The state of one game, apart from the map. Besides the mode, it holds what the modes need:
 #   wait_input: digits typed at the wait prompt          waiting: how waiting is going
 #   look_target, look_saved_log, mode_before_look: look  chat_target, dialogue: chatting
+#   attack_direction: the step that would attack a friend, waiting for y/n
 # Each of these is None when its mode isn't active.
 def new_game_state():
     return {"mode": PLAY, "wait_input": None, "waiting": None,
             "look_target": None, "look_saved_log": None, "mode_before_look": None,
-            "chat_target": None, "dialogue": None}
+            "chat_target": None, "dialogue": None, "attack_direction": None}
 
 # The player has died: switch to the death screen
 def die(game_map, game_state):
@@ -250,6 +252,24 @@ def page_log(game_map):
 
 # --- PLAY mode ---
 
+# The player moves (or stays) one step, and a turn passes
+def take_step(game_map, game_state, direction):
+    game_map.messages = []
+    game_map.log_offset = 0
+    if play_turn(game_map, direction):
+        die(game_map, game_state)
+
+# The player's friend standing one step away in the given direction, or None
+def friend_in_direction(game_map, direction):
+    x, y = game_map.player.get_position()
+    i = find_creature_at(game_map.creatures, x + direction[0], y + direction[1])
+    if i <= 0:                  # -1: nobody there, 0: the player itself (direction (0, 0))
+        return None
+    creature = game_map.creatures[i]
+    if creature.mood == FRIEND and creature.target is game_map.player:
+        return creature
+    return None
+
 def handle_play_key(event_key, typed_char, pygame, game_map, game_state):
     outcome, direction = read_moves(event_key, pygame, typed_char)
     if outcome == "q":
@@ -257,11 +277,15 @@ def handle_play_key(event_key, typed_char, pygame, game_map, game_state):
     elif outcome == "more":
         page_log(game_map)
     elif outcome == "m" or outcome == "s":
-        # a move key, or 5 to stay: one turn passes
-        game_map.messages = []
-        game_map.log_offset = 0
-        if play_turn(game_map, direction):
-            die(game_map, game_state)
+        # a move key, or 5 to stay: one turn passes. Walking into a friend asks first.
+        friend = friend_in_direction(game_map, direction)
+        if friend is not None:
+            game_state["mode"] = CONFIRM_ATTACK
+            game_state["attack_direction"] = direction
+            game_map.log_offset = 0
+            game_map.messages = ["Really attack your friend, " + friend.called() + "? (y/n)"]
+            return
+        take_step(game_map, game_state, direction)
     elif outcome == "commands" or outcome == "help":
         # show the commands (?) or the help (h) in the log, m pages through it; no turn passes
         game_map.messages = list(COMMAND_LINES if outcome == "commands" else HELP_LINES)
@@ -496,6 +520,20 @@ def handle_dialogue(event_key, typed_char, pygame, game_map, game_state):
             game_map.messages = [answer] + topic_lines(creature)
 
 
+# --- CONFIRM_ATTACK mode ---
+
+# y attacks the friend (a turn passes); any other key leaves it be (no turn)
+def handle_confirm_attack(event_key, typed_char, pygame, game_map, game_state):
+    direction = game_state["attack_direction"]
+    game_state["attack_direction"] = None
+    game_state["mode"] = PLAY
+    if event_key == pygame.K_y:
+        take_step(game_map, game_state, direction)
+    else:
+        game_map.log_offset = 0
+        game_map.messages = ["You leave your friend be."]
+
+
 # --- DEAD mode ---
 
 # r plays again (returns "restart"), l looks around, q quits
@@ -520,6 +558,7 @@ KEY_HANDLERS = {
     LOOK: handle_look_input,
     CHOOSE_CHAT: handle_chat_choice,
     DIALOGUE: handle_dialogue,
+    CONFIRM_ATTACK: handle_confirm_attack,
     DEAD: handle_dead_key,
 }
 
