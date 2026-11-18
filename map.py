@@ -13,10 +13,10 @@ OPEN_SPACE  = '.'
 WALL        = '#'
 
 # Define colors for tiles
-WHITE       = (255, 255, 255)  #
+WHITE       = (255, 255, 255)   # 
 GRAY        = (128, 128, 128)   # Open space
-DARK_GRAY   = (64, 64, 64) # Wall
-BLACK       = (0, 0, 0)        # Text color
+DARK_GRAY   = (64, 64, 64)      # Wall
+BLACK       = (0, 0, 0)         # Text color
 
 def find_creature_at(creatures, x, y):
     i = 0
