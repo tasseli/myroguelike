@@ -95,6 +95,7 @@ def empty_room_map():
         for y in range(room[1], room[3]):
             game_map.my_map[x][y] = m.OPEN_SPACE
     game_map.rooms, game_map.corridor = [room], []
+    game_map.distance_cache = {}        # the walls changed
     game_map.creatures = []
     place(game_map, game_map.player, 40, 20)
     return game_map
@@ -121,6 +122,51 @@ def check_step_around():
     print("OK rule checks: a chaser steps around a creature in its way")
 
 # Press keys one after another; game_state is kept between them (e.g. an open wait prompt)
+def check_path_through_corridor():
+    from creatures import Kobold
+    for seed in range(20):
+        random.seed(seed)
+        game_map = m.Map()
+        for c in game_map.creatures:
+            game_map.my_map[c.position[0]][c.position[1]] = m.OPEN_SPACE
+        game_map.creatures = []
+        # the player in the middle of the left room, a chaser in the middle of the right room
+        (l1, t1, r1, b1), (l2, t2, r2, b2) = game_map.rooms
+        player = game_map.player
+        place(game_map, player, (l1 + r1) // 2, (t1 + b1) // 2)
+        kobold = Kobold([0, 0], CHASE, player)
+        place(game_map, kobold, (l2 + r2) // 2, (t2 + b2) // 2)
+        walk = game_map.distances_to(player)[tuple(kobold.position)]
+        # with nobody in the way, it takes the shortest way: next to the player after walk - 1 turns
+        for turn in range(walk - 1):
+            loop_utils.move_moodily(game_map, 1)
+        assert loop_utils.steps_apart(kobold, player) == 1, \
+            f"seed {seed}: after {walk - 1} turns the kobold is at {kobold.position}, player at {player.position}"
+    # in the corridor there's no room to step aside: a chaser swaps places with a wanderer in its way
+    from creatures import Gnoll
+    seed = 0
+    while True:
+        random.seed(seed)
+        game_map = m.Map()
+        if len(game_map.corridor) >= 3:
+            break
+        seed += 1
+    for c in game_map.creatures:
+        game_map.my_map[c.position[0]][c.position[1]] = m.OPEN_SPACE
+    game_map.creatures = []
+    (l2, t2, r2, b2) = game_map.rooms[1]
+    place(game_map, game_map.player, (l2 + r2) // 2, (t2 + b2) // 2)
+    behind, ahead = game_map.corridor[-3], game_map.corridor[-2]
+    kobold = Kobold([0, 0], CHASE, game_map.player)
+    gnoll = Gnoll([0, 0])
+    place(game_map, kobold, *behind)
+    place(game_map, gnoll, *ahead)
+    loop_utils.move_moodily(game_map, game_map.creatures.index(kobold))
+    assert kobold.position == list(ahead) and gnoll.position == list(behind), \
+        f"no swap: kobold at {kobold.position}, gnoll at {gnoll.position}"
+    assert game_map.my_map[ahead[0]][ahead[1]] == "k" and game_map.my_map[behind[0]][behind[1]] == "n"
+    print("OK rule checks: chasers find the shortest way through the corridor, swapping past others there")
+
 def press(game_map, *keys, game_state=None):
     if game_state is None:
         game_state = loop_utils.new_game_state()
@@ -850,6 +896,7 @@ check_hit_message_texts()
 check_run_right_stops_at_wall()
 check_more_key()
 check_step_around()
+check_path_through_corridor()
 check_wait()
 check_help()
 check_look()

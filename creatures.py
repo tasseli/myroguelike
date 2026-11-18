@@ -109,20 +109,6 @@ class Creature:
         y = random.randint(0,2)-1
         return [self.position[0] + x, self.position[1] + y]
 
-    def move_toward(self, destination):
-        destination = destination.get_position()
-        x = 0
-        y = 0
-        if destination[0] > self.position[0]:
-            x = 1
-        elif destination[0] < self.position[0]:
-            x = -1
-        if destination[1] > self.position[1]:
-            y = 1
-        elif destination[1] < self.position[1]:
-            y = -1
-        return [self.position[0] + x, self.position[1] + y]
-
 class Player(Creature):
     sign = "@"
     mood = PLAYER_MOOD

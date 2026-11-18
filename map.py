@@ -3,6 +3,10 @@
 from creatures import Player, Orc, Kobold, Uruk, Gnoll, Goblin, Golem
 from creatures import CHASE, FLEE, FRIEND, RUN_RIGHT
 import random
+from collections import deque
+
+# The 8 steps from a tile to its neighbours
+NEIGHBOURS = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
 
 # Define the dimensions of the map
 MAP_WIDTH   = 80
@@ -73,6 +77,30 @@ class Map:
             self.my_map[x][y] = OPEN_SPACE
         return [room1, room2], corridor
 
+    # How many steps each floor tile is from the given creature, walking around walls (creatures don't
+    # block here: they move). A dict {(x, y): steps}; tiles that can't be reached aren't in it.
+    # The walls never change, so the result for a tile is kept and reused (a few hundred at most).
+    def distances_to(self, creature):
+        start = tuple(creature.get_position())
+        if start not in self.distance_cache:
+            if len(self.distance_cache) > 200:
+                self.distance_cache = {}
+            self.distance_cache[start] = self.walking_distances(start)
+        return self.distance_cache[start]
+
+    # Breadth-first search: first the tiles next to start (1 step), then the tiles next to those (2), ...
+    def walking_distances(self, start):
+        distances = {start: 0}
+        todo = deque([start])
+        while todo:
+            x, y = todo.popleft()
+            for dx, dy in NEIGHBOURS:
+                tile = (x + dx, y + dy)
+                if tile not in distances and self.my_map[tile[0]][tile[1]] != WALL:
+                    distances[tile] = distances[(x, y)] + 1
+                    todo.append(tile)
+        return distances
+
     # The floor tiles in the rooms (not the corridor) that have no creature on them
     def free_room_tiles(self):
         return [[x, y] for left, top, right, bottom in self.rooms
@@ -114,6 +142,7 @@ class Map:
         # name of the creature that killed the player, set when that happens
         self.killed_by = None
         self.rooms, self.corridor = self.generate()
+        self.distance_cache = {}    # for distances_to
         self.creatures = []
 
         # the player must be added first: index 0 in self.creatures is always the player
@@ -235,6 +264,12 @@ class Map:
         f_x, f_y = friend.get_position()
         return [c for c in self.creatures if c.mood == CHASE and c.target is friend
                 and max(abs(c.position[0] - f_x), abs(c.position[1] - f_y)) <= CLOSE_STEPS]
+
+    # Two creatures change places (a chaser getting past one it won't attack, e.g. in the corridor)
+    def swap_places(self, a, b):
+        a.position, b.position = b.position, a.position
+        self.set_sign_with_creature(a)
+        self.set_sign_with_creature(b)
 
     def get_sign(self, x, y):
         return self.my_map[x][y]

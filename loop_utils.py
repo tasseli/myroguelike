@@ -17,34 +17,43 @@ def quit_app(reason, pygame):
     pygame.quit()
     sys.exit()
 
-# A chaser's straight step toward its goal (its target, unless another goal is given) may be blocked by
-# a wall, or by a creature it won't attack. Then try the two directions next to the straight one, the one
-# closer to the goal first, and return the first open one. If both are blocked too, return the straight
-# step (which then does nothing).
-def step_around_blocker(map, creature, new_position, goal=None):
-    if goal is None:
-        goal = creature.target
-    x, y = new_position
-    sign = map.get_sign(x, y)
-    if sign == OPEN_SPACE:
-        return new_position
-    if sign != WALL:
-        blocker = map.creatures[find_creature_at(map.creatures, x, y)]
-        if map.can_attack(creature, blocker):
-            return new_position
+# A chaser's step toward its goal along the shortest walkable way (around walls, e.g. through the
+# corridor). Of the neighbouring tiles, in this order of preference:
+# 1. a tile closer to the goal by walking that is free, or holds a creature it attacks (such as the goal)
+# 2. a free tile just as close (a step sideways, to get around creatures in the way)
+# 3. a closer tile with a creature it won't attack (not the player): the two swap places, so that
+#    creatures can pass each other in the narrow corridor instead of getting stuck head-on
+# Returns where to move (after a swap: where it now stands). With no such tile, it stays put.
+def path_step(map, creature, goal):
+    distances = map.distances_to(goal)
     c_x, c_y = creature.get_position()
-    t_x, t_y = goal.get_position()
-    straight = DIRECTIONS.index((x - c_x, y - c_y))
-    options = []
-    for turn in (-1, 1):
-        dx, dy = DIRECTIONS[(straight + turn) % len(DIRECTIONS)]
-        options.append([c_x + dx, c_y + dy])
-    random.shuffle(options)     # if both are equally close, pick either
-    options.sort(key=lambda p: max(abs(p[0] - t_x), abs(p[1] - t_y)))
-    for option in options:
-        if map.get_sign(option[0], option[1]) == OPEN_SPACE:
-            return option
-    return new_position
+    here = distances.get((c_x, c_y))
+    if here is None:
+        return [c_x, c_y]
+    closer, sideways, swaps = [], [], []
+    for dx, dy in DIRECTIONS:
+        tile = (c_x + dx, c_y + dy)
+        steps = distances.get(tile)
+        if steps is None or steps > here:
+            continue
+        sign = map.get_sign(tile[0], tile[1])
+        if sign == OPEN_SPACE:
+            (closer if steps < here else sideways).append((steps, tile))
+        elif steps < here:
+            blocker = map.creatures[find_creature_at(map.creatures, tile[0], tile[1])]
+            if map.can_attack(creature, blocker):
+                closer.append((steps, tile))
+            elif blocker is not map.player:
+                swaps.append((steps, blocker))
+    if closer or sideways:
+        options = closer or sideways
+        random.shuffle(options)     # equally close tiles: pick any
+        options.sort(key=lambda option: option[0])
+        return list(options[0][1])
+    if swaps:
+        swaps.sort(key=lambda option: option[0])
+        map.swap_places(creature, swaps[0][1])
+    return creature.get_position()
 
 # A fleeing creature steps to the free neighbouring tile farthest from the one it flees from.
 # If no free tile is farther away than where it stands, it stays put.
@@ -74,9 +83,9 @@ def friend_step(map, creature):
     threats = map.threats_to(friend) + map.threats_to(creature)
     if threats:
         threat = min(threats, key=lambda t: steps_apart(creature, t))
-        return step_around_blocker(map, creature, creature.move_toward(threat), threat)
+        return path_step(map, creature, threat)
     if steps_apart(creature, friend) > CLOSE_STEPS:
-        return step_around_blocker(map, creature, creature.move_toward(friend), friend)
+        return path_step(map, creature, friend)
     c_x, c_y = creature.get_position()
     f_x, f_y = friend.get_position()
     options = [[c_x, c_y]]
@@ -107,9 +116,9 @@ def move_moodily(map, creature_i):
         if creature.mood == CHASE:
             if creature.target.alive == False:
                 creature.mood = WANDER
+                creature.target = None
             else:
-                new_position = creature.move_toward(creature.target)
-                new_position = step_around_blocker(map, creature, new_position)
+                new_position = path_step(map, creature, creature.target)
         if creature.mood == WANDER:
             new_position = creature.move_random()
         elif creature.mood == RUN_RIGHT:
