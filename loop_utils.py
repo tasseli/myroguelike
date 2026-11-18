@@ -2,7 +2,7 @@
 
 import sys
 from keyboard import read_moves, read_q_only
-from map import OPEN_SPACE, WALL
+from map import OPEN_SPACE, WALL, LOG_ROWS
 
 def quit_app(reason, pygame):
     print(reason)
@@ -87,10 +87,17 @@ def handle_events(pygame, game_map, game_state):
             elif outcome == "o":
 #               An unhandled key was pressed
                 pass
+            elif outcome == "more":
+                # show the next rows of this turn's messages, back to the first after the last; no turn passes
+                if len(game_map.messages) > LOG_ROWS:
+                    game_map.log_offset += LOG_ROWS
+                    if game_map.log_offset >= len(game_map.messages):
+                        game_map.log_offset = 0
             elif outcome == "m" or outcome == "s": # if moving happened
 #               Move key or stand still key
                 game_map.messages = []
-                x, y = game_map.player.get_position()
+                game_map.log_offset = 0
+                x, y =game_map.player.get_position()
                 new_position = [x + direction[0], y + direction[1]]
                 # move creature_0, the player
                 if game_map.move_to(0, new_position): # 0 refers to the player ## so if player moved, pass the changed new position and work with it

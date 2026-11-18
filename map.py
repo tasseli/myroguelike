@@ -7,6 +7,7 @@ import random
 MAP_WIDTH   = 80
 MAP_HEIGHT  = 40
 TILE_SIZE   = 16
+LOG_ROWS    = 4     # message rows shown under the map
 
 # How many moves away from the player other creatures start, when the room is big enough
 MIN_SPAWN_DISTANCE = 8
@@ -67,6 +68,8 @@ class Map:
     def __init__(self):
         # messages produced during a turn, shown in the bottom UI
         self.messages = []
+        # index of the first message shown in the log; the More key moves it
+        self.log_offset = 0
         # name of the creature that killed the player, set when that happens
         self.killed_by = None
         self.room = self.generate()

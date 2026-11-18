@@ -1,33 +1,42 @@
 # draw.py
 
 from map import (GRAY, DARK_GRAY, BLACK)
-from map import (MAP_WIDTH, MAP_HEIGHT, TILE_SIZE)
+from map import (MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, LOG_ROWS)
 from map import OPEN_SPACE
 
 # how far around the player the map is visible
 VIEW_RADIUS = 12
 
-def render_message_log(messages, pygame, screen, font):
-    if len(messages) > 0:
-        if len(messages) < 4:
-            for i in range(4 - len(messages)):
-                messages.append("")
-                #now there are 4 strings in message
-        string_index = 0
-        for a_string in messages:
-            draw_and_blit_char(pygame, screen, font, " ", 0, MAP_HEIGHT + string_index, GRAY)
-            for i in range(0, len(a_string)):
-                draw_and_blit_char(pygame, screen, font, a_string[i], 1 + i, MAP_HEIGHT + string_index, DARK_GRAY)
-            for j in range(len(a_string), MAP_WIDTH):
-                draw_and_blit_char(pygame, screen, font, " ", j, MAP_HEIGHT + string_index, GRAY)
-            string_index += 1
+# Draw text on a dark background, one character per tile, starting at tile x, y.
+def draw_text(text, x, y, pygame, screen, font):
+    for i in range(len(text)):
+        draw_and_blit_char(pygame, screen, font, text[i], x + i, y, DARK_GRAY)
+
+# Draw text so that it ends one tile before the right edge of the window.
+def draw_text_right(text, y, pygame, screen, font):
+    draw_text(text, MAP_WIDTH - 1 - len(text), y, pygame, screen, font)
+
+# Show LOG_ROWS messages under the map, starting from messages[offset].
+# If there are more messages than fit, the rows are numbered and the last row
+# tells which rows are shown and that the m key shows more.
+def render_message_log(messages, offset, pygame, screen, font):
+    numbered = len(messages) > LOG_ROWS
+    number_width = len(str(len(messages)))
+    shown = messages[offset:offset + LOG_ROWS]
+    for row in range(len(shown)):
+        text = shown[row]
+        if numbered:
+            text = str(offset + row + 1).rjust(number_width) + " " + text
+        draw_text(text, 1, MAP_HEIGHT + row, pygame, screen, font)
+    if numbered:
+        last_shown = offset + len(shown)
+        more = "[m] More: " + str(offset + 1) + "-" + str(last_shown) + " of " + str(len(messages))
+        draw_text_right(more, MAP_HEIGHT + LOG_ROWS - 1, pygame, screen, font)
 
 # Show the player's health at the right end of the first message row. Call after render_message_log.
 def render_player_status(player, pygame, screen, font):
     status = "HP " + str(max(player.health, 0)) + "/" + str(player.health_max)
-    start_x = MAP_WIDTH - 1 - len(status)
-    for i in range(len(status)):
-        draw_and_blit_char(pygame, screen, font, status[i], start_x + i, MAP_HEIGHT, DARK_GRAY)
+    draw_text_right(status, MAP_HEIGHT, pygame, screen, font)
 
 def coords_on_border_of_map(x, y):
     if x == 0 or x == MAP_WIDTH-1 or y == 0 or y == MAP_HEIGHT-1:

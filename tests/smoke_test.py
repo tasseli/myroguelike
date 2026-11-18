@@ -72,6 +72,40 @@ def check_run_right_stops_at_wall():
     assert runner.position[0] == right_wall_x - 1, f"runner stopped at x={runner.position[0]}, not by the wall"
     print("OK rule checks: the 'run right' orc starts wandering at a wall")
 
+def press(game_map, key):
+    pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=key))
+    loop_utils.handle_events(pygame, game_map, {"GAME_ON": True})
+
+def check_more_key():
+    random.seed(0)
+    game_map = m.Map()
+    messages = ["message " + str(i) for i in range(1, 10)]     # 9 messages: pages 1-4, 5-8, 9
+    game_map.messages = list(messages)
+    positions = [list(c.position) for c in game_map.creatures]
+    offsets = []
+    for i in range(4):
+        press(game_map, pygame.K_m)
+        offsets.append(game_map.log_offset)
+    assert offsets == [4, 8, 0, 4], f"More went through offsets {offsets}"
+    assert game_map.messages == messages, "More changed the messages"
+    assert [list(c.position) for c in game_map.creatures] == positions, "More used up a turn"
+
+    # every page draws without errors
+    import draw
+    font = pygame.font.SysFont(None, 22)
+    for offset in (0, 4, 8):
+        draw.render_message_log(messages, offset, pygame, pygame.display.get_surface(), font)
+
+    # a new turn starts the log from its first row
+    press(game_map, pygame.K_KP5)
+    assert game_map.log_offset == 0, "a new turn didn't reset the log to the first row"
+
+    # with no more messages than rows, More does nothing
+    game_map.messages = ["a", "b", "c", "d"]
+    press(game_map, pygame.K_m)
+    assert game_map.log_offset == 0, "More moved a log that fits on the screen"
+    print("OK rule checks: the More key pages through the log without using a turn")
+
 
 # 2. random games
 
@@ -161,6 +195,7 @@ def run_real_game(seconds=1.5):
 
 check_healing()
 check_run_right_stops_at_wall()
+check_more_key()
 play_random_games()
 run_real_game()     # last, because quitting the game shuts pygame down
 print("All checks passed.")

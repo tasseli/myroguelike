@@ -4,10 +4,13 @@
 #   regular move:                           return "m", (dx, dy)
 #   stay still, middle direction:           return "s", (0, 0)
 #   quit command, to be handled in caller:  return "q", None
+#   show more of the message log:           return "more", None
 #   other, currently unhandled:             return "o", None
 def read_moves(eventkey, pygame):
     if eventkey == pygame.K_q or eventkey == pygame.K_x:
         return "q", None
+    elif eventkey == pygame.K_m:
+        return "more", None
     elif eventkey == pygame.K_LEFT or eventkey == pygame.K_KP4:
         return "m", (-1, 0)
     elif eventkey == pygame.K_RIGHT or eventkey == pygame.K_KP6:
