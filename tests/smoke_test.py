@@ -70,27 +70,33 @@ def check_hit_message_texts():
     print("OK rule checks: hit and death messages")
 
 def check_run_right_stops_at_wall():
-    random.seed(0)
-    game_map = m.Map()
-    runner = next(c for c in game_map.creatures if c.mood == RUN_RIGHT)
-    right_wall_x = game_map.room[2]     # the room's right edge is exclusive: that column is wall
+    # a runner in the empty test room, with nothing between it and the room's right wall
+    game_map = empty_room_map()
+    p_x, p_y = game_map.player.position
+    runner = Orc([0, 0], RUN_RIGHT)
+    place(game_map, runner, p_x - 5, p_y + 3)
     for turn in range(m.MAP_WIDTH):
         loop_utils.move_moodily(game_map, game_map.creatures.index(runner))
         if runner.mood != RUN_RIGHT:
             break
     assert runner.mood == WANDER, "the runner never stopped running right"
-    assert runner.position[0] == right_wall_x - 1, f"runner stopped at x={runner.position[0]}, not by the wall"
+    x, y = runner.position
+    assert game_map.my_map[x + 1][y] == m.WALL, f"runner stopped at {runner.position}, not by a wall"
     print("OK rule checks: the 'run right' orc starts wandering at a wall")
 
-# A map with only the player on it, standing in the middle of the room
+# A map with only the player on it, standing in the middle of one big room (30 x 24), so that the
+# rule checks have room around the player whatever the dungeon generation makes
 def empty_room_map():
     random.seed(0)
     game_map = m.Map()
-    for c in game_map.creatures:
-        game_map.my_map[c.position[0]][c.position[1]] = m.OPEN_SPACE
+    game_map.my_map = [[m.WALL for y in range(m.MAP_HEIGHT)] for x in range(m.MAP_WIDTH)]
+    room = (25, 8, 55, 32)
+    for x in range(room[0], room[2]):
+        for y in range(room[1], room[3]):
+            game_map.my_map[x][y] = m.OPEN_SPACE
+    game_map.rooms, game_map.corridor = [room], []
     game_map.creatures = []
-    left, top, right, bottom = game_map.room
-    place(game_map, game_map.player, (left + right) // 2, (top + bottom) // 2)
+    place(game_map, game_map.player, 40, 20)
     return game_map
 
 def place(game_map, creature, x, y):
@@ -690,26 +696,53 @@ def check_starting_creatures(game_map):
     golems = [c for c in game_map.creatures if c.name == "golem"]
     assert len(golems) == 2 and all(g.mood == WANDER for g in golems), "there should be two wandering golems"
 
+# Two rooms within the size limits, left one in the left half and right one in the right half,
+# joined by a straight corridor; every floor tile can be walked to from every other one
+def check_generation(game_map):
+    assert len(game_map.rooms) == 2
+    (l1, t1, r1, b1), (l2, t2, r2, b2) = game_map.rooms
+    for left, top, right, bottom in game_map.rooms:
+        assert m.ROOM_MIN_WIDTH <= right - left <= m.ROOM_MAX_WIDTH, f"room width {right - left}"
+        assert m.ROOM_MIN_HEIGHT <= bottom - top <= m.ROOM_MAX_HEIGHT, f"room height {bottom - top}"
+        assert left >= 1 and top >= 1 and right <= m.MAP_WIDTH - 1 and bottom <= m.MAP_HEIGHT - 1, "room touches the edge"
+    assert r1 <= m.MAP_WIDTH // 2 < l2, "the rooms aren't in the left and right halves"
+    corridor = game_map.corridor
+    rows = {y for x, y in corridor}
+    assert len(rows) == 1, "the corridor isn't straight"
+    y = rows.pop()
+    assert t1 <= y < b1 and t2 <= y < b2, "the corridor isn't on a row both rooms share"
+    assert [x for x, _ in corridor] == list(range(r1, l2)), "the corridor doesn't run from room to room"
+    # flood fill from one floor tile: it must reach every floor tile (creatures stand on floor too)
+    floor = {(x, y) for x in range(m.MAP_WIDTH) for y in range(m.MAP_HEIGHT) if game_map.my_map[x][y] != m.WALL}
+    start = next(iter(floor))
+    reached, todo = {start}, [start]
+    while todo:
+        x, y = todo.pop()
+        for dx, dy in loop_utils.DIRECTIONS:
+            tile = (x + dx, y + dy)
+            if tile in floor and tile not in reached:
+                reached.add(tile)
+                todo.append(tile)
+    assert reached == floor, f"{len(floor - reached)} floor tiles can't be reached"
+
 def check_spawns(game_map):
-    left, top, right, bottom = game_map.room
-    assert right - left >= 8 and bottom - top >= 8, "room smaller than 8x8"
+    room_tiles = [(x, y) for left, top, right, bottom in game_map.rooms
+                  for x in range(left, right) for y in range(top, bottom)]
     for c in game_map.creatures:
-        x, y = c.position
-        assert left <= x < right and top <= y < bottom, f"{c.name} spawned outside the room"
+        assert tuple(c.position) in room_tiles, f"{c.name} spawned outside the rooms, at {c.position}"
     px, py = game_map.player.position
     def moves_from_player(x, y):
         return max(abs(x - px), abs(y - py))
     # the near golem (added right after the player) starts NEAR_GOLEM_SPAWN_DISTANCE moves away,
-    # if the room has a tile that far
+    # if the rooms have a tile that far
     near_golem = game_map.creatures[1]
     assert near_golem.name == "golem"
-    if any(moves_from_player(x, y) == m.NEAR_GOLEM_SPAWN_DISTANCE for x in range(left, right) for y in range(top, bottom)):
+    if any(moves_from_player(x, y) == m.NEAR_GOLEM_SPAWN_DISTANCE for x, y in room_tiles):
         assert moves_from_player(*near_golem.position) == m.NEAR_GOLEM_SPAWN_DISTANCE, \
             f"near golem spawned {moves_from_player(*near_golem.position)} moves from the player"
-    # monsters start at least MIN_SPAWN_DISTANCE moves away, if the room has enough such tiles
+    # monsters start at least MIN_SPAWN_DISTANCE moves away, if the rooms have enough such tiles
     monsters = [c for c in game_map.creatures[1:] if c is not near_golem]
-    far_tiles = sum(1 for x in range(left, right) for y in range(top, bottom)
-                    if moves_from_player(x, y) >= m.MIN_SPAWN_DISTANCE)
+    far_tiles = sum(1 for x, y in room_tiles if moves_from_player(x, y) >= m.MIN_SPAWN_DISTANCE)
     if far_tiles >= len(monsters):
         for c in monsters:
             distance = moves_from_player(*c.position)
@@ -737,6 +770,7 @@ def play_random_games(games=200, max_turns=300):
     for game in range(games):
         random.seed(game)       # same games every run, so results can be compared and repeated
         game_map = m.Map()
+        check_generation(game_map)
         check_starting_creatures(game_map)
         check_spawns(game_map)
         check_consistency(game_map)

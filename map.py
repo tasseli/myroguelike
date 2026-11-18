@@ -10,7 +10,11 @@ MAP_HEIGHT  = 40
 TILE_SIZE   = 16
 LOG_ROWS    = 4     # message rows shown under the map
 
-# How many moves away from the player other creatures start, when the room is big enough
+# The sizes of the two rooms, picked at random between these, inclusive
+ROOM_MIN_WIDTH, ROOM_MAX_WIDTH = 8, 24
+ROOM_MIN_HEIGHT, ROOM_MAX_HEIGHT = 6, 16
+
+# How many moves away from the player other creatures start, when the rooms are big enough
 MIN_SPAWN_DISTANCE = 8
 # How many moves away from the player the near golem starts, when possible
 NEAR_GOLEM_SPAWN_DISTANCE = 6
@@ -40,27 +44,46 @@ def find_creature_at(creatures, x, y):
 
 class Map:
 
-    # Fill the map with walls and carve out one room.
-    # Return the room as (left, top, right, bottom); right and bottom are exclusive.
+    # Fill the map with walls, carve two random sized rooms, one in the left half and one in the right
+    # half, and join them with a straight corridor along a row that both rooms share.
+    # Return the rooms as (left, top, right, bottom), right and bottom exclusive, and the corridor tiles.
     def generate(self):
         self.my_map = [[WALL for y in range(MAP_HEIGHT)] for x in range(MAP_WIDTH)]
-        # the room is at least 8 by 8, and never touches the map's outer wall
-        top = random.randint(1, MAP_HEIGHT // 2 - 4)
-        bottom = random.randint(MAP_HEIGHT // 2 + 4, MAP_HEIGHT - 1)
-        left = random.randint(1, MAP_WIDTH // 2 - 4)
-        right = random.randint(MAP_WIDTH // 2 + 4, MAP_WIDTH - 1)
-        for y in range(top, bottom):
-            for x in range(left, right):
-                self.my_map[x][y] = OPEN_SPACE
-        return (left, top, right, bottom)
+        middle = MAP_WIDTH // 2
+        # the left room ends before the middle column; neither room touches the map's outer wall
+        width1 = random.randint(ROOM_MIN_WIDTH, ROOM_MAX_WIDTH)
+        height1 = random.randint(ROOM_MIN_HEIGHT, ROOM_MAX_HEIGHT)
+        left1 = random.randint(1, middle - 1 - width1)
+        top1 = random.randint(1, MAP_HEIGHT - 1 - height1)
+        room1 = (left1, top1, left1 + width1, top1 + height1)
+        # the right room starts after the middle column, and shares at least one row with the left room
+        width2 = random.randint(ROOM_MIN_WIDTH, ROOM_MAX_WIDTH)
+        height2 = random.randint(ROOM_MIN_HEIGHT, ROOM_MAX_HEIGHT)
+        left2 = random.randint(middle + 1, MAP_WIDTH - 1 - width2)
+        top2 = random.randint(max(1, top1 - height2 + 1), min(MAP_HEIGHT - 1 - height2, room1[3] - 1))
+        room2 = (left2, top2, left2 + width2, top2 + height2)
+        for left, top, right, bottom in (room1, room2):
+            for y in range(top, bottom):
+                for x in range(left, right):
+                    self.my_map[x][y] = OPEN_SPACE
+        # the corridor: on one of the shared rows, from the left room's right wall to the right room's left wall
+        corridor_y = random.randint(max(room1[1], room2[1]), min(room1[3], room2[3]) - 1)
+        corridor = [[x, corridor_y] for x in range(room1[2], room2[0])]
+        for x, y in corridor:
+            self.my_map[x][y] = OPEN_SPACE
+        return [room1, room2], corridor
 
-    # Return the coords of a random floor tile in the room that has no creature on it.
-    # With away_from, only tiles at least min_distance moves from that creature are used.
-    # If the room is too small for that, the farthest free tiles are used instead.
-    def random_free_floor(self, away_from=None, min_distance=0):
-        left, top, right, bottom = self.room
-        free = [[x, y] for x in range(left, right) for y in range(top, bottom)
+    # The floor tiles in the rooms (not the corridor) that have no creature on them
+    def free_room_tiles(self):
+        return [[x, y] for left, top, right, bottom in self.rooms
+                for x in range(left, right) for y in range(top, bottom)
                 if self.my_map[x][y] == OPEN_SPACE]
+
+    # Return the coords of a random free floor tile in a room.
+    # With away_from, only tiles at least min_distance moves from that creature are used.
+    # If the rooms have no tile that far, the farthest free tiles are used instead.
+    def random_free_floor(self, away_from=None, min_distance=0):
+        free = self.free_room_tiles()
         if away_from is not None:
             ax, ay = away_from.get_position()
             def moves(tile):
@@ -73,13 +96,11 @@ class Map:
             free = far
         return random.choice(free)
 
-    # Return a random free floor tile in the room exactly the given number of moves from a creature,
-    # or, if the room has none, one of the free tiles closest to that number of moves.
+    # Return a random free floor tile in a room exactly the given number of moves from a creature,
+    # or, if the rooms have none, one of the free tiles closest to that number of moves.
     def free_floor_at_distance(self, creature, moves_wanted):
-        left, top, right, bottom = self.room
         c_x, c_y = creature.get_position()
-        free = [[x, y] for x in range(left, right) for y in range(top, bottom)
-                if self.my_map[x][y] == OPEN_SPACE]
+        free = self.free_room_tiles()
         def off_by(tile):
             return abs(max(abs(tile[0] - c_x), abs(tile[1] - c_y)) - moves_wanted)
         best = min(off_by(tile) for tile in free)
@@ -92,7 +113,7 @@ class Map:
         self.log_offset = 0
         # name of the creature that killed the player, set when that happens
         self.killed_by = None
-        self.room = self.generate()
+        self.rooms, self.corridor = self.generate()
         self.creatures = []
 
         # the player must be added first: index 0 in self.creatures is always the player
