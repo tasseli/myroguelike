@@ -123,7 +123,7 @@ def press(game_map, *keys, game_state=None):
         loop_utils.handle_events(pygame, game_map, game_state)
 
 def check_help():
-    from help_texts import COMMAND_LINES, HELP_LINES, KEY_HINTS, LOOK_KEY_HINTS, DEATH_KEY_HINTS
+    from help_texts import COMMAND_LINES, HELP_LINES, KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, DEATH_KEY_HINTS
     game_map = empty_room_map()
     turns_until_heal = game_map.player.turns_until_heal
 
@@ -148,7 +148,7 @@ def check_help():
     # the texts fit: a line plus its row number must end before the More indicator
     for line in COMMAND_LINES + HELP_LINES:
         assert len(line) <= 52, f"help line too long ({len(line)} characters): {line}"
-    for hints in (KEY_HINTS, LOOK_KEY_HINTS, DEATH_KEY_HINTS):
+    for hints in (KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, DEATH_KEY_HINTS):
         assert len(hints) <= m.MAP_WIDTH - 2, f"key hints don't fit on one row ({len(hints)} characters)"
     print("OK rule checks: ? shows the commands, h the help, m pages them, no turn used")
 
@@ -239,14 +239,27 @@ def check_provoke():
     assert not any("turns to chase" in s for s in game_map.messages), game_map.messages
     print("OK rule checks: a grey monster the player hits starts chasing the player")
 
+# Run game frames with no keys pressed, like the game loop does, until waiting ends. Return the frame count.
+def run_frames_while_waiting(game_map, game_state):
+    frames = 0
+    while game_state.get("waiting") is not None and frames < 100000:
+        loop_utils.handle_events(pygame, game_map, game_state)
+        frames += 1
+    return frames
+
 def check_wait():
     from creatures import Kobold
+    per_turn = loop_utils.WAIT_FRAMES_PER_TURN
     # nobody around: wait the full 20 turns and heal 1
     game_map = empty_room_map()
     state = {"GAME_ON": True}
     game_map.player.health = 5
     press(game_map, pygame.K_w, pygame.K_2, pygame.K_KP0, pygame.K_RETURN, game_state=state)
     assert state["wait_input"] is None, "the prompt stayed open"
+    # the first turn is played on the same frame as Enter, and shown
+    assert game_map.messages[0] == "Waiting: 1/20 turns", game_map.messages
+    frames = run_frames_while_waiting(game_map, state)
+    assert frames == 19 * per_turn, f"the other 19 turns took {frames} frames, not {19 * per_turn}"
     assert game_map.messages[0] == "You wait 20 turns.", game_map.messages
     assert game_map.player.health == 6, "didn't heal while waiting 20 turns"
 
@@ -264,6 +277,7 @@ def check_wait():
     place(game_map, kobold, p_x - 5, p_y)
     health = game_map.player.health
     press(game_map, pygame.K_w, pygame.K_5, pygame.K_0, pygame.K_RETURN, game_state=state)
+    run_frames_while_waiting(game_map, state)
     assert game_map.messages[0] == "You stop waiting after 4 turns: the kobold is next to you.", game_map.messages
     assert loop_utils.creature_next_to_player(game_map) is kobold
     assert game_map.player.health == health, "the kobold got to hit while the player waited"
@@ -273,7 +287,21 @@ def check_wait():
     press(game_map, pygame.K_w, pygame.K_9, pygame.K_RETURN, game_state=state)
     assert game_map.messages == ["You can't wait with the kobold next to you."], game_map.messages
     assert kobold.position == kobold_position, "a turn passed although waiting was refused"
-    print("OK rule checks: w waits and heals, stops when someone comes next to the player")
+    assert state.get("waiting") is None, "waiting started although it was refused"
+
+    # any key stops waiting, and that key does nothing else
+    game_map = empty_room_map()
+    state = {"GAME_ON": True}
+    press(game_map, pygame.K_w, pygame.K_9, pygame.K_9, pygame.K_RETURN, game_state=state)    # turn 1
+    for frame in range(2 * per_turn):                                                         # turns 2 and 3
+        loop_utils.handle_events(pygame, game_map, state)
+    assert game_map.messages[0] == "Waiting: 3/99 turns", game_map.messages
+    position = list(game_map.player.position)
+    press(game_map, pygame.K_LEFT, game_state=state)
+    assert state["waiting"] is None and game_map.messages[0] == "You stop waiting after 3 turns.", game_map.messages
+    assert game_map.player.position == position, "the key that stopped waiting also moved the player"
+    assert game_map.player.turns_until_heal == game_map.player.heal_interval - 3, "more turns passed than shown"
+    print("OK rule checks: w waits about 3 turns a second and heals, stops when someone comes next or a key is pressed")
 
 def check_more_key():
     random.seed(0)

@@ -23,6 +23,7 @@ HELP_LINES = [
     "Healing: everyone heals 1 health every 20 turns.",
     "Waiting (w): type how many turns, then Enter.",
     "   Backspace deletes a digit, Esc cancels.",
+    "   The turns are shown as they pass; any key stops.",
     "   Waiting stops when someone comes next to you,",
     "   and doesn't start if someone already is.",
     "Colors: monsters on red are chasing you; those on",
@@ -38,5 +39,6 @@ HELP_LINES = [
 
 # Shown on the row under the message log
 KEY_HINTS = "arrows/numpad: move  5: stay  w: wait  l: look  m: more  ?: commands  h: help"
-LOOK_KEY_HINTS = "arrows/numpad: next creature that way   l or Esc: stop looking"
+WAIT_KEY_HINTS = "any key: stop waiting"
+LOOK_KEY_HINTS ="arrows/numpad: next creature that way   l or Esc: stop looking"
 DEATH_KEY_HINTS = "r: play again   q: quit"

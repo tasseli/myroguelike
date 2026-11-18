@@ -136,29 +136,54 @@ def creature_next_to_player(game_map):
 def turns_text(turns):
     return str(turns) + (" turn" if turns == 1 else " turns")
 
-# Wait up to the given number of turns, stopping early when a creature comes next to the player.
-# The log gets a summary first, then the messages of all the waited turns.
-def wait_turns(game_map, game_state, turns):
-    game_map.messages = []
+# Waiting plays one turn every WAIT_FRAMES_PER_TURN frames, so each turn can be seen.
+# The game draws 30 frames a second, so this is about 3 turns a second.
+WAIT_FRAMES_PER_TURN = 10
+
+# Start waiting up to the given number of turns. game_state["waiting"] keeps track of it;
+# None means not waiting. Waiting doesn't start if a creature is already next to the player.
+def start_waiting(game_map, game_state, turns):
     game_map.log_offset = 0
     nearby = creature_next_to_player(game_map)
     if nearby is not None:
         game_map.messages = ["You can't wait with " + nearby.called() + " next to you."]
         return
-    waited = 0
-    while waited < turns:
-        waited += 1
-        if play_turn(game_map, (0, 0)):
-            game_state["GAME_ON"] = False
-            return
-        nearby = creature_next_to_player(game_map)
-        if nearby is not None:
-            break
+    # frames starts one short, so the first turn is played on the very next frame
+    game_state["waiting"] = {"turns": turns, "waited": 0, "frames": WAIT_FRAMES_PER_TURN - 1, "log": []}
+    game_map.messages = ["Waiting: 0/" + str(turns) + " turns"]
+
+# End waiting: the log gets the summary first, then the messages of all the waited turns
+def finish_waiting(game_map, game_state, summary):
+    game_map.messages = [summary] + game_state["waiting"]["log"]
+    game_map.log_offset = 0
+    game_state["waiting"] = None
+
+# Called once a frame while waiting. Every WAIT_FRAMES_PER_TURN frames, play one turn; stop when
+# all turns are waited, or a creature comes next to the player, or the player dies.
+def continue_waiting(game_map, game_state):
+    waiting = game_state["waiting"]
+    waiting["frames"] += 1
+    if waiting["frames"] < WAIT_FRAMES_PER_TURN:
+        return
+    waiting["frames"] = 0
+    waiting["waited"] += 1
+    game_map.messages = []
+    if play_turn(game_map, (0, 0)):
+        game_state["waiting"] = None
+        game_state["GAME_ON"] = False
+        return
+    turn_messages = game_map.messages
+    waiting["log"] += turn_messages
+    waited = turns_text(waiting["waited"])
+    nearby = creature_next_to_player(game_map)
     if nearby is not None:
-        summary = "You stop waiting after " + turns_text(waited) + ": " + nearby.called() + " is next to you."
+        finish_waiting(game_map, game_state, "You stop waiting after " + waited + ": " + nearby.called() + " is next to you.")
+    elif waiting["waited"] >= waiting["turns"]:
+        finish_waiting(game_map, game_state, "You wait " + waited + ".")
     else:
-        summary = "You wait " + turns_text(waited) + "."
-    game_map.messages.insert(0, summary)
+        # show the progress and this turn's messages
+        game_map.messages = ["Waiting: " + str(waiting["waited"]) + "/" + str(waiting["turns"]) + " turns"] + turn_messages
+        game_map.log_offset = 0
 
 WAIT_PROMPT = "Wait how many turns? "
 WAIT_HELP = "   (Enter: wait, Esc: cancel)"
@@ -181,7 +206,7 @@ def handle_wait_input(event_key, pygame, game_map, game_state):
         if typed == "" or int(typed) == 0:
             game_map.messages = ["You decide not to wait."]
         else:
-            wait_turns(game_map, game_state, int(typed))
+            start_waiting(game_map, game_state, int(typed))
         return
     game_state["wait_input"] = typed
     game_map.messages = [WAIT_PROMPT + typed + "_" + WAIT_HELP]
@@ -213,16 +238,18 @@ def handle_look_input(event_key, typed_char, pygame, game_map, game_state):
             game_state["look_target"] = next_target
             game_map.messages = describe(next_target, game_map)
 
+# Called once a frame: handle the keys pressed, and play the next waited turn when it's time
 def handle_events(pygame, game_map, game_state):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit_app("", pygame)
-        if event.type == pygame.KEYDOWN and game_state.get("look_target") is not None:
+        if event.type == pygame.KEYDOWN and game_state.get("waiting") is not None:
+            # any key stops waiting
+            finish_waiting(game_map, game_state, "You stop waiting after " + turns_text(game_state["waiting"]["waited"]) + ".")
+        elif event.type == pygame.KEYDOWN and game_state.get("look_target") is not None:
             handle_look_input(event.key, getattr(event, "unicode", ""), pygame, game_map, game_state)
         elif event.type == pygame.KEYDOWN and game_state.get("wait_input") is not None:
             handle_wait_input(event.key, pygame, game_map, game_state)
-            if not game_state["GAME_ON"]:
-                return                                  # died while waiting
         elif event.type == pygame.KEYDOWN:
             outcome, direction = read_moves(event.key, pygame, getattr(event, "unicode", ""))
             if outcome == "q":
@@ -254,6 +281,8 @@ def handle_events(pygame, game_map, game_state):
                 game_state["wait_input"] = ""
                 game_map.log_offset = 0
                 game_map.messages = [WAIT_PROMPT + "_" + WAIT_HELP]
+    if game_state.get("waiting") is not None:
+        continue_waiting(game_map, game_state)
 
 # Return "restart" if the player wants to play again; quitting exits the program.
 def handle_death_screen_keys(pygame):
