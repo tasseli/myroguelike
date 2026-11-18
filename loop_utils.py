@@ -148,8 +148,12 @@ def start_waiting(game_map, game_state, turns):
     if nearby is not None:
         game_map.messages = ["You can't wait with " + nearby.called() + " next to you."]
         return
-    # frames starts one short, so the first turn is played on the very next frame
-    game_state["waiting"] = {"turns": turns, "waited": 0, "frames": WAIT_FRAMES_PER_TURN - 1, "log": []}
+    # frames starts one short, so the first turn is played on the very next frame.
+    # stop_at_full_health: waiting started below full health, so stop when full health is reached;
+    # waiting started at full health goes on as long as asked.
+    player = game_map.player
+    game_state["waiting"] = {"turns": turns, "waited": 0, "frames": WAIT_FRAMES_PER_TURN - 1, "log": [],
+                             "stop_at_full_health": player.health < player.health_max}
     game_map.messages = ["Waiting: 0/" + str(turns) + " turns"]
 
 # End waiting: the log gets the summary first, then the messages of all the waited turns
@@ -159,7 +163,8 @@ def finish_waiting(game_map, game_state, summary):
     game_state["waiting"] = None
 
 # Called once a frame while waiting. Every WAIT_FRAMES_PER_TURN frames, play one turn; stop when
-# all turns are waited, or a creature comes next to the player, or the player dies.
+# all turns are waited, or a creature comes next to the player, or the player reaches full health
+# (if waiting started below it), or the player dies.
 def continue_waiting(game_map, game_state):
     waiting = game_state["waiting"]
     waiting["frames"] += 1
@@ -176,8 +181,11 @@ def continue_waiting(game_map, game_state):
     waiting["log"] += turn_messages
     waited = turns_text(waiting["waited"])
     nearby = creature_next_to_player(game_map)
+    player = game_map.player
     if nearby is not None:
         finish_waiting(game_map, game_state, "You stop waiting after " + waited + ": " + nearby.called() + " is next to you.")
+    elif waiting["stop_at_full_health"] and player.health >= player.health_max:
+        finish_waiting(game_map, game_state, "You stop waiting after " + waited + ": you are at full health.")
     elif waiting["waited"] >= waiting["turns"]:
         finish_waiting(game_map, game_state, "You wait " + waited + ".")
     else:

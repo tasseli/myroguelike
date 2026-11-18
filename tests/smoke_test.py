@@ -263,6 +263,18 @@ def check_wait():
     assert game_map.messages[0] == "You wait 20 turns.", game_map.messages
     assert game_map.player.health == 6, "didn't heal while waiting 20 turns"
 
+    # started below full health: stop when full health is reached (1 health short heals in 20 turns)
+    full_map = empty_room_map()
+    full_state = {"GAME_ON": True}
+    full_map.player.health = full_map.player.health_max - 1
+    press(full_map, pygame.K_w, pygame.K_5, pygame.K_0, pygame.K_RETURN, game_state=full_state)
+    run_frames_while_waiting(full_map, full_state)
+    assert full_map.messages[0] == "You stop waiting after 20 turns: you are at full health.", full_map.messages
+    # started at full health: wait as long as asked
+    press(full_map, pygame.K_w, pygame.K_2, pygame.K_5, pygame.K_RETURN, game_state=full_state)
+    run_frames_while_waiting(full_map, full_state)
+    assert full_map.messages[0] == "You wait 25 turns.", full_map.messages
+
     # typing: backspace removes a digit, Esc cancels without using a turn
     press(game_map, pygame.K_w, pygame.K_1, pygame.K_2, pygame.K_BACKSPACE, game_state=state)
     assert state["wait_input"] == "1", state

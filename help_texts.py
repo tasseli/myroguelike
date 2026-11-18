@@ -26,6 +26,8 @@ HELP_LINES = [
     "   The turns are shown as they pass; any key stops.",
     "   Waiting stops when someone comes next to you,",
     "   and doesn't start if someone already is.",
+    "   It also stops when you reach full health,",
+    "   unless you started waiting at full health.",
     "Colors: monsters on red are chasing you; those on",
     "   grey wander or go their own way.",
     "   Hit a grey one and it starts chasing you.",
