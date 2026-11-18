@@ -22,7 +22,9 @@ def quit_app(reason, pygame):
 # 1. a tile closer to the goal by walking that is free, or holds a creature it attacks (such as the goal)
 # 2. a free tile just as close (a step sideways, to get around creatures in the way)
 # 3. a closer tile with a creature it won't attack (not the player): the two swap places, so that
-#    creatures can pass each other in the narrow corridor instead of getting stuck head-on
+#    creatures can pass each other in the narrow corridor instead of getting stuck head-on.
+#    Not with one chasing the same goal, though: that one is going the same way and moves on its own
+#    turn; swapping with it would only make the two swap back and forth without getting anywhere.
 # Returns where to move (after a swap: where it now stands). With no such tile, it stays put.
 def path_step(map, creature, goal):
     distances = map.distances_to(goal)
@@ -43,7 +45,7 @@ def path_step(map, creature, goal):
             blocker = map.creatures[find_creature_at(map.creatures, tile[0], tile[1])]
             if map.can_attack(creature, blocker):
                 closer.append((steps, tile))
-            elif blocker is not map.player:
+            elif blocker is not map.player and not (blocker.mood == CHASE and blocker.target is goal):
                 swaps.append((steps, blocker))
     if closer or sideways:
         options = closer or sideways

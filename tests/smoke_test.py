@@ -165,6 +165,24 @@ def check_path_through_corridor():
     assert kobold.position == list(ahead) and gnoll.position == list(behind), \
         f"no swap: kobold at {kobold.position}, gnoll at {gnoll.position}"
     assert game_map.my_map[ahead[0]][ahead[1]] == "k" and game_map.my_map[behind[0]][behind[1]] == "n"
+
+    # two chasers after the same target in single file, the rear one moving first: they mustn't swap
+    # back and forth (which kept both in place). The rear one waits one turn for the front one to move
+    # on, then follows: after two turns both are closer to the player
+    for c in (kobold, gnoll):
+        game_map.my_map[c.position[0]][c.position[1]] = m.OPEN_SPACE
+        game_map.creatures.remove(c)
+    rear = Gnoll([0, 0], CHASE, game_map.player)
+    front = Gnoll([0, 0], CHASE, game_map.player)
+    place(game_map, rear, *behind)      # added first, so it moves first
+    place(game_map, front, *ahead)
+    distances = game_map.distances_to(game_map.player)
+    before = [distances[tuple(rear.position)], distances[tuple(front.position)]]
+    for turn in range(2):
+        for i in (1, 2):
+            loop_utils.move_moodily(game_map, i)
+    after = [distances[tuple(rear.position)], distances[tuple(front.position)]]
+    assert after[0] < before[0] and after[1] < before[1], f"walking distances {before} -> {after}"
     print("OK rule checks: chasers find the shortest way through the corridor, swapping past others there")
 
 def press(game_map, *keys, game_state=None):
