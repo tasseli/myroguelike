@@ -91,6 +91,10 @@ def handle_events(pygame, game_map, game_state):
                     check_deaths(game_map, False)       # check if player killed anyone
                 if check_deaths(game_map, True):        # have all creatures move and check if they killed anyone
                     game_state["GAME_ON"] = False
+                    return                              # ignore any further keys pressed in the same frame
+                # a turn has passed: everyone still alive heals a little
+                for creature in game_map.creatures:
+                    creature.heal_slowly()
 
 def handle_quit_key(pygame):
     for event in pygame.event.get():

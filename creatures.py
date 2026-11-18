@@ -7,11 +7,13 @@ class Creature:
     name = "generic creature"
     health_range = (2, 2)   # starting health is rolled from this range, inclusive
     damage = 1
+    heal_interval = 20      # heal 1 health every this many turns
 
     def __init__(self, coords, mood=None, target=None):
         self.position = [int(coords[0]), int(coords[1])]
         self.health = random.randint(*self.health_range)
         self.health_max = self.health
+        self.turns_until_heal = self.heal_interval
         self.alive = True
         self.target = target
         if mood is not None:
@@ -26,6 +28,14 @@ class Creature:
         message1 = target_creature.name + " hit for " + str(self.damage) + " damage by " + self.name
         message2 = target_creature.name + " has " + str(target_creature.health) + " health. "
         return message1, message2
+
+    # Call once per turn. Every heal_interval turns, heal 1 health, up to health_max.
+    def heal_slowly(self):
+        self.turns_until_heal -= 1
+        if self.turns_until_heal <= 0:
+            self.turns_until_heal = self.heal_interval
+            if 0 < self.health < self.health_max:
+                self.health += 1
 
     def check_death(self):
         if self.health < 1:
