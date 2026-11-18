@@ -297,7 +297,15 @@ def check_flee():
 
 def check_wait():
     from creatures import Kobold
-    per_turn = loop_utils.WAIT_FRAMES_PER_TURN
+    gap = loop_utils.wait_frames_before_turn
+    start = loop_utils.WAIT_START_FRAMES
+
+    # the pace: starts at WAIT_START_FRAMES between turns, never slows down, gets clearly faster
+    gaps = [gap(turn) for turn in range(2, 101)]
+    assert gaps[0] == start, gaps[:3]
+    assert all(later <= earlier for earlier, later in zip(gaps, gaps[1:])), "waiting slowed down"
+    assert gaps[-1] == loop_utils.WAIT_MIN_FRAMES, "long waits never reach full speed"
+
     # nobody around: wait the full 20 turns and heal 1
     game_map = empty_room_map()
     state = {"GAME_ON": True}
@@ -307,8 +315,19 @@ def check_wait():
     # the first turn is played on the same frame as Enter, and shown
     assert game_map.messages[0] == "Waiting: 1/20 turns", game_map.messages
     frames = run_frames_while_waiting(game_map, state)
-    assert frames == 19 * per_turn, f"the other 19 turns took {frames} frames, not {19 * per_turn}"
+    expected = sum(gap(turn) for turn in range(2, 21))
+    assert frames == expected, f"the other 19 turns took {frames} frames, not {expected}"
+    assert frames < 19 * start, "waiting didn't speed up"
     assert game_map.messages[0] == "You wait 20 turns.", game_map.messages
+
+    # the next wait starts at the original pace again: turn 2 comes after WAIT_START_FRAMES frames
+    press(game_map, pygame.K_w, pygame.K_5, pygame.K_RETURN, game_state=state)
+    for frame in range(start - 1):
+        loop_utils.handle_events(pygame, game_map, state)
+    assert game_map.messages[0] == "Waiting: 1/5 turns", game_map.messages
+    loop_utils.handle_events(pygame, game_map, state)
+    assert game_map.messages[0] == "Waiting: 2/5 turns", game_map.messages
+    run_frames_while_waiting(game_map, state)
     assert game_map.player.health == 6, "didn't heal while waiting 20 turns"
 
     # started below full health: stop when full health is reached (1 health short heals in 20 turns)
@@ -353,7 +372,7 @@ def check_wait():
     game_map = empty_room_map()
     state = {"GAME_ON": True}
     press(game_map, pygame.K_w, pygame.K_9, pygame.K_9, pygame.K_RETURN, game_state=state)    # turn 1
-    for frame in range(2 * per_turn):                                                         # turns 2 and 3
+    for frame in range(gap(2) + gap(3)):                                                      # turns 2 and 3
         loop_utils.handle_events(pygame, game_map, state)
     assert game_map.messages[0] == "Waiting: 3/99 turns", game_map.messages
     position = list(game_map.player.position)
@@ -361,7 +380,7 @@ def check_wait():
     assert state["waiting"] is None and game_map.messages[0] == "You stop waiting after 3 turns.", game_map.messages
     assert game_map.player.position == position, "the key that stopped waiting also moved the player"
     assert game_map.player.turns_until_heal == game_map.player.heal_interval - 3, "more turns passed than shown"
-    print("OK rule checks: w waits about 3 turns a second and heals, stops when someone comes next or a key is pressed")
+    print("OK rule checks: w starts at about 3 turns a second and speeds up, heals, stops when someone comes next or a key is pressed")
 
 def check_more_key():
     random.seed(0)

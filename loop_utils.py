@@ -157,9 +157,18 @@ def creature_next_to_player(game_map):
 def turns_text(turns):
     return str(turns) + (" turn" if turns == 1 else " turns")
 
-# Waiting plays one turn every WAIT_FRAMES_PER_TURN frames, so each turn can be seen.
-# The game draws 30 frames a second, so this is about 3 turns a second.
-WAIT_FRAMES_PER_TURN = 10
+# Waiting plays the turns a few frames apart, so each turn can be seen, and speeds up as it goes on.
+# The game draws 30 frames a second. Every wait starts with WAIT_START_FRAMES between turns
+# (about 3 turns a second); each later gap is WAIT_SPEEDUP times shorter, down to WAIT_MIN_FRAMES.
+WAIT_START_FRAMES = 10
+WAIT_SPEEDUP = 1.1
+WAIT_MIN_FRAMES = 1
+
+# How many frames to wait before playing the given turn of a wait (turn 1 is the first)
+def wait_frames_before_turn(turn_number):
+    if turn_number <= 2:
+        return WAIT_START_FRAMES
+    return max(WAIT_MIN_FRAMES, round(WAIT_START_FRAMES / WAIT_SPEEDUP ** (turn_number - 2)))
 
 # Start waiting up to the given number of turns. game_state["waiting"] keeps track of it;
 # None means not waiting. Waiting doesn't start if a creature is already next to the player.
@@ -173,7 +182,7 @@ def start_waiting(game_map, game_state, turns):
     # stop_at_full_health: waiting started below full health, so stop when full health is reached;
     # waiting started at full health goes on as long as asked.
     player = game_map.player
-    game_state["waiting"] = {"turns": turns, "waited": 0, "frames": WAIT_FRAMES_PER_TURN - 1, "log": [],
+    game_state["waiting"] = {"turns": turns, "waited": 0, "frames": wait_frames_before_turn(1) - 1, "log": [],
                              "stop_at_full_health": player.health < player.health_max}
     game_map.messages = ["Waiting: 0/" + str(turns) + " turns"]
 
@@ -183,13 +192,13 @@ def finish_waiting(game_map, game_state, summary):
     game_map.log_offset = 0
     game_state["waiting"] = None
 
-# Called once a frame while waiting. Every WAIT_FRAMES_PER_TURN frames, play one turn; stop when
+# Called once a frame while waiting. When enough frames have passed, play the next turn; stop when
 # all turns are waited, or a creature comes next to the player, or the player reaches full health
 # (if waiting started below it), or the player dies.
 def continue_waiting(game_map, game_state):
     waiting = game_state["waiting"]
     waiting["frames"] += 1
-    if waiting["frames"] < WAIT_FRAMES_PER_TURN:
+    if waiting["frames"] < wait_frames_before_turn(waiting["waited"] + 1):
         return
     waiting["frames"] = 0
     waiting["waited"] += 1

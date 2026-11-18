@@ -23,7 +23,7 @@ HELP_LINES = [
     "Healing: everyone heals 1 health every 20 turns.",
     "Waiting (w): type how many turns, then Enter.",
     "   Backspace deletes a digit, Esc cancels.",
-    "   The turns are shown as they pass; any key stops.",
+    "   Turns are shown, speeding up; any key stops.",
     "   Waiting stops when someone comes next to you,",
     "   and doesn't start if someone already is.",
     "   It also stops when you reach full health,",
