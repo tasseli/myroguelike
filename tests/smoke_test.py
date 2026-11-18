@@ -59,6 +59,16 @@ def check_healing():
     assert orc.health == 0, "a dead creature healed"
     print("OK rule checks: healing")
 
+def check_hit_message_texts():
+    from creatures import Uruk
+    player, orc, orc2, uruk = Player([1, 1]), Orc([1, 1]), Orc([1, 1]), Uruk([1, 1])
+    orc.health = orc2.health = 5
+    assert player.hit(orc) == ["You hit the orc for 4. It has 1 health left."], player.hit
+    assert uruk.hit(player) == ["The uruk hits you for 4. You have 8 health left."]
+    assert orc2.hit(orc) == ["The orc hits another orc for 3."], "killing hit should leave out health"
+    assert orc.check_death() == "The orc dies!"
+    print("OK rule checks: hit and death messages")
+
 def check_run_right_stops_at_wall():
     random.seed(0)
     game_map = m.Map()
@@ -171,14 +181,15 @@ def check_spawns(game_map):
             distance = max(abs(c.position[0] - px), abs(c.position[1] - py))
             assert distance >= m.MIN_SPAWN_DISTANCE, f"{c.name} spawned {distance} moves from the player"
 
+def is_hit_message(message):
+    return message.startswith("You hit ") or " hits " in message
+
 def check_hit_messages(messages):
     for message in messages:
-        if " hit for " in message:
-            victim = message.split(" hit for ")[0]
-            attacker = message.split(" damage by ")[1]
-            # only orcs have non-player targets (other orcs)
-            assert "player" in (victim, attacker) or (victim, attacker) == ("orc", "orc"), \
-                "attack against the rules: " + message
+        if is_hit_message(message):
+            # the player is in every hit, except orcs hitting their target orc
+            assert message.startswith("You hit ") or " hits you " in message \
+                or message.startswith("The orc hits another orc "), "attack against the rules: " + message
 
 def play_random_games(games=200, max_turns=300):
     totals = {"turns": 0, "hits": 0, "deaths": 0, "heals": 0, "player deaths": 0}
@@ -193,7 +204,7 @@ def play_random_games(games=200, max_turns=300):
             pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=random.choice(KEYS)))
             loop_utils.handle_events(pygame, game_map, game_state)
             totals["turns"] += 1
-            totals["hits"] += sum(" hit for " in s for s in game_map.messages)
+            totals["hits"] += sum(is_hit_message(s) for s in game_map.messages)
             totals["deaths"] += sum("dies!" in s for s in game_map.messages)
             check_hit_messages(game_map.messages)
             if not game_state["GAME_ON"]:
@@ -250,6 +261,7 @@ def run_real_game(seconds=3):
 
 
 check_healing()
+check_hit_message_texts()
 check_run_right_stops_at_wall()
 check_more_key()
 check_step_around()
