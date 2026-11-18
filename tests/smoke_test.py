@@ -59,6 +59,19 @@ def check_healing():
     assert orc.health == 0, "a dead creature healed"
     print("OK rule checks: healing")
 
+def check_run_right_stops_at_wall():
+    random.seed(0)
+    game_map = m.Map()
+    runner = next(c for c in game_map.creatures if c.mood == "run right")
+    right_wall_x = game_map.room[2]     # the room's right edge is exclusive: that column is wall
+    for turn in range(m.MAP_WIDTH):
+        loop_utils.move_moodily(game_map, game_map.creatures.index(runner))
+        if runner.mood != "run right":
+            break
+    assert runner.mood == "ambulate", "the runner never stopped running right"
+    assert runner.position[0] == right_wall_x - 1, f"runner stopped at x={runner.position[0]}, not by the wall"
+    print("OK rule checks: the 'run right' orc starts wandering at a wall")
+
 
 # 2. random games
 
@@ -147,6 +160,7 @@ def run_real_game(seconds=1.5):
 
 
 check_healing()
+check_run_right_stops_at_wall()
 play_random_games()
 run_real_game()     # last, because quitting the game shuts pygame down
 print("All checks passed.")

@@ -2,7 +2,7 @@
 
 import sys
 from keyboard import read_moves, read_q_only
-from map import OPEN_SPACE
+from map import OPEN_SPACE, WALL
 
 def quit_app(reason, pygame):
     print(reason)
@@ -28,6 +28,9 @@ def move_moodily(map, creature_i):
             new_position = creature.move_random()
         elif creature.mood == "run right":
             new_position = creature.move_right()
+            # a wall ahead: running right can't go on, so start wandering from the next turn
+            if map.get_sign(new_position[0], new_position[1]) == WALL:
+                creature.mood = "ambulate"
         map.move_to(creature_i, new_position)
         #I need to check here if the hit creature died, and return the data if they did
         neighbor_death_note, creature_index = map.check_death_for_coords(new_position[0], new_position[1])
