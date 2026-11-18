@@ -27,7 +27,8 @@ pygame.init()
 pygame.display.set_mode((100, 100))
 
 import map as m
-import loop_utils
+import modes
+import monsters
 from creatures import Player, Orc, CHASE, WANDER, FLEE, FRIEND, RUN_RIGHT
 
 KEYS = [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN, pygame.K_KP1,
@@ -76,7 +77,7 @@ def check_run_right_stops_at_wall():
     runner = Orc([0, 0], RUN_RIGHT)
     place(game_map, runner, p_x - 5, p_y + 3)
     for turn in range(m.MAP_WIDTH):
-        loop_utils.move_moodily(game_map, game_map.creatures.index(runner))
+        monsters.move_moodily(game_map, game_map.creatures.index(runner))
         if runner.mood != RUN_RIGHT:
             break
     assert runner.mood == WANDER, "the runner never stopped running right"
@@ -116,7 +117,7 @@ def check_step_around():
     place(game_map, kobold, p_x - 3, p_y)
     place(game_map, gnoll, p_x - 2, p_y)
     gnoll_health = gnoll.health
-    loop_utils.move_moodily(game_map, game_map.creatures.index(kobold))
+    monsters.move_moodily(game_map, game_map.creatures.index(kobold))
     k_x, k_y = kobold.position
     assert k_x == p_x - 2 and abs(k_y - p_y) == 1, f"kobold went to {kobold.position}, not around the gnoll"
     assert gnoll.health == gnoll_health, "kobold hit the gnoll"
@@ -140,8 +141,8 @@ def check_path_through_corridor():
         walk = game_map.distances_to(player)[tuple(kobold.position)]
         # with nobody in the way, it takes the shortest way: next to the player after walk - 1 turns
         for turn in range(walk - 1):
-            loop_utils.move_moodily(game_map, 1)
-        assert loop_utils.steps_apart(kobold, player) == 1, \
+            monsters.move_moodily(game_map, 1)
+        assert monsters.steps_apart(kobold, player) == 1, \
             f"seed {seed}: after {walk - 1} turns the kobold is at {kobold.position}, player at {player.position}"
     # in the corridor there's no room to step aside: a chaser swaps places with a wanderer in its way
     from creatures import Gnoll
@@ -162,7 +163,7 @@ def check_path_through_corridor():
     gnoll = Gnoll([0, 0])
     place(game_map, kobold, *behind)
     place(game_map, gnoll, *ahead)
-    loop_utils.move_moodily(game_map, game_map.creatures.index(kobold))
+    monsters.move_moodily(game_map, game_map.creatures.index(kobold))
     assert kobold.position == list(ahead) and gnoll.position == list(behind), \
         f"no swap: kobold at {kobold.position}, gnoll at {gnoll.position}"
     assert game_map.my_map[ahead[0]][ahead[1]] == "k" and game_map.my_map[behind[0]][behind[1]] == "n"
@@ -181,7 +182,7 @@ def check_path_through_corridor():
     before = [distances[tuple(rear.position)], distances[tuple(front.position)]]
     for turn in range(2):
         for i in (1, 2):
-            loop_utils.move_moodily(game_map, i)
+            monsters.move_moodily(game_map, i)
     after = [distances[tuple(rear.position)], distances[tuple(front.position)]]
     assert after[0] < before[0] and after[1] < before[1], f"walking distances {before} -> {after}"
     print("OK rule checks: chasers find the shortest way through the corridor, swapping past others there")
@@ -224,10 +225,10 @@ def check_line_of_sight():
 
 def press(game_map, *keys, game_state=None):
     if game_state is None:
-        game_state = loop_utils.new_game_state()
+        game_state = modes.new_game_state()
     for key in keys:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=key))
-        loop_utils.handle_events(pygame, game_map, game_state)
+        modes.handle_events(pygame, game_map, game_state)
 
 def check_help():
     from help_texts import COMMAND_LINES, HELP_LINES, KEY_HINTS, WAIT_KEY_HINTS, LOOK_KEY_HINTS, DEATH_KEY_HINTS
@@ -237,7 +238,7 @@ def check_help():
 
     # '?' is recognised by the character typed (here Shift + slash, as on a US keyboard)
     pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SLASH, unicode="?"))
-    loop_utils.handle_events(pygame, game_map, loop_utils.new_game_state())
+    modes.handle_events(pygame, game_map, modes.new_game_state())
     assert game_map.messages == COMMAND_LINES, "? didn't show the commands"
     press(game_map, pygame.K_m)
     assert game_map.log_offset == 4, "m didn't page the commands"
@@ -271,7 +272,7 @@ def check_look():
     place(game_map, gnoll, p_x, p_y - 4)
     place(game_map, golem, min(p_x + 16, m.MAP_WIDTH - 2), p_y)    # too far away to see
     game_map.messages = ["before looking"]
-    state = loop_utils.new_game_state()
+    state = modes.new_game_state()
     turns_until_heal = game_map.player.turns_until_heal
 
     press(game_map, pygame.K_l, game_state=state)
@@ -393,7 +394,7 @@ def check_provoke():
 def run_frames_while_waiting(game_map, game_state):
     frames = 0
     while game_state.get("waiting") is not None and frames < 100000:
-        loop_utils.handle_events(pygame, game_map, game_state)
+        modes.handle_events(pygame, game_map, game_state)
         frames += 1
     return frames
 
@@ -421,13 +422,13 @@ def check_flee():
         return (kobold.position[0] - p_x)**2 + (kobold.position[1] - p_y)**2
     for turn in range(3):
         before = squared_distance()
-        loop_utils.move_moodily(game_map, i)
+        monsters.move_moodily(game_map, i)
         assert squared_distance() > before, f"fleeing kobold didn't get farther: {before} -> {squared_distance()}"
     assert kobold.mood == FLEE, "stopped fleeing before full health"
 
     # back at full health it starts wandering
     kobold.health = kobold.health_max
-    loop_utils.move_moodily(game_map, i)
+    monsters.move_moodily(game_map, i)
     assert kobold.mood == WANDER and kobold.target is None, kobold.mood
 
     # a kobold left at 2 health flees too
@@ -453,15 +454,15 @@ def check_look_while_dead():
     place(game_map, uruk, p_x + 1, p_y)
     game_map.player.health = -2                 # dead
     game_map.killed_by = "uruk"
-    state = loop_utils.new_game_state()
-    loop_utils.die(game_map, state)
-    assert state["mode"] == loop_utils.DEAD and game_map.messages[1] == "Killed by an uruk.", game_map.messages
+    state = modes.new_game_state()
+    modes.die(game_map, state)
+    assert state["mode"] == modes.DEAD and game_map.messages[1] == "Killed by an uruk.", game_map.messages
 
     def death_screen_keys(*keys):
         result = None
         for key in keys:
             pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=key))
-            result = loop_utils.handle_events(pygame, game_map, state)
+            result = modes.handle_events(pygame, game_map, state)
         return result
 
     assert death_screen_keys(pygame.K_l) is None and state["look_target"] is uruk, "l didn't look at the killer"
@@ -469,7 +470,7 @@ def check_look_while_dead():
     assert state["look_target"] is game_map.player
     assert game_map.messages == ["Looking at: you (@).", "Health 0/12."], game_map.messages
     death_screen_keys(pygame.K_ESCAPE)
-    assert state["look_target"] is None and state["mode"] == loop_utils.DEAD, "Esc didn't go back to the death screen"
+    assert state["look_target"] is None and state["mode"] == modes.DEAD, "Esc didn't go back to the death screen"
     assert game_map.messages[1] == "Killed by an uruk.", "the death screen text didn't come back"
     assert death_screen_keys(pygame.K_r) == "restart", "r didn't restart after looking"
     print("OK rule checks: l looks around on the death screen")
@@ -489,10 +490,10 @@ def check_friend():
     # it comes close, then stays close without ever bumping into or hurting the player
     health = game_map.player.health
     for turn in range(30):
-        loop_utils.move_moodily(game_map, i)
+        monsters.move_moodily(game_map, i)
         if turn >= 2:
-            assert loop_utils.steps_apart(friend, game_map.player) <= m.CLOSE_STEPS, \
-                f"turn {turn}: friend {loop_utils.steps_apart(friend, game_map.player)} steps away"
+            assert monsters.steps_apart(friend, game_map.player) <= m.CLOSE_STEPS, \
+                f"turn {turn}: friend {monsters.steps_apart(friend, game_map.player)} steps away"
     assert game_map.player.health == health and friend.mood == FRIEND, "the friend hurt or turned on the player"
 
     # next to the player, the friend doesn't stop waiting
@@ -500,7 +501,7 @@ def check_friend():
     game_map.my_map[friend.position[0]][friend.position[1]] = m.OPEN_SPACE
     friend.position = place_next
     game_map.my_map[place_next[0]][place_next[1]] = friend.sign
-    assert loop_utils.creature_next_to_player(game_map) is None, "the friend counts as someone next to the player"
+    assert monsters.creature_next_to_player(game_map) is None, "the friend counts as someone next to the player"
 
     # a monster chasing the player comes close: the friend goes for it and attacks it
     orc = Orc([0, 0], CHASE, game_map.player)
@@ -508,7 +509,7 @@ def check_friend():
     orc.health = orc.health_max = 20
     assert describe(friend, game_map)[1].endswith("It is defending you."), describe(friend, game_map)
     for turn in range(4):
-        loop_utils.move_moodily(game_map, i)
+        monsters.move_moodily(game_map, i)
     assert orc.health < 20, "the friend didn't attack the orc chasing the player"
 
     # the orc it hit fights back: it turns on the friend, and the friend keeps fighting it
@@ -517,8 +518,8 @@ def check_friend():
     assert game_map.can_attack(orc, friend) and game_map.can_attack(friend, orc)
     orc_health, friend_health = orc.health, friend.health
     for turn in range(4):
-        loop_utils.move_moodily(game_map, game_map.creatures.index(orc))
-        loop_utils.move_moodily(game_map, i)
+        monsters.move_moodily(game_map, game_map.creatures.index(orc))
+        monsters.move_moodily(game_map, i)
     assert friend.health < friend_health and orc.health < orc_health, "the orc and the friend didn't fight"
     assert friend.mood == FRIEND, "the friend stopped being a friend"
 
@@ -545,16 +546,16 @@ def check_golem_flee():
     assert golem.health == 2 and golem.mood == FLEE and golem.target is orc, golem.mood
     assert game_map.messages[-1] == "The golem flees from the orc!", game_map.messages
     # while fleeing it's still the player's friend: walking into it asks first, and it doesn't stop waiting
-    assert loop_utils.friend_in_direction(game_map, (1, 0)) is golem
-    assert loop_utils.creature_next_to_player(game_map) is None
+    assert modes.friend_in_direction(game_map, (1, 0)) is golem
+    assert monsters.creature_next_to_player(game_map) is None
 
     # below half health it keeps fleeing; at half health it's the player's friend again
     i = game_map.creatures.index(golem)
     golem.health = 7
-    loop_utils.move_moodily(game_map, i)
+    monsters.move_moodily(game_map, i)
     assert golem.mood == FLEE, "stopped fleeing below half health"
     golem.health = 8
-    loop_utils.move_moodily(game_map, i)
+    monsters.move_moodily(game_map, i)
     assert golem.mood == FRIEND and golem.target is player, f"after fleeing: {golem.mood}"
 
     # if what it did before was about a creature that has died since, it wanders instead
@@ -571,17 +572,17 @@ def check_attack_friend():
     p_x, p_y = game_map.player.position
     friend = Golem([0, 0], FRIEND, game_map.player)
     place(game_map, friend, p_x + 1, p_y)
-    state = loop_utils.new_game_state()
+    state = modes.new_game_state()
     player = game_map.player
     health, turns = friend.health, player.turns_until_heal
 
     # walking into the friend asks first, and takes no turn
     press(game_map, pygame.K_RIGHT, game_state=state)
-    assert state["mode"] == loop_utils.CONFIRM_ATTACK, state["mode"]
+    assert state["mode"] == modes.CONFIRM_ATTACK, state["mode"]
     assert game_map.messages == ["Really attack your friend, the golem? (y/n)"], game_map.messages
     # n: nothing happens
     press(game_map, pygame.K_n, game_state=state)
-    assert state["mode"] == loop_utils.PLAY and game_map.messages == ["You leave your friend be."]
+    assert state["mode"] == modes.PLAY and game_map.messages == ["You leave your friend be."]
     assert friend.health == health and player.turns_until_heal == turns, "saying no hurt the friend or took a turn"
     # y: the player attacks, a turn passes, and the friend turns on the player
     press(game_map, pygame.K_RIGHT, pygame.K_y, game_state=state)
@@ -598,7 +599,7 @@ def check_chat():
     kobold = Kobold([0, 0])
     place(game_map, golem, p_x + 2, p_y)
     place(game_map, kobold, p_x - 3, p_y)
-    state = loop_utils.new_game_state()
+    state = modes.new_game_state()
     player = game_map.player
     def turns_passed(before):
         return before - player.turns_until_heal
@@ -654,18 +655,18 @@ def check_chat():
 
 def check_wait():
     from creatures import Kobold
-    gap = loop_utils.wait_frames_before_turn
-    start = loop_utils.WAIT_START_FRAMES
+    gap = modes.wait_frames_before_turn
+    start = modes.WAIT_START_FRAMES
 
     # the pace: starts at WAIT_START_FRAMES between turns, never slows down, gets clearly faster
     gaps = [gap(turn) for turn in range(2, 101)]
     assert gaps[0] == start, gaps[:3]
     assert all(later <= earlier for earlier, later in zip(gaps, gaps[1:])), "waiting slowed down"
-    assert gaps[-1] == loop_utils.WAIT_MIN_FRAMES, "long waits never reach full speed"
+    assert gaps[-1] == modes.WAIT_MIN_FRAMES, "long waits never reach full speed"
 
     # nobody around: wait the full 20 turns and heal 1
     game_map = empty_room_map()
-    state = loop_utils.new_game_state()
+    state = modes.new_game_state()
     game_map.player.health = 5
     press(game_map, pygame.K_w, pygame.K_2, pygame.K_KP0, pygame.K_RETURN, game_state=state)
     assert state["wait_input"] is None, "the prompt stayed open"
@@ -680,16 +681,16 @@ def check_wait():
     # the next wait starts at the original pace again: turn 2 comes after WAIT_START_FRAMES frames
     press(game_map, pygame.K_w, pygame.K_5, pygame.K_RETURN, game_state=state)
     for frame in range(start - 1):
-        loop_utils.handle_events(pygame, game_map, state)
+        modes.handle_events(pygame, game_map, state)
     assert game_map.messages[0] == "Waiting: 1/5 turns", game_map.messages
-    loop_utils.handle_events(pygame, game_map, state)
+    modes.handle_events(pygame, game_map, state)
     assert game_map.messages[0] == "Waiting: 2/5 turns", game_map.messages
     run_frames_while_waiting(game_map, state)
     assert game_map.player.health == 6, "didn't heal while waiting 20 turns"
 
     # started below full health: stop when full health is reached (1 health short heals in 20 turns)
     full_map = empty_room_map()
-    full_state = loop_utils.new_game_state()
+    full_state = modes.new_game_state()
     full_map.player.health = full_map.player.health_max - 1
     press(full_map, pygame.K_w, pygame.K_5, pygame.K_0, pygame.K_RETURN, game_state=full_state)
     run_frames_while_waiting(full_map, full_state)
@@ -715,7 +716,7 @@ def check_wait():
     press(game_map, pygame.K_w, pygame.K_5, pygame.K_0, pygame.K_RETURN, game_state=state)
     run_frames_while_waiting(game_map, state)
     assert game_map.messages[0] == "You stop waiting after 4 turns: the kobold is next to you.", game_map.messages
-    assert loop_utils.creature_next_to_player(game_map) is kobold
+    assert monsters.creature_next_to_player(game_map) is kobold
     assert game_map.player.health == health, "the kobold got to hit while the player waited"
 
     # someone already next to the player: don't wait at all
@@ -727,10 +728,10 @@ def check_wait():
 
     # any key stops waiting, and that key does nothing else
     game_map = empty_room_map()
-    state = loop_utils.new_game_state()
+    state = modes.new_game_state()
     press(game_map, pygame.K_w, pygame.K_9, pygame.K_9, pygame.K_RETURN, game_state=state)    # turn 1
     for frame in range(gap(2) + gap(3)):                                                      # turns 2 and 3
-        loop_utils.handle_events(pygame, game_map, state)
+        modes.handle_events(pygame, game_map, state)
     assert game_map.messages[0] == "Waiting: 3/99 turns", game_map.messages
     position = list(game_map.player.position)
     press(game_map, pygame.K_LEFT, game_state=state)
@@ -819,7 +820,7 @@ def check_generation(game_map):
     reached, todo = {start}, [start]
     while todo:
         x, y = todo.pop()
-        for dx, dy in loop_utils.DIRECTIONS:
+        for dx, dy in monsters.DIRECTIONS:
             tile = (x + dx, y + dy)
             if tile in floor and tile not in reached:
                 reached.add(tile)
@@ -863,11 +864,11 @@ def play_random_games(games=200, max_turns=300):
     totals = {"turns": 0, "hits": 0, "deaths": 0, "heals": 0, "player deaths": 0}
     # remember the log of the turn the player dies on, before die() replaces it with the death screen
     last_turn_before_death = [[]]
-    original_die = loop_utils.die
+    original_die = modes.die
     def remembering_die(game_map, game_state):
         last_turn_before_death[0] = list(game_map.messages)
         original_die(game_map, game_state)
-    loop_utils.die = remembering_die
+    modes.die = remembering_die
     for game in range(games):
         random.seed(game)       # same games every run, so results can be compared and repeated
         game_map = m.Map()
@@ -875,18 +876,18 @@ def play_random_games(games=200, max_turns=300):
         check_starting_creatures(game_map)
         check_spawns(game_map)
         check_consistency(game_map)
-        game_state = loop_utils.new_game_state()
+        game_state = modes.new_game_state()
         for turn in range(max_turns):
             health_before = {id(c): c.health for c in game_map.creatures}
             pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=random.choice(KEYS)))
-            loop_utils.handle_events(pygame, game_map, game_state)
+            modes.handle_events(pygame, game_map, game_state)
             # on the turn the player dies, the log shows the death screen; count that turn's messages instead
-            turn_messages = last_turn_before_death[0] if game_state["mode"] == loop_utils.DEAD else game_map.messages
+            turn_messages = last_turn_before_death[0] if game_state["mode"] == modes.DEAD else game_map.messages
             totals["turns"] += 1
             totals["hits"] += sum(is_hit_message(s) for s in turn_messages)
             totals["deaths"] += sum("dies!" in s for s in turn_messages)
             check_hit_messages(turn_messages)
-            if game_state["mode"] == loop_utils.DEAD:
+            if game_state["mode"] == modes.DEAD:
                 assert game_map.player.health < 1, "game ended but the player is alive"
                 killers = {"orc", "uruk", "kobold", "gnoll", "goblin", "golem"}
                 assert game_map.killed_by in killers, f"killed_by is {game_map.killed_by!r}"
@@ -898,7 +899,7 @@ def play_random_games(games=200, max_turns=300):
                     assert c.health == health_before[id(c)] + 1, f"{c.name} healed more than 1"
                     totals["heals"] += 1
             check_consistency(game_map)
-    loop_utils.die = original_die
+    modes.die = original_die
     print(f"OK random games: {games} games, " + ", ".join(f"{v} {k}" for k, v in totals.items()))
 
 
