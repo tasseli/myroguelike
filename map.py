@@ -13,10 +13,10 @@ OPEN_SPACE  = '.'
 WALL        = '#'
 
 # Define colors for tiles
-WHITE       = (255, 255, 255)   # 
+WHITE       = (255, 255, 255)  #
 GRAY        = (128, 128, 128)   # Open space
-DARK_GRAY   = (64, 64, 64)      # Wall
-BLACK       = (0, 0, 0)         # Text color
+DARK_GRAY   = (64, 64, 64) # Wall
+BLACK       = (0, 0, 0)        # Text color
 
 def find_creature_at(creatures, x, y):
     i = 0
@@ -28,39 +28,33 @@ def find_creature_at(creatures, x, y):
 
 class Map:
 
+    # Fill the map with walls and carve out one room.
+    # Return the room as (left, top, right, bottom); right and bottom are exclusive.
     def generate(self):
-        for y in range (MAP_HEIGHT):
-            for x in range (MAP_WIDTH):
-                self.my_map[x][y] = WALL
-        #let's create a room of dimensions at least 7 by 7
-        first_room_top = random.randint(1, int(MAP_HEIGHT/2)-1)
-        first_room_bottom = random.randint(int(MAP_HEIGHT/2), MAP_HEIGHT -2)
-        first_room_left = random.randint(1, int(MAP_WIDTH/2)-1)
-        first_room_right = random.randint(int(MAP_WIDTH/2), MAP_WIDTH -2)
-        for y in range (first_room_top, first_room_bottom):
-            for x in range (first_room_left, first_room_right):
+        self.my_map = [[WALL for y in range(MAP_HEIGHT)] for x in range(MAP_WIDTH)]
+        # the room is at least 8 by 8, and never touches the map's outer wall
+        top = random.randint(1, MAP_HEIGHT // 2 - 4)
+        bottom = random.randint(MAP_HEIGHT // 2 + 4, MAP_HEIGHT - 1)
+        left = random.randint(1, MAP_WIDTH // 2 - 4)
+        right = random.randint(MAP_WIDTH // 2 + 4, MAP_WIDTH - 1)
+        for y in range(top, bottom):
+            for x in range(left, right):
                 self.my_map[x][y] = OPEN_SPACE
-        return [random.randint(first_room_left, first_room_right), random.randint(first_room_top, first_room_bottom)]
-        
+        return (left, top, right, bottom)
+
+    # Return the coords of a random floor tile in the room that has no creature on it.
+    def random_free_floor(self):
+        left, top, right, bottom = self.room
+        while True:
+            x = random.randint(left, right - 1)
+            y = random.randint(top, bottom - 1)
+            if self.my_map[x][y] == OPEN_SPACE:
+                return [x, y]
+
     def __init__(self):
-        self.messages = ["","","",""]
-        self.my_map = [[OPEN_SPACE for y in range(MAP_HEIGHT)] for x in range(MAP_WIDTH)]
-        # Set a wall at position (3, 5)
-        self.my_map[3][5] = WALL
-        for i in range(6, 14):
-            self.my_map[55][i] = WALL
-        for i in range(13, 30):
-            self.my_map[75][i] = WALL
-        for i in range(15, 25):
-            self.my_map[i][33] = WALL
-        # wall for left side
-        self.my_map[0] = [WALL for x in range(MAP_HEIGHT)]
-        # wall for right side
-        self.my_map[MAP_WIDTH-1] = [WALL for x in range(MAP_HEIGHT)]
-        # wall for top and bottom
-        for x in range(MAP_WIDTH):
-            self.my_map[x][0] = WALL
-            self.my_map[x][MAP_HEIGHT-1] = WALL
+        # messages produced during a turn, shown in the bottom UI
+        self.messages = []
+        self.room = self.generate()
 
         def init_player(coords):
             player = Player(coords)
@@ -103,21 +97,20 @@ class Map:
             creatures.append(golem)
             return golem
 
-#        self.player = init_player([3,6])
-
-        self.player = init_player(self.generate())
+        free = self.random_free_floor
+        self.player = init_player(free())
         self.creatures = [self.player]
-        orc = init_orc([5,12], "run right", None, self.creatures)
-        orc2 = init_orc([1,3], None, None, self.creatures)
-        orc3 = init_orc([72,33], "toward", self.player, self.creatures)
-        orc4 = init_orc([37,23], "toward", orc3, self.creatures)
-        orc5 = init_orc([6,38], "toward", orc4, self.creatures)
-        kobold = init_kobold([49,29], "toward", self.player, self.creatures)
-        uruk = init_uruk([40,10], "toward", self.player, self.creatures) 
-        gnoll1 = init_gnoll([45,2], "toward", self.player, self.creatures)
-        gnoll2 = init_gnoll([48,5], "toward", self.player, self.creatures)
-        goblin1 = init_goblin([65,38], "toward", self.player, self.creatures)
-        golem1 = init_golem([6,7], None, None, self.creatures)
+        orc = init_orc(free(), "run right", None, self.creatures)
+        orc2 = init_orc(free(), None, None, self.creatures)
+        orc3 = init_orc(free(), "toward", self.player, self.creatures)
+        orc4 = init_orc(free(), "toward", orc3, self.creatures)
+        orc5 = init_orc(free(), "toward", orc4, self.creatures)
+        kobold = init_kobold(free(), "toward", self.player, self.creatures)
+        uruk = init_uruk(free(), "toward", self.player, self.creatures)
+        gnoll1 = init_gnoll(free(), "toward", self.player, self.creatures)
+        gnoll2 = init_gnoll(free(), "toward", self.player, self.creatures)
+        goblin1 = init_goblin(free(), "toward", self.player, self.creatures)
+        golem1 = init_golem(free(), None, None, self.creatures)
 
     def position_filled_by_creature(self, x, y):
         # if position is either open or wall, false
@@ -125,11 +118,11 @@ class Map:
         return self.my_map[x][y] != OPEN_SPACE and self.my_map[x][y] != WALL
 
     # return True if something happened and time passed, False if no clause managed to do something worthwhile
-    # move_to may hurt the target creature. Dying needs to be checked outside of it. Target is at new_position, self.creatures[target]
-    # target = find_creature_at(creatures, new_position[0], new_position[1])
+    # move_to may hurt the target creature. Dying needs to be checked outside of it.
+    # Hitting adds its messages to self.messages.
     def move_to(self, i, new_position, creatures):
         creature = creatures[i]
-        
+
         if new_position == creature.get_position():
             return True
         if self.my_map[new_position[0]][new_position[1]] == OPEN_SPACE:
@@ -141,12 +134,10 @@ class Map:
             # Mark the new position with its ID
             self.my_map[creature.position[0]][creature.position[1]] = creature.sign
             return True
-        elif self.position_filled_by_creature(new_position[0], new_position[1]) or self.my_map[new_position[0]][new_position[1]] == "@":
+        elif self.position_filled_by_creature(new_position[0], new_position[1]):
             target = find_creature_at(creatures, new_position[0], new_position[1])
             if target != -1:
-                msg1, msg2 = creature.hit(self.creatures[target])
-                self.messages[2] = msg1
-                self.messages[3] = msg2
+                self.messages.extend(creature.hit(creatures[target]))
             return True
         return False
 
@@ -165,4 +156,3 @@ class Map:
             if message != "":
                 return (message, creature_index)
         return ("", -1)
-        # a function call to print a message would make sense, but there's no function like that yet.
