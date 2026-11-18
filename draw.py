@@ -20,6 +20,13 @@ def render_message_log(messages, pygame, screen, font):
                 draw_and_blit_char(pygame, screen, font, " ", j, MAP_HEIGHT + string_index, GRAY)
             string_index += 1
 
+# Show the player's health at the right end of the first message row. Call after render_message_log.
+def render_player_status(player, pygame, screen, font):
+    status = "HP " + str(max(player.health, 0)) + "/" + str(player.health_max)
+    start_x = MAP_WIDTH - 1 - len(status)
+    for i in range(len(status)):
+        draw_and_blit_char(pygame, screen, font, status[i], start_x + i, MAP_HEIGHT, DARK_GRAY)
+
 def coords_on_border_of_map(x, y):
     if x == 0 or x == MAP_WIDTH-1 or y == 0 or y == MAP_HEIGHT-1:
         return True

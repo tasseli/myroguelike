@@ -3,7 +3,7 @@
 
 import pygame
 from loop_utils import handle_events, handle_quit_key
-from draw import render_map, render_message_log
+from draw import render_map, render_message_log, render_player_status
 from map import Map, MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, GRAY
 
 BOTTOM_UI_HEIGHT = 4
@@ -26,6 +26,7 @@ game_map = Map()
 def draw_frame(messages):
     screen.fill(GRAY)
     render_message_log(messages[-BOTTOM_UI_HEIGHT:], pygame, screen, font)
+    render_player_status(game_map.player, pygame, screen, font)
     render_map(game_map, pygame, screen, font, game_map.player)
     pygame.display.flip()
     clock.tick(FPS)
