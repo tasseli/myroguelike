@@ -76,8 +76,7 @@ def handle_events(pygame, game_map, game_state):
         if event.type == pygame.QUIT:
             quit_app("", pygame)
         if event.type == pygame.KEYDOWN:
-            new_position = game_map.player.get_position().copy()
-            outcome = read_moves(new_position, event.key, pygame) # changes the passed new_position?!
+            outcome, direction = read_moves(event.key, pygame)
             if outcome == "q":
                 quit_app("", pygame)
             elif outcome == "o":
@@ -86,6 +85,8 @@ def handle_events(pygame, game_map, game_state):
             elif outcome == "m" or outcome == "s": # if moving happened
 #               Move key or stand still key
                 game_map.messages = []
+                x, y = game_map.player.get_position()
+                new_position = [x + direction[0], y + direction[1]]
                 # move creature_0, the player
                 if game_map.move_to(0, new_position): # 0 refers to the player ## so if player moved, pass the changed new position and work with it
                     check_deaths(game_map, False)       # check if player killed anyone
