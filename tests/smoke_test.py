@@ -184,6 +184,16 @@ def check_look():
     assert game_map.player.turns_until_heal == turns_until_heal, "looking used up a turn"
     assert kobold.position == [p_x + 3, p_y], "creatures moved while looking"
 
+    # a target other than the player is told with its distance and direction
+    from look import describe
+    leader = Orc([0, 0], "toward", game_map.player)
+    follower = Orc([0, 0], "toward", leader)
+    place(game_map, follower, p_x + 2, p_y + 2)
+    place(game_map, leader, p_x - 1, p_y - 1)     # 3 steps up-left of the follower
+    line = describe(follower, game_map)[1]
+    assert line.endswith("It is chasing the orc 3 steps up-left of it."), line
+    assert describe(leader, game_map)[1].endswith("It is chasing you."), describe(leader, game_map)
+
     # with no monster in sight, looking starts on the player; l also stops looking
     lonely = empty_room_map()
     press(lonely, pygame.K_l, game_state=state)

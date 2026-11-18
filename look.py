@@ -50,12 +50,32 @@ def next_in_direction(current, candidates, direction):
             best, best_score = creature, score
     return best
 
+def steps_text(steps):
+    return str(steps) + (" step" if steps == 1 else " steps")
+
+DIRECTION_NAMES = {(1, 0): "right", (1, 1): "down-right", (0, 1): "down", (-1, 1): "down-left",
+                   (-1, 0): "left", (-1, -1): "up-left", (0, -1): "up", (1, -1): "up-right"}
+
+# The direction from one tile to another, as the nearest of the 8 directions, e.g. "up-left"
+def direction_name(start, end):
+    v_x, v_y = end[0] - start[0], end[1] - start[1]
+    nearest = max(DIRECTION_NAMES, key=lambda d: (v_x * d[0] + v_y * d[1]) / math.hypot(d[0], d[1]))
+    return DIRECTION_NAMES[nearest]
+
+# How a creature's target is called: "you", or e.g. "the orc 3 steps up-left of it"
+def target_text(creature):
+    target = creature.target
+    if target.is_player:
+        return "you"
+    steps = steps_between(creature.get_position(), target.get_position())
+    return target.called() + " " + steps_text(steps) + " " + direction_name(creature.position, target.position) + " of it"
+
 # What a creature is doing, for the look description
 def doing(creature):
     if creature.mood == "toward" and creature.target is not None:
-        return "It is chasing " + creature.target.called() + "."
+        return "It is chasing " + target_text(creature) + "."
     if creature.mood == "flee" and creature.target is not None:
-        return "It is fleeing from " + creature.target.called() + "."
+        return "It is fleeing from " + target_text(creature) + "."
     if creature.mood == "run right":
         return "It is running to the right."
     return "It is wandering around."
@@ -67,6 +87,6 @@ def describe(creature, game_map):
         return ["Looking at: you (@).", health]
     steps = steps_between(creature.get_position(), game_map.player.get_position())
     article = "an" if creature.name[0] in "aeiou" else "a"
-    where = str(steps) + (" step" if steps == 1 else " steps") + " away"
+    where = steps_text(steps) + " away"
     return ["Looking at: " + article + " " + creature.name + " (" + creature.sign + "), " + where + ".",
             health + " " + doing(creature)]
