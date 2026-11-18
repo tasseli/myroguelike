@@ -4,11 +4,9 @@ Fix / rewrite:
 - adding messages to bottom UI
     - simplify
     - pick a good function setup
-    - only the last 4 messages fit, so a busy turn can push out the player's own
 - modularize rendering logic
     - draw smarter than one char at a time
     - redraw only when something changes; a turn-based game doesn't need 30 redraws a second
-- requirements.txt says pygame 2.6.1, 2.5.2 is installed
 
 Add features:
 - create a better message system
@@ -44,3 +42,8 @@ Done (Nov 2026):
 - read_moves returns the direction instead of changing the passed position
 - death screen shows what killed the player
 - the "run right" orc starts wandering when it reaches a wall
+- More key (m): a turn's messages are all kept; when they don't fit, rows are numbered and m pages through them
+- chasers step around a creature or wall in their way
+- press r on the death screen to play again; the game loop is play_game()
+- messages from the player's point of view, one line per hit ("The uruk hits you for 3. You have 9 health left.")
+- requirements.txt: pygame>=2.5
