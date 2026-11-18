@@ -8,10 +8,6 @@ Fix / rewrite:
 - modularize rendering logic
     - draw smarter than one char at a time
     - redraw only when something changes; a turn-based game doesn't need 30 redraws a second
-- keep the smoke test in the repo (tests/), so changes can be checked with one command
-- read_moves changes the passed new_position; return the new position instead
-- death screen should show what killed the player
-- the "run right" orc gets stuck against a wall for the rest of the game
 - requirements.txt says pygame 2.6.1, 2.5.2 is installed
 
 Add features:
@@ -44,3 +40,7 @@ Done (Nov 2026):
 - slow healing for all creatures: 1 hp per 20 turns
 - 30 fps cap; faster drawing (only tiles near the player, no square root, cached characters)
 - less duplicate code: one Creature __init__ with health_range, Map.add_creature
+- smoke test in the repo: python tests/smoke_test.py
+- read_moves returns the direction instead of changing the passed position
+- death screen shows what killed the player
+- the "run right" orc starts wandering when it reaches a wall
