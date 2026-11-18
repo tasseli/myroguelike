@@ -29,8 +29,11 @@ def render_message_log(messages, offset, pygame, screen, font):
             text = str(offset + row + 1).rjust(number_width) + " " + text
         draw_text(text, 1, MAP_HEIGHT + row, pygame, screen, font)
     if numbered:
-        last_shown = offset + len(shown)
-        more = "[m] More: " + str(offset + 1) + "-" + str(last_shown) + " of " + str(len(messages))
+        if len(shown) == 1:
+            rows = str(offset + 1)                                      # "9 of 9"
+        else:
+            rows = str(offset + 1) + "-" + str(offset + len(shown))    # "1-4 of 9"
+        more = "[m] More: " + rows + " of " + str(len(messages))
         draw_text_right(more, MAP_HEIGHT + LOG_ROWS - 1, pygame, screen, font)
 
 # Show the player's health at the right end of the first message row. Call after render_message_log.
