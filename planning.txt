@@ -12,7 +12,6 @@ Add features:
 - create a better message system
 - consider game manager class
 - add changing moods at least once destination becomes ineligible
-- a new mood, shown in green (draw.creature_color)
 - adding knowledge, first levels
 - adding discussion
 - adding key handling for fun commands like look, say, tickle, hit
@@ -58,3 +57,4 @@ Done (Nov 2026):
 - a grey monster bumping into the player turns red and chases instead of hitting
 - l works on the death screen too, e.g. to look at what killed the player
 - look: the target is told with distance and direction; t jumps the cursor to it
+- green friend mood: a friendly golem starts 6 steps from the player, stays within 2 steps, and attacks monsters chasing the player that come within 2 steps of the player

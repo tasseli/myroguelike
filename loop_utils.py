@@ -3,7 +3,7 @@
 import sys
 import random
 from keyboard import read_moves, read_death_screen_key, read_digit
-from map import OPEN_SPACE, WALL, LOG_ROWS, find_creature_at
+from map import OPEN_SPACE, WALL, LOG_ROWS, CLOSE_STEPS, find_creature_at
 from help_texts import COMMAND_LINES, HELP_LINES
 from look import visible_creatures, first_look_target, next_in_direction, describe
 
@@ -15,10 +15,13 @@ def quit_app(reason, pygame):
     pygame.quit()
     sys.exit()
 
-# A chaser's straight step toward its target may be blocked by a wall, or by a creature it won't attack.
-# Then try the two directions next to the straight one, the one closer to the target first,
-# and return the first open one. If both are blocked too, return the straight step (which then does nothing).
-def step_around_blocker(map, creature, new_position):
+# A chaser's straight step toward its goal (its target, unless another goal is given) may be blocked by
+# a wall, or by a creature it won't attack. Then try the two directions next to the straight one, the one
+# closer to the goal first, and return the first open one. If both are blocked too, return the straight
+# step (which then does nothing).
+def step_around_blocker(map, creature, new_position, goal=None):
+    if goal is None:
+        goal = creature.target
     x, y = new_position
     sign = map.get_sign(x, y)
     if sign == OPEN_SPACE:
@@ -28,7 +31,7 @@ def step_around_blocker(map, creature, new_position):
         if map.can_attack(creature, blocker):
             return new_position
     c_x, c_y = creature.get_position()
-    t_x, t_y = creature.target.get_position()
+    t_x, t_y = goal.get_position()
     straight = DIRECTIONS.index((x - c_x, y - c_y))
     options = []
     for turn in (-1, 1):
@@ -56,6 +59,30 @@ def flee_step(map, creature):
             best = option
     return best
 
+def steps_apart(a, b):
+    return max(abs(a.position[0] - b.position[0]), abs(a.position[1] - b.position[1]))
+
+# A friendly creature's move:
+# 1. if creatures chasing its friend are close to the friend, go for the nearest of them (and attack it when next to it)
+# 2. otherwise, if it's farther than CLOSE_STEPS from its friend, walk back toward the friend
+# 3. otherwise move around randomly, or stay, without leaving the friend's close area
+def friend_step(map, creature):
+    friend = creature.target
+    threats = map.threats_to(friend)
+    if threats:
+        threat = min(threats, key=lambda t: steps_apart(creature, t))
+        return step_around_blocker(map, creature, creature.move_toward(threat), threat)
+    if steps_apart(creature, friend) > CLOSE_STEPS:
+        return step_around_blocker(map, creature, creature.move_toward(friend), friend)
+    c_x, c_y = creature.get_position()
+    f_x, f_y = friend.get_position()
+    options = [[c_x, c_y]]
+    for dx, dy in DIRECTIONS:
+        x, y = c_x + dx, c_y + dy
+        if map.get_sign(x, y) == OPEN_SPACE and max(abs(x - f_x), abs(y - f_y)) <= CLOSE_STEPS:
+            options.append([x, y])
+    return random.choice(options)
+
 #   An idea for solving moving a whole array of creatures: implement calling each creature's type of movement by their mood.
 def move_moodily(map, creature_i):
     creatures = map.creatures
@@ -68,6 +95,10 @@ def move_moodily(map, creature_i):
     if death_note == "":
         if creature.mood == "flee" and (creature.health >= creature.health_max or not creature.target.alive):
             # back at full health, or the one it fled from is dead: stop fleeing and wander
+            creature.mood = "ambulate"
+            creature.target = None
+        if creature.mood == "friend" and not creature.target.alive:
+            # its friend is dead: wander
             creature.mood = "ambulate"
             creature.target = None
         if creature.mood == "toward":
@@ -85,6 +116,8 @@ def move_moodily(map, creature_i):
                 creature.mood = "ambulate"
         elif creature.mood == "flee":
             new_position = flee_step(map, creature)
+        elif creature.mood == "friend":
+            new_position = friend_step(map, creature)
         map.move_to(creature_i, new_position)
         #I need to check here if the hit creature died, and return the data if they did
         neighbor_death_note, creature_index = map.check_death_for_coords(new_position[0], new_position[1])
@@ -145,10 +178,13 @@ def play_turn(game_map, direction):
         creature.heal_slowly()
     return False
 
-# Return a creature standing next to the player (in any of the 8 directions), or None
+# Return a creature standing next to the player (in any of the 8 directions), or None.
+# The player's friends don't count.
 def creature_next_to_player(game_map):
     p_x, p_y = game_map.player.get_position()
     for creature in game_map.creatures[1:]:
+        if creature.mood == "friend" and creature.target is game_map.player:
+            continue
         x, y = creature.get_position()
         if max(abs(x - p_x), abs(y - p_y)) == 1:
             return creature
@@ -262,12 +298,12 @@ def stop_looking(game_map, game_state):
     game_map.messages, game_map.log_offset = game_state["look_saved_log"]
     game_state["look_target"] = None
 
-# While looking, t moves the cursor to the creature the selected one chases or flees from.
+# While looking, t moves the cursor to the creature the selected one chases, flees from or befriends.
 # If it has none, or that one can't be seen, the cursor stays and the log says why.
 def jump_to_target(game_map, game_state):
     current = game_state["look_target"]
     target = current.target
-    if current.is_player or current.mood not in ("toward", "flee") or target is None:
+    if current.is_player or current.mood not in ("toward", "flee", "friend") or target is None:
         game_map.messages = describe(current, game_map) + ["It isn't chasing or fleeing anyone."]
     elif not target.alive or target not in visible_creatures(game_map):
         game_map.messages = describe(current, game_map) + ["What it's after is out of sight."]

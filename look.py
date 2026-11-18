@@ -71,7 +71,13 @@ def target_text(creature):
     return target.called() + " " + steps_text(steps) + " " + direction_name(creature.position, target.position) + " of it"
 
 # What a creature is doing, for the look description
-def doing(creature):
+def doing(creature, game_map):
+    if creature.mood == "friend" and creature.target is not None:
+        if game_map.threats_to(creature.target):
+            return "It is defending " + target_text(creature) + "."
+        if creature.target.is_player:
+            return "It is your friend."
+        return "It is a friend of " + target_text(creature) + "."
     if creature.mood == "toward" and creature.target is not None:
         return "It is chasing " + target_text(creature) + "."
     if creature.mood == "flee" and creature.target is not None:
@@ -89,4 +95,4 @@ def describe(creature, game_map):
     article = "an" if creature.name[0] in "aeiou" else "a"
     where = steps_text(steps) + " away"
     return ["Looking at: " + article + " " + creature.name + " (" + creature.sign + "), " + where + ".",
-            health + " " + doing(creature)]
+            health + " " + doing(creature, game_map)]

@@ -362,6 +362,48 @@ def check_look_while_dead():
     assert death_screen_keys(pygame.K_r) == "restart", "r didn't restart after looking"
     print("OK rule checks: l looks around on the death screen")
 
+def check_friend():
+    import draw
+    from look import describe
+    from creatures import Golem, Gnoll
+    game_map = empty_room_map()
+    p_x, p_y = game_map.player.position
+    friend = Golem([0, 0], "friend", game_map.player)
+    place(game_map, friend, p_x + 4, p_y)
+    i = game_map.creatures.index(friend)
+    assert draw.creature_color(friend, game_map.player) == m.GREEN
+    assert describe(friend, game_map)[1].endswith("It is your friend."), describe(friend, game_map)
+
+    # it comes close, then stays close without ever bumping into or hurting the player
+    health = game_map.player.health
+    for turn in range(30):
+        loop_utils.move_moodily(game_map, i)
+        if turn >= 2:
+            assert loop_utils.steps_apart(friend, game_map.player) <= m.CLOSE_STEPS, \
+                f"turn {turn}: friend {loop_utils.steps_apart(friend, game_map.player)} steps away"
+    assert game_map.player.health == health and friend.mood == "friend", "the friend hurt or turned on the player"
+
+    # next to the player, the friend doesn't stop waiting
+    place_next = [p_x + 1, p_y + 1]
+    game_map.my_map[friend.position[0]][friend.position[1]] = m.OPEN_SPACE
+    friend.position = place_next
+    game_map.my_map[place_next[0]][place_next[1]] = friend.sign
+    assert loop_utils.creature_next_to_player(game_map) is None, "the friend counts as someone next to the player"
+
+    # a monster chasing the player comes close: the friend goes for it and attacks it
+    orc = Orc([0, 0], "toward", game_map.player)
+    place(game_map, orc, p_x - 2, p_y)
+    orc.health = orc.health_max = 20
+    assert describe(friend, game_map)[1].endswith("It is defending you."), describe(friend, game_map)
+    for turn in range(4):
+        loop_utils.move_moodily(game_map, i)
+    assert orc.health < 20, "the friend didn't attack the orc chasing the player"
+
+    # it doesn't attack a monster that isn't chasing the player
+    wanderer = Gnoll([0, 0])
+    assert not game_map.can_attack(friend, wanderer) and not game_map.can_attack(friend, game_map.player)
+    print("OK rule checks: the friendly golem (green) stays close, defends the player, never hurts the player")
+
 def check_wait():
     from creatures import Kobold
     gap = loop_utils.wait_frames_before_turn
@@ -503,6 +545,11 @@ def check_starting_creatures(game_map):
     wandering = [k for k in kobolds if k.mood == "ambulate"]
     assert len(kobolds) == 4 and len(hostile) == 2 and len(wandering) == 2, \
         f"{len(kobolds)} kobolds: {len(hostile)} hostile, {len(wandering)} wandering"
+    friends = [c for c in game_map.creatures if c.mood == "friend"]
+    assert len(friends) == 1 and friends[0].name == "golem" and friends[0].target is game_map.player, \
+        f"friends: {[(c.name, c.target) for c in friends]}"
+    golems = [c for c in game_map.creatures if c.name == "golem"]
+    assert len(golems) == 2, "the wandering golem should still be there too"
 
 def check_spawns(game_map):
     left, top, right, bottom = game_map.room
@@ -510,13 +557,21 @@ def check_spawns(game_map):
     for c in game_map.creatures:
         x, y = c.position
         assert left <= x < right and top <= y < bottom, f"{c.name} spawned outside the room"
-    # monsters start at least MIN_SPAWN_DISTANCE moves away, if the room has enough such tiles
     px, py = game_map.player.position
+    def moves_from_player(x, y):
+        return max(abs(x - px), abs(y - py))
+    # the friend starts FRIEND_SPAWN_DISTANCE moves away, if the room has a tile that far
+    friend = next(c for c in game_map.creatures if c.mood == "friend")
+    if any(moves_from_player(x, y) == m.FRIEND_SPAWN_DISTANCE for x in range(left, right) for y in range(top, bottom)):
+        assert moves_from_player(*friend.position) == m.FRIEND_SPAWN_DISTANCE, \
+            f"friend spawned {moves_from_player(*friend.position)} moves from the player"
+    # monsters start at least MIN_SPAWN_DISTANCE moves away, if the room has enough such tiles
+    monsters = [c for c in game_map.creatures[1:] if c is not friend]
     far_tiles = sum(1 for x in range(left, right) for y in range(top, bottom)
-                    if max(abs(x - px), abs(y - py)) >= m.MIN_SPAWN_DISTANCE)
-    if far_tiles >= len(game_map.creatures) - 1:
-        for c in game_map.creatures[1:]:
-            distance = max(abs(c.position[0] - px), abs(c.position[1] - py))
+                    if moves_from_player(x, y) >= m.MIN_SPAWN_DISTANCE)
+    if far_tiles >= len(monsters):
+        for c in monsters:
+            distance = moves_from_player(*c.position)
             assert distance >= m.MIN_SPAWN_DISTANCE, f"{c.name} spawned {distance} moves from the player"
 
 def is_hit_message(message):
@@ -525,9 +580,11 @@ def is_hit_message(message):
 def check_hit_messages(messages):
     for message in messages:
         if is_hit_message(message):
-            # the player is in every hit, except orcs hitting their target orc
+            # the player is in every hit, except orcs hitting their target orc,
+            # and the friendly golem hitting monsters that chase the player
             assert message.startswith("You hit ") or " hits you " in message \
-                or message.startswith("The orc hits another orc "), "attack against the rules: " + message
+                or message.startswith("The orc hits another orc ") or message.startswith("The golem hits the "), \
+                "attack against the rules: " + message
 
 def play_random_games(games=200, max_turns=300):
     totals = {"turns": 0, "hits": 0, "deaths": 0, "heals": 0, "player deaths": 0}
@@ -567,9 +624,15 @@ def run_real_game(seconds=3):
     # count the games started: myroguelike.py creates a new Map for each game
     games_started = [0]
     original_map = m.Map
+    # so that the player dies soon and r can be tested: 1 health, and no friend to defend the player
     def counting_map():
         games_started[0] += 1
-        return original_map()
+        game_map = original_map()
+        game_map.player.health = 1
+        for friend in [c for c in game_map.creatures if c.mood == "friend"]:
+            game_map.my_map[friend.position[0]][friend.position[1]] = m.OPEN_SPACE
+            game_map.creatures.remove(friend)
+        return game_map
     m.Map = counting_map
 
     # after each drawn frame, press 5 (wait); every 10th frame press r (play again) instead;
@@ -611,6 +674,7 @@ check_look_while_dead()
 check_mood_colors()
 check_provoke()
 check_flee()
+check_friend()
 play_random_games()
 run_real_game()     # last, because quitting the game shuts pygame down
 print("All checks passed.")

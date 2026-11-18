@@ -11,6 +11,10 @@ LOG_ROWS    = 4     # message rows shown under the map
 
 # How many moves away from the player other creatures start, when the room is big enough
 MIN_SPAWN_DISTANCE = 8
+# How many moves away from the player a friend of the player starts, when possible
+FRIEND_SPAWN_DISTANCE = 6
+# "Close" for a friendly creature: next to its friend, or next to one of those tiles
+CLOSE_STEPS = 2
 
 # Define constants for tile types
 OPEN_SPACE  = '.'
@@ -23,6 +27,7 @@ DARK_GRAY   = (64, 64, 64)      # Wall
 BLACK       = (0, 0, 0)         # Text color
 RED         = (190, 50, 50)     # Monster chasing the player
 YELLOW      = (210, 180, 50)    # Monster fleeing
+GREEN       = (70, 170, 70)     # Friendly creature
 
 def find_creature_at(creatures, x, y):
     i = 0
@@ -67,6 +72,18 @@ class Map:
             free = far
         return random.choice(free)
 
+    # Return a random free floor tile in the room exactly the given number of moves from a creature,
+    # or, if the room has none, one of the free tiles closest to that number of moves.
+    def free_floor_at_distance(self, creature, moves_wanted):
+        left, top, right, bottom = self.room
+        c_x, c_y = creature.get_position()
+        free = [[x, y] for x in range(left, right) for y in range(top, bottom)
+                if self.my_map[x][y] == OPEN_SPACE]
+        def off_by(tile):
+            return abs(max(abs(tile[0] - c_x), abs(tile[1] - c_y)) - moves_wanted)
+        best = min(off_by(tile) for tile in free)
+        return random.choice([tile for tile in free if off_by(tile) == best])
+
     def __init__(self):
         # messages produced during a turn, shown in the bottom UI
         self.messages = []
@@ -79,6 +96,10 @@ class Map:
 
         # the player must be added first: index 0 in self.creatures is always the player
         self.player = self.add_creature(Player)
+        # the player's friend: a golem starting FRIEND_SPAWN_DISTANCE moves away if possible
+        friend = Golem(self.free_floor_at_distance(self.player, FRIEND_SPAWN_DISTANCE), "friend", self.player)
+        self.set_sign_with_creature(friend)
+        self.creatures.append(friend)
         self.add_creature(Orc, "run right")
         self.add_creature(Orc)
         orc3 = self.add_creature(Orc, "toward", self.player)
@@ -172,10 +193,21 @@ class Map:
         if victim.health > 0:       # a killed one gets a death message instead
             self.messages.append("The " + victim.name + " turns to chase you!")
 
-    # The player attacks anyone. Other creatures attack only the player or their own target.
+    # The player attacks anyone. A friendly creature never attacks its friend, but attacks anyone
+    # chasing its friend. Other creatures attack only the player or their own target.
     # (move_to turns a grey monster's attack on the player into turning to chase instead.)
     def can_attack(self, creature, victim):
-        return creature is self.player or victim is self.player or victim is creature.target
+        if creature is self.player:
+            return True
+        if creature.mood == "friend":
+            return victim is not creature.target and victim.mood == "toward" and victim.target is creature.target
+        return victim is self.player or victim is creature.target
+
+    # The creatures chasing the given one that are close to it (within CLOSE_STEPS)
+    def threats_to(self, friend):
+        f_x, f_y = friend.get_position()
+        return [c for c in self.creatures if c.mood == "toward" and c.target is friend
+                and max(abs(c.position[0] - f_x), abs(c.position[1] - f_y)) <= CLOSE_STEPS]
 
     def get_sign(self, x, y):
         return self.my_map[x][y]

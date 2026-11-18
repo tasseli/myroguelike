@@ -35,6 +35,8 @@ HELP_LINES = [
     "   Hit a grey one and it starts chasing you.",
     "   Yellow: fleeing. Kobolds flee at 2 health or less",
     "   until they have healed back to full.",
+    "   Green: friendly. Your friend stays near you",
+    "   and attacks monsters that come after you.",
     "Looking (l): a blinking cursor shows a creature",
     "   you can see; arrows/numpad jump to the next",
     "   one that way; t jumps to the one it chases or",

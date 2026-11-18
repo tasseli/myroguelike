@@ -1,6 +1,6 @@
 # draw.py
 
-from map import (WHITE, GRAY, DARK_GRAY, BLACK, RED, YELLOW)
+from map import (WHITE, GRAY, DARK_GRAY, BLACK, RED, YELLOW, GREEN)
 from map import (MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, LOG_ROWS)
 from map import OPEN_SPACE
 
@@ -93,13 +93,15 @@ def render_map(game_map, pygame, screen, font, creature):
 # The background color of a creature's tile, by its mood:
 #   red:    a monster chasing the player
 #   yellow: a monster fleeing
+#   green:  a friendly creature
 #   grey:   everyone else (wandering, running, chasing another creature, and the player)
-# A new mood shown in green is planned: add it here, e.g. if creature.mood == "...": return GREEN
 def creature_color(creature, player):
     if creature.mood == "toward" and creature.target is player:
         return RED
     if creature.mood == "flee":
         return YELLOW
+    if creature.mood == "friend":
+        return GREEN
     return DARK_GRAY
 
 # Rendered characters, built once per font and character and then reused
