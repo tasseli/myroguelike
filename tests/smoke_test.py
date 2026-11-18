@@ -194,6 +194,25 @@ def check_look():
     assert line.endswith("It is chasing the orc 3 steps up-left of it."), line
     assert describe(leader, game_map)[1].endswith("It is chasing you."), describe(leader, game_map)
 
+    # t follows the chain: follower -> leader -> player; the player has no target
+    state["look_saved_log"] = (["before looking"], 0)
+    state["look_target"] = follower
+    press(game_map, pygame.K_t, game_state=state)
+    assert state["look_target"] is leader, "t didn't jump to the orc it chases"
+    press(game_map, pygame.K_t, game_state=state)
+    assert state["look_target"] is game_map.player, "t didn't jump to the player"
+    press(game_map, pygame.K_t, game_state=state)
+    assert state["look_target"] is game_map.player and game_map.messages[-1] == "It isn't chasing or fleeing anyone."
+    # a wanderer has no target either; a target out of sight can't be jumped to
+    state["look_target"] = gnoll
+    press(game_map, pygame.K_t, game_state=state)
+    assert state["look_target"] is gnoll and game_map.messages[-1] == "It isn't chasing or fleeing anyone."
+    leader.position = [golem.position[0], golem.position[1] - 1]   # out of sight (the map tile isn't updated)
+    state["look_target"] = follower
+    press(game_map, pygame.K_t, game_state=state)
+    assert state["look_target"] is follower and game_map.messages[-1] == "What it's after is out of sight.", game_map.messages
+    press(game_map, pygame.K_ESCAPE, game_state=state)
+
     # with no monster in sight, looking starts on the player; l also stops looking
     lonely = empty_room_map()
     press(lonely, pygame.K_l, game_state=state)

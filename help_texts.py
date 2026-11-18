@@ -37,7 +37,8 @@ HELP_LINES = [
     "   until they have healed back to full.",
     "Looking (l): a blinking cursor shows a creature",
     "   you can see; arrows/numpad jump to the next",
-    "   one that way. l or Esc stops looking.",
+    "   one that way; t jumps to the one it chases or",
+    "   flees from. l or Esc stops looking.",
     "Log: when a turn has more than 4 messages, the",
     "   rows are numbered and m shows the next ones.",
     "After dying: r plays again, l looks around, q quits.",
@@ -46,5 +47,5 @@ HELP_LINES = [
 # Shown on the row under the message log
 KEY_HINTS = "arrows/numpad: move  5: stay  w: wait  l: look  m: more  ?: commands  h: help"
 WAIT_KEY_HINTS = "any key: stop waiting"
-LOOK_KEY_HINTS ="arrows/numpad: next creature that way   l or Esc: stop looking"
+LOOK_KEY_HINTS ="arrows/numpad: next creature that way  t: its target  l or Esc: stop looking"
 DEATH_KEY_HINTS = "r: play again   l: look around   q: quit"

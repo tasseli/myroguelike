@@ -57,3 +57,4 @@ Done (Nov 2026):
 - three more kobolds on the starting map: one hostile, two wandering (4 kobolds in all)
 - a grey monster bumping into the player turns red and chases instead of hitting
 - l works on the death screen too, e.g. to look at what killed the player
+- look: the target is told with distance and direction; t jumps the cursor to it

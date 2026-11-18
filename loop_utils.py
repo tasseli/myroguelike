@@ -262,10 +262,26 @@ def stop_looking(game_map, game_state):
     game_map.messages, game_map.log_offset = game_state["look_saved_log"]
     game_state["look_target"] = None
 
+# While looking, t moves the cursor to the creature the selected one chases or flees from.
+# If it has none, or that one can't be seen, the cursor stays and the log says why.
+def jump_to_target(game_map, game_state):
+    current = game_state["look_target"]
+    target = current.target
+    if current.is_player or current.mood not in ("toward", "flee") or target is None:
+        game_map.messages = describe(current, game_map) + ["It isn't chasing or fleeing anyone."]
+    elif not target.alive or target not in visible_creatures(game_map):
+        game_map.messages = describe(current, game_map) + ["What it's after is out of sight."]
+    else:
+        game_state["look_target"] = target
+        game_map.messages = describe(target, game_map)
+
 # While looking, direction keys jump to the next visible creature in that direction; no turns pass
 def handle_look_input(event_key, typed_char, pygame, game_map, game_state):
     if event_key == pygame.K_l or event_key == pygame.K_ESCAPE:
         stop_looking(game_map, game_state)
+        return
+    if event_key == pygame.K_t:
+        jump_to_target(game_map, game_state)
         return
     outcome, direction = read_moves(event_key, pygame, typed_char)
     if outcome == "q":
